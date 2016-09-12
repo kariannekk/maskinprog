@@ -1,0 +1,6 @@
+FOR Å SJEKKE OM ENERGIFORBRUK BLIR BEDRE.
+
+mtp på aksesstid til minnet: rydd kode fra <ldr, mov, orr, str. ldr, mov, orr, str.> til <ldr, ldr, mov, mov, orr, orr, str, str.> 
+
+
+
