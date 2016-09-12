@@ -121,9 +121,9 @@ _reset:
 	GPIO_PC_DIN = 0x064	//offset addr
 
 	mov r1, #0x33333333
-	mov r2, #0xFF
-		
 	str r1, [r7, #GPIO_PC_MODEL]
+
+	mov r2, #0xFF
 	str r2, [r7, #GPIO_PC_DOUT]
 	//---
 
