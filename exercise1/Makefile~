@@ -13,13 +13,14 @@ LINKERSCRIPT=efm32gg.ld
 
 EX1 =ex1.s
 
-ex1*.bin : ex1*.elf
+
+ex1.bin : ex1.elf
 	${OBJCOPY} -j .text -O binary $< $@
 
-ex1*.elf : ex1*.o 
+ex1.elf : ex1.o 
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
-ex1*.o : ex1*.s
+ex1.o : ${EX1}
 	${AS} ${ASFLAGS} $< -o $@
 
 
@@ -30,18 +31,21 @@ upload :
 .PHONY : clean
 clean :
 	-rm -rf *.o *.elf *.bin *.hex
-	
+
 .PHONY : polling
 polling :
-	make
-	
-	
+	make EX1=ex1_polling.s
+
 .PHONY : interrupt
 interrupt :
-	EX1 =ex1_interrupt.s
-	
-	
-	
+	make EX1=ex1_interrupt.s
+
+.PHONY : help
+help :
+	@echo "--------------------------------------------------------------"
+	@echo "Please clean before switching option (e.g. poll -> interrupt)."
+	@echo "Commands: "
+	@echo "<none>, help, upload, clean, polling, interrupt.\n"
 	
 	
 	

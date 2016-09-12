@@ -33,7 +33,7 @@ clean :
 	
 .PHONY : polling
 polling :
-	make
+	EX1 =ex1_polling.s
 	
 	
 .PHONY : interrupt

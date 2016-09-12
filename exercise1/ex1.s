@@ -112,7 +112,7 @@ _reset:
 	mov r3, #0xFF00
 	str r3, [r7, #GPIO_PA_DOUT]
 	//---
-	
+
 
 	//Enable GPIO buttons		//Notice: kept GPIO_BASE
 	GPIO_PC_CTRL = 0x048	//offset addr
@@ -138,7 +138,7 @@ loop:
 
 
 
-	
+
 cmu_base_addr:
 	.long CMU_BASE
 
