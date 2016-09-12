@@ -141,7 +141,7 @@ _reset:
 	str r3, [r1, #GPIO_PC_DOUT]
 
 	b loop
-
+	//hhahah tosk! eller ikkje. 
 
 loop:
 	ldr r6, [r1, #GPIO_PC_DIN]
