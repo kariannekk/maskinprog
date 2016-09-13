@@ -88,7 +88,7 @@ _reset:
 	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
 	ldr r1, cmu_base_addr
 
-	ldr r2, [r1, #CMU_HFPERCLKEN0_GPIO]
+	ldr r2, [r1, #CMU_HFPERCLKEN0]
 	mov r3, #1
 	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 	orr r2, r2, r3
@@ -101,44 +101,44 @@ _reset:
 	GPIO_PA_CTRL = 0x2 		//offset addr
 	GPIO_PA_MODEH = 0x008 		//offset addr
 	GPIO_PA_DOUT = 0x00C 		//offset addr
-	ldr r7, gpio_base_addr
-	
+	ldr r0, gpio_base_addr
+
 	mov r1, #0x2
-	str r1, [r7, #GPIO_PA_CTRL]
+	str r1, [r0, #GPIO_PA_CTRL]
 
 	mov r2, #0x55555555
-	str r2, [r7, #GPIO_PA_MODEH]
+	str r2, [r0, #GPIO_PA_MODEH]
 
 	mov r3, #0xFF00
-	str r3, [r7, #GPIO_PA_DOUT]
+	str r3, [r0, #GPIO_PA_DOUT]
 	//---
-	
 
-	//Enable GPIO buttons		//Notice: kept GPIO_BASE
+
+	//Enable GPIO buttons	//Notice: kept GPIO_BASE at register
 	GPIO_PC_CTRL = 0x048	//offset addr
 	GPIO_PC_MODEL = 0x04C	//offset addr
 	GPIO_PC_DOUT = 0x054	//offset addr
 	GPIO_PC_DIN = 0x064	//offset addr
 
 	mov r1, #0x33333333
-	str r1, [r7, #GPIO_PC_MODEL]
+	str r1, [r0, #GPIO_PC_MODEL]
 
 	mov r2, #0xFF
-	str r2, [r7, #GPIO_PC_DOUT]
+	str r2, [r0, #GPIO_PC_DOUT]
 	//---
 
 	b loop
 
 loop:
-	ldr r6, [r7, #GPIO_PC_DIN]	//load the button word
-	lsl r6, #8
-	str r6, [r7, #GPIO_PA_DOUT]	//store the LED word
+	ldr r1, [r0, #GPIO_PC_DIN]	//load the button word
+	lsl r1, #8
+	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
 
 	b loop
 
 
 
-	
+
 cmu_base_addr:
 	.long CMU_BASE
 

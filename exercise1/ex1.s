@@ -88,7 +88,7 @@ _reset:
 	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
 	ldr r1, cmu_base_addr
 
-	ldr r2, [r1, #CMU_HFPERCLKEN0_GPIO]
+	ldr r2, [r1, #CMU_HFPERCLKEN0]
 	mov r3, #1
 	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 	orr r2, r2, r3

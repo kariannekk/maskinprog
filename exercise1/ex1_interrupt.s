@@ -88,7 +88,7 @@ _reset:
 	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
 	ldr r1, cmu_base_addr
 
-	ldr r2, [r1, #CMU_HFPERCLKEN0_GPIO]
+	ldr r2, [r1, #CMU_HFPERCLKEN0]
 	mov r3, #1
 	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 	orr r2, r2, r3
@@ -101,49 +101,84 @@ _reset:
 	GPIO_PA_CTRL = 0x2 		//offset addr
 	GPIO_PA_MODEH = 0x008 		//offset addr
 	GPIO_PA_DOUT = 0x00C 		//offset addr
-	ldr r7, gpio_base_addr
-	
+	ldr r0, gpio_base_addr
+
 	mov r1, #0x2
-	str r1, [r7, #GPIO_PA_CTRL]
+	str r1, [r0, #GPIO_PA_CTRL]
 
 	mov r2, #0x55555555
-	str r2, [r7, #GPIO_PA_MODEH]
+	str r2, [r0, #GPIO_PA_MODEH]
 
 	mov r3, #0xFF00
-	str r3, [r7, #GPIO_PA_DOUT]
+	str r3, [r0, #GPIO_PA_DOUT]
 	//---
-	
 
-	//Enable GPIO buttons		//Notice: kept GPIO_BASE
+
+	//Enable GPIO buttons	//Notice: kept GPIO_BASE at register
 	GPIO_PC_CTRL = 0x048	//offset addr
 	GPIO_PC_MODEL = 0x04C	//offset addr
 	GPIO_PC_DOUT = 0x054	//offset addr
 	GPIO_PC_DIN = 0x064	//offset addr
 
 	mov r1, #0x33333333
-	str r1, [r7, #GPIO_PC_MODEL]
+	str r1, [r0, #GPIO_PC_MODEL]
 
 	mov r2, #0xFF
-	str r2, [r7, #GPIO_PC_DOUT]
+	str r2, [r0, #GPIO_PC_DOUT]
 	//---
+
+	
+	//Enable GPIO interrupts//Notice: kept GPIO_BASE at register
+	GPIO_EXTIPSELL = 0x100	//offset addr
+	GPIO_EXTIRISE = 0x108	//offset addr
+	GPIO_EXTIFALL = 0x10C	//offset addr
+	GPIO_IEN = 0x110	//offset addr
+	GPIO_IF = 0x114		//offset addr
+	GPIO_IFC = 0x11C	//offset addr
+	ISER0 = 0xE000E100	//base addr
+
+	mov r1, #0x22222222	
+	str r1, [r0, #GPIO_EXTIPSELL]	//Selects port C for interrupts. 
+
+	mov r2, #0xFF
+	str r2, [r0, #GPIO_EXTIRISE]	//Enables rising edge detection.
+	mov r2, #0xFF
+	str r2, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
+	mov r2, #0xFF
+	str r2, [r0, #GPIO_IEN]		//Enables external interrupts.
+
+	ldr r2, [r0, #GPIO_IF]		//Reads external interrupt flags.
+	mov r2, #0xFF		//temp test
+	str r2, [r0, #GPIO_IFC]		//Clears external interrupt flags.
+
+	ldr r1, iser_base_addr
+	mov r2, #0x800
+	orr r2, r2, #0x2
+	str r2, [r1]
+	//---
+	
+
 
 	b loop
 
 loop:
-	ldr r6, [r7, #GPIO_PC_DIN]	//load the button word
-	lsl r6, #8
-	str r6, [r7, #GPIO_PA_DOUT]	//store the LED word
+	ldr r1, [r0, #GPIO_PC_DIN]	//load the button word
+	lsl r1, #8
+	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
 
 	b loop
 
+	b . // do nothing
 
 
-	
 cmu_base_addr:
 	.long CMU_BASE
 
 gpio_base_addr:
 	.long GPIO_BASE
+
+iser_base_addr:
+	.long ISER0
 
 	
 /////////////////////////////////////////////////////////////////////////////
@@ -154,13 +189,24 @@ gpio_base_addr:
 /////////////////////////////////////////////////////////////////////////////
 
     .thumb_func
-gpio_handler:  
+gpio_handler:
+	ldr r1, [r0, #GPIO_IF]
+	mov r1, #0xFF		//temp test
+	str r1, [r0, #GPIO_IFC]
+
+	mov r1, #0x7E00
+	str r1, [r0, #GPIO_PA_DOUT]
+
+
+	
 	b .  // do nothing
 
 /////////////////////////////////////////////////////////////////////////////
 
     .thumb_func
-dummy_handler:  
+dummy_handler:
+	mov r1, #0xF000
+	str r1, [r0, #GPIO_PA_DOUT]
 	b .  // do nothing
 
 

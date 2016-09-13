@@ -40,6 +40,12 @@ polling :
 interrupt :
 	make EX1=ex1_interrupt.s
 
+.PHONY : redo
+redo :
+	make clean
+	make interrupt
+	make upload
+
 .PHONY : help
 help :
 	@echo "--------------------------------------------------------------"

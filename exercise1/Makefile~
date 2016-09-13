@@ -46,9 +46,5 @@ help :
 	@echo "Please clean before switching option (e.g. poll -> interrupt)."
 	@echo "Commands: "
 	@echo "<none>, help, upload, clean, polling, interrupt.\n"
-	
-	
-	
-	
-	
-	
+
+
