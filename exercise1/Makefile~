@@ -47,6 +47,10 @@ redo :
 	make clean
 	make interrupt
 	make upload
+	
+.PHONY : debug
+debug :
+	arm-none-eabi-gdb ex1.elf -tui
 
 .PHONY : help
 help :

@@ -85,14 +85,12 @@ _reset:
 	//Enable GPIO-clk
 	CMU_BASE = 0x400c8000 		//base addr
 	CMU_HFPERCLKEN0 = 0x044 	//offset addr
-	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
 	ldr r1, cmu_base_addr
 
 	ldr r2, [r1, #CMU_HFPERCLKEN0]
-	mov r3, #1
-	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
-	orr r2, r2, r3
-	str r2, [r1, #CMU_HFPERCLKEN0]
+	mov r3, #0x2000
+	orr r2, r2, r3			//Does not dispose existing values.
+	str r2, [r1, #CMU_HFPERCLKEN0]	//Enables CMU_HFPERCLKEN0 for GPIO.
 	//---
 	
 
@@ -104,31 +102,31 @@ _reset:
 	ldr r0, gpio_base_addr
 
 	mov r1, #0x2
-	str r1, [r0, #GPIO_PA_CTRL]
+	str r1, [r0, #GPIO_PA_CTRL]	//Sets high drive strength (20 mA).
 
 	mov r2, #0x55555555
-	str r2, [r0, #GPIO_PA_MODEH]
+	str r2, [r0, #GPIO_PA_MODEH]	//Sets push-pull output with the same drive strength. 
 
 	mov r3, #0xFF00
 	str r3, [r0, #GPIO_PA_DOUT]
 	//---
 
 
-	//Enable GPIO buttons	//Notice: kept GPIO_BASE at register
+	//Enable GPIO buttons	//Notice: kept GPIO_BASE at register.
 	GPIO_PC_CTRL = 0x048	//offset addr
 	GPIO_PC_MODEL = 0x04C	//offset addr
 	GPIO_PC_DOUT = 0x054	//offset addr
 	GPIO_PC_DIN = 0x064	//offset addr
 
 	mov r2, #0x33333333
-	str r2, [r0, #GPIO_PC_MODEL]
+	str r2, [r0, #GPIO_PC_MODEL]	//Enables input with filter. 
 
 	mov r1, #0xFF
-	str r1, [r0, #GPIO_PC_DOUT]
+	str r1, [r0, #GPIO_PC_DOUT]	//Enables 
 	//---
 
 	
-	//Enable GPIO interrupts//Notice: kept GPIO_BASE at register
+	//Enable GPIO interrupts//Notice: kept GPIO_BASE at register.
 	GPIO_EXTIPSELL = 0x100	//offset addr
 	GPIO_EXTIRISE = 0x108	//offset addr
 	GPIO_EXTIFALL = 0x10C	//offset addr
@@ -143,12 +141,9 @@ _reset:
 	//mov r1, #0xFF			//Has already loaded #0xFF.
 	//str r1, [r0, #GPIO_EXTIRISE]	//Enables rising edge detection.
 	str r1, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
-	str r1, [r0, #GPIO_IFC]		//Clears external interrupt flags.
-	str r1, [r0, #GPIO_IEN]		//Enables external interrupts.
 
 	str r1, [r0, #GPIO_IFC]		//Clears external interrupt flags.
-	//ldr r1, [r0, #GPIO_IF]		//Reads external interrupt flags.
-	//str r1, [r0, #GPIO_IFC]		//Clears external interrupt flags.
+	str r1, [r0, #GPIO_IEN]		//Enables external interrupts.
 
 	ldr r2, iser_base_addr
 	mov r3, #0x800
@@ -157,13 +152,13 @@ _reset:
 	//---
 
 
-	b dum
+	b i_waiter
 
-dum:
+i_waiter:			//Waits for interrupt.
 	mov r2, #0xF000
-	str r2, [r0, #GPIO_PA_DOUT]
+	str r2, [r0, #GPIO_PA_DOUT]	//Sets LEDs.
 
-	b dum
+	b i_waiter
 	
 	b . // do nothing
 
@@ -189,31 +184,30 @@ iser_base_addr:
 
     .thumb_func
 gpio_handler:
-	ldr r3, [r0, #GPIO_IF]
-	str r3, [r0, #GPIO_IFC]
+	ldr r3, [r0, #GPIO_IF]		//Reads external interrupt flags.
+	str r3, [r0, #GPIO_IFC]		//Clears external interrupt flags.
 	
 	mov r2, #0x7E00
-	str r2, [r0, #GPIO_PA_DOUT]
+	str r2, [r0, #GPIO_PA_DOUT]	//Sets the LEDs.
 
 
-loop:	ldr r3, [r0, #GPIO_PC_DIN]
-	ands r3, r3, #0x01
-	beq loop
+loop:	ldr r3, [r0, #GPIO_PC_DIN]	//Reads buttons.
+	ands r3, r3, #0x01		//Only button SW1 for today.
+	beq loop			//Exits loop upon button release.
 	
 
-
-	b dum
+	bx LR				//Should return to pre-interrupt state.
+//	b i_waiter
 //	b .  // do nothing
 
 /////////////////////////////////////////////////////////////////////////////
 
     .thumb_func
-dummy_handler:
+dummy_handler:		//LED signature if this is entered.
 	mov r2, #0xF000
 	str r2, [r0, #GPIO_PA_DOUT]
 
 	b .  // do nothing
-
 
 
 	
