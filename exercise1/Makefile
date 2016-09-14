@@ -34,10 +34,12 @@ clean :
 
 .PHONY : polling
 polling :
+	make clean
 	make EX1=ex1_polling.s
 
 .PHONY : interrupt
 interrupt :
+	make clean
 	make EX1=ex1_interrupt.s
 
 .PHONY : redo
@@ -45,6 +47,10 @@ redo :
 	make clean
 	make interrupt
 	make upload
+	
+.PHONY : debug
+debug :
+	arm-none-eabi-gdb ex1.elf -tui
 
 .PHONY : help
 help :

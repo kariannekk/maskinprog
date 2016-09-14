@@ -120,11 +120,11 @@ _reset:
 	GPIO_PC_DOUT = 0x054	//offset addr
 	GPIO_PC_DIN = 0x064	//offset addr
 
-	mov r1, #0x33333333
-	str r1, [r0, #GPIO_PC_MODEL]
+	mov r2, #0x33333333
+	str r2, [r0, #GPIO_PC_MODEL]
 
-	mov r2, #0xFF
-	str r2, [r0, #GPIO_PC_DOUT]
+	mov r1, #0xFF
+	str r1, [r0, #GPIO_PC_DOUT]
 	//---
 
 	
@@ -137,38 +137,37 @@ _reset:
 	GPIO_IFC = 0x11C	//offset addr
 	ISER0 = 0xE000E100	//base addr
 
-	mov r1, #0x22222222	
-	str r1, [r0, #GPIO_EXTIPSELL]	//Selects port C for interrupts. 
+	mov r2, #0x22222222	
+	str r2, [r0, #GPIO_EXTIPSELL]	//Selects port C for interrupts. 
 
-	mov r2, #0xFF
-	str r2, [r0, #GPIO_EXTIRISE]	//Enables rising edge detection.
-	//mov r2, #0xFF
-	//str r2, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
-	mov r2, #0xFF
-	str r2, [r0, #GPIO_IEN]		//Enables external interrupts.
+	//mov r1, #0xFF			//Has already loaded #0xFF.
+	//str r1, [r0, #GPIO_EXTIRISE]	//Enables rising edge detection.
+	str r1, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
+	str r1, [r0, #GPIO_IFC]		//Clears external interrupt flags.
+	str r1, [r0, #GPIO_IEN]		//Enables external interrupts.
 
-	ldr r2, [r0, #GPIO_IF]		//Reads external interrupt flags.
-	mov r2, #0xFF		//temp test
-	str r2, [r0, #GPIO_IFC]		//Clears external interrupt flags.
+	str r1, [r0, #GPIO_IFC]		//Clears external interrupt flags.
+	//ldr r1, [r0, #GPIO_IF]		//Reads external interrupt flags.
+	//str r1, [r0, #GPIO_IFC]		//Clears external interrupt flags.
 
-	ldr r1, iser_base_addr
-	mov r2, #0x800
-	orr r2, r2, #0x2
-	str r2, [r1]
+	ldr r2, iser_base_addr
+	mov r3, #0x800
+	orr r3, r3, #0x2
+	str r3, [r2]
 	//---
+
+
+	b dum
+
+dum:
+	mov r2, #0xF000
+	str r2, [r0, #GPIO_PA_DOUT]
+
+	b dum
 	
-
-
-	b loop
-
-loop:
-	ldr r1, [r0, #GPIO_PC_DIN]	//load the button word
-	lsl r1, #8
-	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
-
-	b loop
-
 	b . // do nothing
+
+
 
 
 cmu_base_addr:
@@ -190,23 +189,29 @@ iser_base_addr:
 
     .thumb_func
 gpio_handler:
-	ldr r1, [r0, #GPIO_IF]
-	mov r1, #0xFF		//temp test
-	str r1, [r0, #GPIO_IFC]
-
-	mov r1, #0x7E00
-	str r1, [r0, #GPIO_PA_DOUT]
-
-
+	ldr r3, [r0, #GPIO_IF]
+	str r3, [r0, #GPIO_IFC]
 	
-	b .  // do nothing
+	mov r2, #0x7E00
+	str r2, [r0, #GPIO_PA_DOUT]
+
+
+loop:	ldr r3, [r0, #GPIO_PC_DIN]
+	ands r3, r3, #0x01
+	beq loop
+	
+
+
+	b dum
+//	b .  // do nothing
 
 /////////////////////////////////////////////////////////////////////////////
 
     .thumb_func
 dummy_handler:
-	mov r1, #0xF000
-	str r1, [r0, #GPIO_PA_DOUT]
+	mov r2, #0xF000
+	str r2, [r0, #GPIO_PA_DOUT]
+
 	b .  // do nothing
 
 
