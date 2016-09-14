@@ -142,8 +142,8 @@ _reset:
 
 	mov r2, #0xFF
 	str r2, [r0, #GPIO_EXTIRISE]	//Enables rising edge detection.
-	mov r2, #0xFF
-	str r2, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
+	//mov r2, #0xFF
+	//str r2, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
 	mov r2, #0xFF
 	str r2, [r0, #GPIO_IEN]		//Enables external interrupts.
 
