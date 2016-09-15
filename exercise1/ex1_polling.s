@@ -82,7 +82,7 @@
 	.type   _reset, %function
 	.thumb_func
 _reset:
-	//Enable GPIO-clk
+	// -- Enable GPIO-clk
 	CMU_BASE = 0x400c8000 		//base addr
 	CMU_HFPERCLKEN0 = 0x044 	//offset addr
 	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
@@ -93,12 +93,12 @@ _reset:
 	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 	orr r2, r2, r3
 	str r2, [r1, #CMU_HFPERCLKEN0]
-	//---
+	// ---
 	
 
-	//Enable GPIO LEDs
+	// -- Enable GPIO LEDs
 	GPIO_BASE = 0x40006000		//base addr
-	GPIO_PA_CTRL = 0x2 		//offset addr
+	GPIO_PA_CTRL = 0x2 			//offset addr
 	GPIO_PA_MODEH = 0x008 		//offset addr
 	GPIO_PA_DOUT = 0x00C 		//offset addr
 	ldr r0, gpio_base_addr
@@ -111,48 +111,52 @@ _reset:
 
 	mov r3, #0xFF00
 	str r3, [r0, #GPIO_PA_DOUT]
-	//---
+	// ---
 
 
-	//Enable GPIO buttons	//Notice: kept GPIO_BASE at register
-	GPIO_PC_CTRL = 0x048	//offset addr
-	GPIO_PC_MODEL = 0x04C	//offset addr
-	GPIO_PC_DOUT = 0x054	//offset addr
-	GPIO_PC_DIN = 0x064	//offset addr
+	// -- Enable GPIO buttons	//Notice: kept GPIO_BASE at register
+	GPIO_PC_CTRL = 0x048		//offset addr
+	GPIO_PC_MODEL = 0x04C		//offset addr
+	GPIO_PC_DOUT = 0x054		//offset addr
+	GPIO_PC_DIN = 0x064			//offset addr
 
 	mov r1, #0x33333333
 	str r1, [r0, #GPIO_PC_MODEL]
 
 	mov r2, #0xFF
 	str r2, [r0, #GPIO_PC_DOUT]
+	// ---
 
-//	b buttons
-
-
-	
+	// -- Reads button(s), and jumps to "off" if none is pushed
 buttons:
 	ldr r1, [r0, #GPIO_PC_DIN]	//load the button word
 	mov r2, #0xFF
 	eor r2, r2, r1
-        cmp r2, #0
+	cmp r2, #0
 	beq off
 	
 	mov r4, #0xFF
 	mov r3, #0x80
-	
-check:	and r6, r2, r3
+
+	// -- Check for the highest value of pushed button	
+check:
+	and r6, r2, r3
 	cmp r6, #0
 	bne lights
 	lsr r4, #1
 	lsr r3, #1
 	cmp r4, #0
 	bne check
-		
-off:	mov r1, #0xFF00
+
+	// -- Turn off LEDs, and go back to wait for buttons
+off:
+	mov r1, #0xFF00
 	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
 	b buttons
 	
-lights:	eor r4, r4, #0xFF
+	// -- Turn on x LEDs, given by highest button value pushed
+lights:
+	eor r4, r4, #0xFF
 	lsl r4, #8
 	str r4, [r0, #GPIO_PA_DOUT]
 	b buttons
