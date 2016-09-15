@@ -152,15 +152,21 @@ _reset:
 	//---
 
 
-	b i_waiter
+//	b i_waiter
 
 i_waiter:			//Waits for interrupt.
-	mov r2, #0xF000
-	str r2, [r0, #GPIO_PA_DOUT]	//Sets LEDs.
+//	mov r2, #0xF000
+//	str r2, [r0, #GPIO_PA_DOUT]	//Sets LEDs.
+	//Sleep mode
+	ldr r6, =SCR
+	mov r7, #6
+	str r7, [r6]
 
-	b i_waiter
+	wfi
 	
-	b . // do nothing
+//	b i_waiter
+	
+//	b . // do nothing
 
 
 
@@ -190,12 +196,30 @@ gpio_handler:
 	mov r2, #0x7E00
 	str r2, [r0, #GPIO_PA_DOUT]	//Sets the LEDs.
 
+buttons:
+	ldr r3, [r0, #GPIO_PC_DIN]	//Reads buttons.
+	eor r2, r3, #0xFF
+	cmp r2, #0
+	beq exit
 
-loop:	ldr r3, [r0, #GPIO_PC_DIN]	//Reads buttons.
-	ands r3, r3, #0x01		//Only button SW1 for today.
-	beq loop			//Exits loop upon button release.
+	mov r4, #0xFF
+	mov r3, #0x80
+
+check:	and r5, r2, r3
+	cmp r5, #0
+	bne lights
+	lsr r3, #1
+	lsr r4, #1
+	cmp r4, #0
+	bne check
+
+lights:	eor r4, r4, #0xFF
+	lsl r4, #8
+	str r4, [r0, #GPIO_PA_DOUT]
+	b buttons
 	
-
+exit:	mov r1, #0xFF00
+	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
 	bx LR				//Should return to pre-interrupt state.
 //	b i_waiter
 //	b .  // do nothing
@@ -204,9 +228,6 @@ loop:	ldr r3, [r0, #GPIO_PC_DIN]	//Reads buttons.
 
     .thumb_func
 dummy_handler:		//LED signature if this is entered.
-	mov r2, #0xF000
-	str r2, [r0, #GPIO_PA_DOUT]
-
 	b .  // do nothing
 
 

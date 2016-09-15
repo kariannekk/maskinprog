@@ -125,18 +125,37 @@ _reset:
 
 	mov r2, #0xFF
 	str r2, [r0, #GPIO_PC_DOUT]
-	//---
 
-	b loop
+//	b buttons
 
-loop:
+
+	
+buttons:
 	ldr r1, [r0, #GPIO_PC_DIN]	//load the button word
-	lsl r1, #8
+	mov r2, #0xFF
+	eor r2, r2, r1
+        cmp r2, #0
+	beq off
+	
+	mov r4, #0xFF
+	mov r3, #0x80
+	
+check:	and r6, r2, r3
+	cmp r6, #0
+	bne lights
+	lsr r4, #1
+	lsr r3, #1
+	cmp r4, #0
+	bne check
+		
+off:	mov r1, #0xFF00
 	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
-
-	b loop
-
-
+	b buttons
+	
+lights:	eor r4, r4, #0xFF
+	lsl r4, #8
+	str r4, [r0, #GPIO_PA_DOUT]
+	b buttons
 
 
 cmu_base_addr:
