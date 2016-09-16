@@ -83,9 +83,9 @@
 	.thumb_func
 _reset:
 	// -- Enable GPIO-clk
-	CMU_BASE = 0x400c8000 		//base addr
-	CMU_HFPERCLKEN0 = 0x044 	//offset addr
-	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
+//	CMU_BASE = 0x400c8000 		//base addr
+//	CMU_HFPERCLKEN0 = 0x044 	//offset addr
+//	CMU_HFPERCLKEN0_GPIO = 13 	//bit representing GPIO
 	ldr r1, cmu_base_addr
 
 	ldr r2, [r1, #CMU_HFPERCLKEN0]
@@ -97,10 +97,10 @@ _reset:
 	
 
 	// -- Enable GPIO LEDs
-	GPIO_BASE = 0x40006000		//base addr
-	GPIO_PA_CTRL = 0x2 			//offset addr
-	GPIO_PA_MODEH = 0x008 		//offset addr
-	GPIO_PA_DOUT = 0x00C 		//offset addr
+//	GPIO_BASE = 0x40006000		//base addr
+//	GPIO_PA_CTRL = 0x2 			//offset addr
+//	GPIO_PA_MODEH = 0x008 		//offset addr
+//	GPIO_PA_DOUT = 0x00C 		//offset addr
 	ldr r0, gpio_base_addr
 
 	mov r1, #0x2
@@ -115,10 +115,10 @@ _reset:
 
 
 	// -- Enable GPIO buttons	//Notice: kept GPIO_BASE at register
-	GPIO_PC_CTRL = 0x048		//offset addr
-	GPIO_PC_MODEL = 0x04C		//offset addr
-	GPIO_PC_DOUT = 0x054		//offset addr
-	GPIO_PC_DIN = 0x064			//offset addr
+//	GPIO_PC_CTRL = 0x048		//offset addr
+//	GPIO_PC_MODEL = 0x04C		//offset addr
+//	GPIO_PC_DOUT = 0x054		//offset addr
+//	GPIO_PC_DIN = 0x064			//offset addr
 
 	mov r1, #0x33333333
 	str r1, [r0, #GPIO_PC_MODEL]
