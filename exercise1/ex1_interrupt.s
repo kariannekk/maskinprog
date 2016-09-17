@@ -83,22 +83,15 @@
 	.thumb_func
 _reset:
 	// -- Enable GPIO-clk
-//	CMU_BASE = 0x400c8000 			//base addr
-//	CMU_HFPERCLKEN0 = 0x044 		//offset addr
 	ldr r1, cmu_base_addr
 
 	ldr r2, [r1, #CMU_HFPERCLKEN0]
-	mov r3, #0x2000
-	orr r2, r2, r3					//Does not dispose existing values.
-	str r2, [r1, #CMU_HFPERCLKEN0]	//Enables CMU_HFPERCLKEN0 for GPIO.
-	// ---
-	
+	mov r3, #1
+	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
+	orr r2, r2, r3
+	str r2, [r1, #CMU_HFPERCLKEN0] 	//Enables CMU_HFPERCLKEN0 for GPIO.
 
 	// -- Enable GPIO LEDs
-//	GPIO_BASE = 0x40006000		//base addr
-//	GPIO_PA_CTRL = 0x2 			//offset addr
-//	GPIO_PA_MODEH = 0x008 		//offset addr
-//	GPIO_PA_DOUT = 0x00C 		//offset addr
 	ldr r0, gpio_base_addr
 
 	mov r1, #0x2
@@ -109,37 +102,20 @@ _reset:
 
 	mov r3, #0xFF00
 	str r3, [r0, #GPIO_PA_DOUT]
-	// ---
 
 
-	// -- Enable GPIO buttons	//Notice: kept GPIO_BASE at register.
-//	GPIO_PC_CTRL = 0x048	//offset addr
-//	GPIO_PC_MODEL = 0x04C	//offset addr
-//	GPIO_PC_DOUT = 0x054	//offset addr
-//	GPIO_PC_DIN = 0x064		//offset addr
-
+	// -- Enable GPIO buttons
 	mov r2, #0x33333333
 	str r2, [r0, #GPIO_PC_MODEL]	//Enables input with filter. 
 
 	mov r1, #0xFF
-	str r1, [r0, #GPIO_PC_DOUT]	//Enables 
-	// ---
-
+	str r1, [r0, #GPIO_PC_DOUT]
 	
-	// -- Enable GPIO interrupts//Notice: kept GPIO_BASE at register.
-//	GPIO_EXTIPSELL = 0x100	//offset addr
-//	GPIO_EXTIRISE = 0x108	//offset addr
-//	GPIO_EXTIFALL = 0x10C	//offset addr
-//	GPIO_IEN = 0x110		//offset addr
-//	GPIO_IF = 0x114			//offset addr
-//	GPIO_IFC = 0x11C		//offset addr
-//	ISER0 = 0xE000E100		//base addr
-
+	
+	// -- Enable GPIO interrupts
 	mov r2, #0x22222222	
 	str r2, [r0, #GPIO_EXTIPSELL]	//Selects port C for interrupts. 
 
-	//mov r1, #0xFF					//Has already loaded #0xFF.
-	//str r1, [r0, #GPIO_EXTIRISE]	//Enables rising edge detection.
 	str r1, [r0, #GPIO_EXTIFALL]	//Enables falling edge detection.
 
 	str r1, [r0, #GPIO_IFC]			//Clears external interrupt flags.
@@ -149,28 +125,16 @@ _reset:
 	mov r3, #0x800
 	orr r3, r3, #0x2
 	str r3, [r2]
-	//---
 
-
-//	b i_waiter
-
-//i_waiter:			//Waits for interrupt.
-//	mov r2, #0xF000
-//	str r2, [r0, #GPIO_PA_DOUT]	//Sets LEDs.
-
+	
 	// -- Set-up sleep mode
 	ldr r6, =SCR
 	mov r7, #6
 	str r7, [r6]
+
 	
 	// -- wait for interrupt
 	wfi
-	
-//	b i_waiter
-	
-//	b . // do nothing
-
-
 
 
 cmu_base_addr:
@@ -197,15 +161,15 @@ gpio_handler:
 
 	// -- Reads button(s), and jumps to "exit" if none is pushed
 buttons:
-	ldr r3, [r0, #GPIO_PC_DIN]	//Reads buttons.
+	ldr r3, [r0, #GPIO_PC_DIN]	//Reads pushed/unpushed buttons
 	eor r2, r3, #0xFF
 	cmp r2, #0
 	beq exit
 
-	mov r4, #0xFF
+	mov r4, #0xFF				//Keeps track off how many lights should be on
 	mov r3, #0x80
 
-	// -- Check for the highest value of pushed button
+	// -- Find the most significant bit, the highest pushed button value
 check:
 	and r5, r2, r3
 	cmp r5, #0
@@ -215,7 +179,7 @@ check:
 	cmp r4, #0
 	bne check
 
-	// -- Turn on x LEDs, given by highest button value pushed
+	// -- Turn on x LEDs, given by MSB
 lights:
 	eor r4, r4, #0xFF
 	lsl r4, #8
