@@ -44,6 +44,7 @@ interrupt :
 
 .PHONY : debug
 debug :
+	gnome-terminal -x JLinkGDBServer
 	arm-none-eabi-gdb ex1.elf -tui
 
 .PHONY : help
