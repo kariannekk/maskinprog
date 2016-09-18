@@ -85,8 +85,8 @@ _reset:
 	// -- Enable GPIO-clk
 	ldr r1, cmu_base_addr
 	
-	ldr r2, [r1, #CMU_HFPERCLKEN0]
 	mov r3, #1
+	ldr r2, [r1, #CMU_HFPERCLKEN0]
 	lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 	orr r2, r2, r3
 	str r2, [r1, #CMU_HFPERCLKEN0]	//Enables CMU_HFPERCLKEN0 for GPIO.
@@ -96,59 +96,55 @@ _reset:
 	ldr r0, gpio_base_addr
 
 	mov r1, #0x2
-	str r1, [r0, #GPIO_PA_CTRL]		//Sets high drive strength (20 mA).
-
 	mov r2, #0x55555555
-	str r2, [r0, #GPIO_PA_MODEH]	//Sets push-pull output with the same drive strength.
-
 	mov r3, #0xFF00
-	str r3, [r0, #GPIO_PA_DOUT]
+	
+	str r1, [r0, #GPIO_PA_CTRL]	//Sets high drive strength (20 mA).
+	str r2, [r0, #GPIO_PA_MODEH]	//Sets push-pull output with the same drive strength. 
+	str r3, [r0, #GPIO_PA_DOUT]	//Initializes LEDs off. 
 
 	
 	// -- Enable GPIO buttons
 	mov r1, #0x33333333
-	str r1, [r0, #GPIO_PC_MODEL]	//Enables input with filter.
-
 	mov r2, #0xFF
-	str r2, [r0, #GPIO_PC_DOUT]
+	
+	str r1, [r0, #GPIO_PC_MODEL]	//Enables input with filter. 
+	str r2, [r0, #GPIO_PC_DOUT]	//Enables pull-up resistors.
 
 	
-	// -- Reads button(s), and jumps to "off" if none is pushed
-buttons:
-	ldr r1, [r0, #GPIO_PC_DIN]	//load the button word
-	mov r2, #0xFF
-	eor r2, r2, r1
-	cmp r2, #0
-	beq off
+	// -- Read buttons and jump to "off" if none is pushed.
+read_buttons:
+	ldr r1, [r0, #GPIO_PC_DIN]	//Read buttons.
+	eors r2, r1, #0xFF		//Invert the register.
+	beq lights_off
 	
-	mov r4, #0xFF				//Keeps track off how many lights should be on
-	mov r3, #0x80
-
+	mov r3, #0x80		//Seeks the MSB by right-shifting every loop until the comparison hits.
+	mov r4, #0xFF		//Keeps track of how many lights should be on.
 	
-	// -- Find the most significant bit, the highest pushed button value	
-check:
-	and r6, r2, r3
-	cmp r6, #0
-	bne lights
+	
+	// -- Find the most significant bit; the highest pushed button value	
+read_MSB:
+	ands r6, r2, r3
+	bne set_lights
 	lsr r4, #1
 	lsr r3, #1
 	cmp r4, #0
-	bne check
+	bne read_MSB
 
 	
-	// -- Turn off LEDs, and go back to wait for buttons
-off:
+	// -- Turn off LEDs.
+lights_off:
 	mov r1, #0xFF00
-	str r1, [r0, #GPIO_PA_DOUT]	//store the LED word
-	b buttons
+	str r1, [r0, #GPIO_PA_DOUT]	//Store the LED word.
+	b read_buttons
 	
 	
-	// -- Turn on x LEDs, given by MSB
-lights:
-	eor r4, r4, #0xFF
+	// -- Turn on x LEDs, given by MSB.
+set_lights:
+	mvn r4, r4
 	lsl r4, #8
-	str r4, [r0, #GPIO_PA_DOUT]
-	b buttons
+	str r4, [r0, #GPIO_PA_DOUT]	//Store the LED word.
+	b read_buttons
 
 
 cmu_base_addr:

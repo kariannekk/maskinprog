@@ -42,12 +42,6 @@ interrupt :
 	make clean
 	make EX1=ex1_interrupt.s
 
-.PHONY : redo
-redo :
-	make clean
-	make interrupt
-	make upload
-	
 .PHONY : debug
 debug :
 	arm-none-eabi-gdb ex1.elf -tui
@@ -55,8 +49,7 @@ debug :
 .PHONY : help
 help :
 	@echo "--------------------------------------------------------------"
-	@echo "Please clean before switching option (e.g. poll -> interrupt)."
 	@echo "Commands: "
-	@echo "<none>, help, upload, clean, debug, polling, interrupt, redo.\n"
+	@echo "<none>, help, upload, clean, debug, polling, interrupt.\n"
 
 
