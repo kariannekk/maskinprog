@@ -6,6 +6,12 @@
 /* function to setup the timer */
 void setupTimer(uint16_t period)
 {
+	
+	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_TIMER1;
+	*TIMER1_TOP |= 2; //Tilfeldig tall, temp. 
+	*TIMER1_IEN |= 1;
+	*TIMER1_CMD |= 1;
+	
 	/*
 	   TODO enable and set up the timer
 
