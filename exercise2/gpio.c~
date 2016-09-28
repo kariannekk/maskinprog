@@ -27,7 +27,7 @@ void setupGPIO()
 
 void setupGPIOinterrupts()
 {
-	/* Enable interrupts. */
+	/* Enable interrupts */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
 	*GPIO_EXTIFALL = 0xFF;			//Enables falling edge detection.
 	//*GPIO_IFC = 0xFF;				//Clears external interrupt flags. 

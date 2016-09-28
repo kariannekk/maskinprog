@@ -6,10 +6,6 @@
 /* function to setup the timer */
 void setupTimer(uint16_t period)
 {
-	/*
-	   This will cause a timer interrupt to be generated every (period) cycles. Remember to configure the NVIC as well, otherwise the interrupt handler will not be invoked.
-	 */
-	
 	/* Enable Timer clock. */
 	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_TIMER1;
 	
@@ -19,4 +15,10 @@ void setupTimer(uint16_t period)
 	
 	/* Start/stop the timer. */
 	*TIMER1_CMD = 0x1;			//0x1 start, 0x2 stops, 0x0 does naught.
+
+
+
+	/*
+	   This will cause a timer interrupt to be generated every (period) cycles. Remember to configure the NVIC as well, otherwise the interrupt handler will not be invoked.
+	 */
 }

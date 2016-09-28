@@ -34,4 +34,5 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 	*GPIO_PA_DOUT = 0x5500;	//temp signal.
 
 	*GPIO_IFC |= 0x55;	//Clears odd numbered interrupt flags (1-indexed).
+
 }

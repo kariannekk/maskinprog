@@ -44,7 +44,7 @@ int main(void)
 	while (1)
 	{
 		runDAC(120);
-		while (*GPIO_PC_DIN & 1)
+		while (*GPIO_PC_DIN & (1 << 0))
 		{
 			*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
 		}
