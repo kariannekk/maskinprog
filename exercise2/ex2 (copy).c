@@ -37,13 +37,34 @@ int main(void)
 	setupTimer(SAMPLE_PERIOD);		//Consider moving to setupNVIC().
 
 	/* Enable interrupt handling */
-	setupNVIC();
+	//setupNVIC();
 
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 	
+//	while (1)
+//	{
+//		runDAC(120);
+//		while (*GPIO_PC_DIN & 1)
+//		{
+//			*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+//		}
+//	}
 	while (1){
-		
+		if(*TIMER1_CNT == 0) {
+			*GPIO_PA_DOUT = 0xF000;
+			*TIMER1_CMD = 0x1;
+//			runDAC(120);
+		}
+//		*GPIO_PA_DOUT = 0xFF00;
+		if(*TIMER1_CNT == SAMPLE_PERIOD/2) {
+			*GPIO_PA_DOUT = 0xFF00;
+		}
+		if(*TIMER1_CNT == SAMPLE_PERIOD/4) {
+			*GPIO_PA_DOUT = 0x0000;
+		}
+//	TIMER1_IRQHandler();
+//	*GPIO_PA_DOUT = 0xFF00;
 	}
 
 	return 0;
@@ -53,8 +74,19 @@ int main(void)
 
 void setupNVIC()
 {
+	/* TODO use the NVIC ISERx registers to enable handling of interrupt(s)
+	   remember two things are necessary for interrupt handling:
+	   - the peripheral must generate an interrupt signal
+	   - the NVIC must be configured to make the CPU handle the signal
+	   You will need TIMER1, GPIO odd and GPIO even interrupt handling for this
+	   assignment.
+	 */
+
+	//setupGPIOinterrupts();
+	//setupTimer(SAMPLE_PERIOD);	//Consider moving from main().
+	
 	/* Set NVIC ISERx register for interrupt enable. */
-	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts, and TIMER1 interrupts. 
+	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts. 
 }
 
 void setupSleepMode()

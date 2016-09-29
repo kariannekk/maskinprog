@@ -33,7 +33,7 @@ void setupDAC()
 void runDAC(uint16_t sampleAmount)
 	{
 	uint16_t SAMPLE_MEDIAN = 0x400;		//Appears to be 'dont-care' value.
-	uint16_t amplitudeStep = 0x2;	//Volume.
+	uint16_t amplitudeStep = 0x1;	//Volume.
 	//uint16_t sampleAmount = 800;		//Frequency, somewhat. Approximate min: 30. Approximate max: 1500. will make noise further than 1500. 
 	
 	for (int i=0; i<sampleAmount; i++)

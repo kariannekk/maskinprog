@@ -3,6 +3,8 @@
 
 #include "efm32gg.h"
 
+void setupGPIOinterrupts();
+
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
 {
@@ -23,6 +25,9 @@ void setupGPIO()
 	/* Enable buttons. */
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
 	*GPIO_PC_DOUT = 0xFF;			//Enables pull-up resistors. 
+
+	setupGPIOinterrupts();
+
 }
 
 void setupGPIOinterrupts()

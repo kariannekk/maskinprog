@@ -16,6 +16,7 @@ void setupTimer(uint16_t period)
 	/* Enable interrupt. */
 	*TIMER1_TOP = period;		//Sets timer period. Max is 0xFFFF.
 	*TIMER1_IEN = 0x1;			//Enables overflow interrupt. Read more 20.5.4 [13].
+//	*ISER0 |= 0x1000;
 	
 	/* Start/stop the timer. */
 	*TIMER1_CMD = 0x1;			//0x1 start, 0x2 stops, 0x0 does naught.
