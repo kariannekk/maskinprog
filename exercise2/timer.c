@@ -3,7 +3,7 @@
 
 #include "efm32gg.h"
 
-/* function to setup the timer */
+/* function to setup the timer. Maximum input period is 0xFFFF. */
 void setupTimer(uint16_t period)
 {
 	/*

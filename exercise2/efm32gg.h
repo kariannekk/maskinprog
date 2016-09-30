@@ -69,6 +69,9 @@
 #define TIMER1_TOP ((volatile uint32_t*)(TIMER1_BASE + 0x1c))
 #define TIMER1_CNT ((volatile uint32_t*)(TIMER1_BASE + 0x24))
 
+#define TIMER1_CTRL ((volatile uint32_t*)(TIMER1_BASE + 0x00))
+
+
 // NVIC
 
 #define ISER0 ((volatile uint32_t*)0xe000e100)

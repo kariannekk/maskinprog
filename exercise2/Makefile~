@@ -36,4 +36,4 @@ clean :
 .PHONY : debug
 debug : 
 	gnome-terminal -x JLinkGDBServer
-	arm-none-eabi-gdb ex2.elf
+	arm-none-eabi-gdb ex2.elf -tui

@@ -3,6 +3,8 @@
 
 #include "efm32gg.h"
 
+void setupGPIOinterrupts();
+
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
 {
@@ -16,7 +18,7 @@ void setupGPIO()
 	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;	
 
 	/* Enable LEDs. */
-	*GPIO_PA_CTRL = 2;				//Sets high drive strength (20mA).
+	*GPIO_PA_CTRL = 0x2;			//Sets high drive strength (20mA).
 	*GPIO_PA_MODEH = 0x55555555;	//Sets pins A8-15 as output.
 	*GPIO_PA_DOUT = 0x0700;			//Turn on LEDs D4-D8 (LEDs are active low).
 
