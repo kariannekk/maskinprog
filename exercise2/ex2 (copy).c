@@ -3,8 +3,6 @@
 
 #include "efm32gg.h"
 
-
-
 /* 
   TODO calculate the appropriate sample period for the sound wave(s) 
   you want to generate. The core clock (which the timer clock is derived
@@ -13,8 +11,6 @@
 */
 /* The period between sound samples, in clock cycles */
 #define   SAMPLE_PERIOD   100
-
-
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();
@@ -26,51 +22,47 @@ void setupGPIOinterrupts();
 void setupSleepMode();
 void __attribute__ ((interrupt)) TIMER1_IRQHandler();
 
-
-
 /* Your code will start executing here */
 int main(void)
 {
 	/* Call the peripheral setup functions */
 	setupGPIO();
 	setupDAC();
-	setupTimer(SAMPLE_PERIOD);		//Consider moving to setupNVIC().
+	setupTimer(SAMPLE_PERIOD);	//Consider moving to setupNVIC().
 
 	/* Enable interrupt handling */
 	//setupNVIC();
 
 	/* Enable energy efficiency. */
 	//setupSleepMode();
-	
-//	while (1)
-//	{
-//		runDAC(120);
-//		while (*GPIO_PC_DIN & 1)
-//		{
-//			*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-//		}
-//	}
-	while (1){
-		if(*TIMER1_CNT == 0) {
+
+//      while (1)
+//      {
+//              runDAC(120);
+//              while (*GPIO_PC_DIN & 1)
+//              {
+//                      *GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+//              }
+//      }
+	while (1) {
+		if (*TIMER1_CNT == 0) {
 			*GPIO_PA_DOUT = 0xF000;
 			*TIMER1_CMD = 0x1;
-//			runDAC(120);
+//                      runDAC(120);
 		}
-//		*GPIO_PA_DOUT = 0xFF00;
-		if(*TIMER1_CNT == SAMPLE_PERIOD/2) {
+//              *GPIO_PA_DOUT = 0xFF00;
+		if (*TIMER1_CNT == SAMPLE_PERIOD / 2) {
 			*GPIO_PA_DOUT = 0xFF00;
 		}
-		if(*TIMER1_CNT == SAMPLE_PERIOD/4) {
+		if (*TIMER1_CNT == SAMPLE_PERIOD / 4) {
 			*GPIO_PA_DOUT = 0x0000;
 		}
-//	TIMER1_IRQHandler();
-//	*GPIO_PA_DOUT = 0xFF00;
+//      TIMER1_IRQHandler();
+//      *GPIO_PA_DOUT = 0xFF00;
 	}
 
 	return 0;
 }
-
-
 
 void setupNVIC()
 {
@@ -83,8 +75,8 @@ void setupNVIC()
 	 */
 
 	//setupGPIOinterrupts();
-	//setupTimer(SAMPLE_PERIOD);	//Consider moving from main().
-	
+	//setupTimer(SAMPLE_PERIOD);    //Consider moving from main().
+
 	/* Set NVIC ISERx register for interrupt enable. */
 	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts. 
 }
@@ -93,8 +85,8 @@ void setupSleepMode()
 {
 	/* Sleep mode */
 	*SCR |= 0x6;		//Enables sleep mode for CPU.
-	
-	//wfi;		//What is the non-assembler version of this? Do we have alternatives?
+
+	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
 }
 
 /* if other interrupt handlers are needed, use the following names: 

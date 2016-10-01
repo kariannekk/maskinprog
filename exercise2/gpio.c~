@@ -26,12 +26,6 @@ void setupGPIO()
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
 	*GPIO_PC_DOUT = 0xFF;			//Enables pull-up resistors. 
 
-	setupGPIOinterrupts();
-
-}
-
-void setupGPIOinterrupts()
-{
 	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
 	*GPIO_EXTIFALL = 0xFF;			//Enables falling edge detection.

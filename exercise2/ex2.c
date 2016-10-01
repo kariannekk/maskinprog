@@ -3,8 +3,6 @@
 
 #include "efm32gg.h"
 
-
-
 /* 
   TODO calculate the appropriate sample period for the sound wave(s) 
   you want to generate. The core clock (which the timer clock is derived
@@ -13,8 +11,6 @@
 */
 /* The period between sound samples, in clock cycles */
 #define   SAMPLE_PERIOD   0xFFF0
-
-
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();
@@ -25,7 +21,7 @@ void setupNVIC();
 void setupSleepMode();
 void __attribute__ ((interrupt)) TIMER1_IRQHandler();
 void runTimerOnce(uint16_t DAC_Freq);
-
+void playArray(uint32_t inputList, uint16_t length);
 
 /* Your code will start executing here */
 int main(void)
@@ -33,19 +29,26 @@ int main(void)
 	/* Call the peripheral setup functions */
 	setupGPIO();
 	setupDAC();
-	setupTimer(SAMPLE_PERIOD);		//Consider moving to setupNVIC().
+	setupTimer(SAMPLE_PERIOD);	//Consider moving to setupNVIC().
 
 	/* Enable interrupt handling */
 	//setupNVIC();
 
 	/* Enable energy efficiency. */
 	//setupSleepMode();
-	
-	while (1){
+
+
+
+	uint32_t a4[] = { 127, 135, 143, 151, 159, 166, 174, 181, 188, 195, 202, 208, 214, 220, 225, 230, 234, 239, 242, 245, 248, 250, 252, 253, 254, 254, 254, 254, 252, 251, 248, 246, 243, 239, 235, 231, 226, 220, 215, 209, 203, 196, 189, 182, 175, 167, 160, 152, 144, 136, 128, 120, 112, 104, 96, 89, 81, 74, 67, 60, 53, 47, 41, 35, 30, 25, 20, 16, 12, 9, 6, 4, 2, 1, 0, 0, 0, 0, 2, 3, 5, 8, 11, 15, 19, 23, 28, 33, 39, 44, 51, 57, 64, 71, 78, 86, 94, 101, 109, 117 };
+	uint32_t a5[] = { 127, 143, 159, 174, 188, 202, 214, 225, 234, 242, 248, 252, 254, 254, 252, 248, 243, 235, 226, 215, 203, 189, 175, 160, 144, 128, 112, 96, 81, 67, 53, 41, 30, 20, 12, 6, 2, 0, 0, 2, 5, 11, 19, 28, 39, 51, 64, 78, 94, 109 };
+	uint16_t a_length = 50; //100;
+
+
+	/* Run polling program. */
+	while (1) {
 		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-		if (!(*GPIO_PC_DIN & 1))
-		{
-//			runDAC(850);
+		if (!(*GPIO_PC_DIN & 1)) {
+//                      runDAC(850);
 /*			uint32_t temp = *TIMER1_CNT;
 			if (temp < SAMPLE_PERIOD/3){
 				runDAC(150);
@@ -54,22 +57,19 @@ int main(void)
 				runDAC(850);
 			}
 			*/
-			
+
 			runTimerOnce(150);
-		}
-		else if (!(*GPIO_PC_DIN & 2))
-		{
+		} else if (!(*GPIO_PC_DIN & 2)) {
 			runTimerOnce(450);
+		} else if (!(*GPIO_PC_DIN & 4)) {
+			*GPIO_PA_DOUT = 0xAA00;
+			playArray(*a4, 100);
 		}
-		
-		
-		
+
 	}
 
 	return 0;
 }
-
-
 
 void setupNVIC()
 {
@@ -81,28 +81,23 @@ void setupSleepMode()
 {
 	/* Sleep mode */
 	*SCR |= 0x6;		//Enables sleep mode for CPU.
-	
-	//wfi;		//What is the non-assembler version of this? Do we have alternatives?
+
+	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
 }
 
 void runTimerOnce(uint16_t DAC_Freq)
 {
-	*TIMER1_CTRL = 0x9000000;		//Prescale signal. 
+	*TIMER1_CTRL = 0x9000000;	//Prescale signal. 
 	*TIMER1_TOP = SAMPLE_PERIOD;
 
-	while (*TIMER1_CNT < (SAMPLE_PERIOD * 4 / 5))
-	{
+	while (*TIMER1_CNT < (SAMPLE_PERIOD * 4 / 5)) {
 		runDAC(DAC_Freq);
-	
+
 	}
 
 	*TIMER1_TOP = 0x0008;
 	*TIMER1_CTRL = 0x0000000;
 }
-
-
-
-
 
 /* if other interrupt handlers are needed, use the following names: 
    NMI_Handler

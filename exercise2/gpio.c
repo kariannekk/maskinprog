@@ -15,20 +15,20 @@ void setupGPIO()
 	 */
 
 	/* Enable GPIO clock. */
-	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;	
+	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;
 
 	/* Enable LEDs. */
-	*GPIO_PA_CTRL = 0x2;			//Sets high drive strength (20mA).
+	*GPIO_PA_CTRL = 0x2;	//Sets high drive strength (20mA).
 	*GPIO_PA_MODEH = 0x55555555;	//Sets pins A8-15 as output.
-	*GPIO_PA_DOUT = 0x0700;			//Turn on LEDs D4-D8 (LEDs are active low).
+	*GPIO_PA_DOUT = 0x0700;	//Turn on LEDs D4-D8 (LEDs are active low).
 
 	/* Enable buttons. */
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
-	*GPIO_PC_DOUT = 0xFF;			//Enables pull-up resistors. 
+	*GPIO_PC_DOUT = 0xFF;	//Enables pull-up resistors. 
 
 	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
-	*GPIO_EXTIFALL = 0xFF;			//Enables falling edge detection.
-	//*GPIO_IFC = 0xFF;				//Clears external interrupt flags. 
-	*GPIO_IEN = 0xFF;				//Enables external interrupts.
+	*GPIO_EXTIFALL = 0xFF;	//Enables falling edge detection.
+	//*GPIO_IFC = 0xFF;                             //Clears external interrupt flags. 
+	*GPIO_IEN = 0xFF;	//Enables external interrupts.
 }

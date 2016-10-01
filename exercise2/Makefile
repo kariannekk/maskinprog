@@ -33,6 +33,11 @@ clean :
 	-rm -rf *.o *.elf *.bin *.hex 
 	
 	
+.PHONY : redo
+redo : 
+	make
+	make upload
+
 .PHONY : debug
 debug : 
 	gnome-terminal -x JLinkGDBServer
