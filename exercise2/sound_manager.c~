@@ -3,10 +3,10 @@
 
 #include "efm32gg.h"
 
-
-
 /* temp define. removed 'D' to prevent multi-instance. */
 #define SAMPLE_PERIO 0xFFF0
+
+void runDAC(uint16_t sampleAmount);
 
 
 

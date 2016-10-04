@@ -24,6 +24,9 @@ void runTimerOnce(uint16_t DAC_Freq, int sample_period);
 void playArray(uint32_t inputList, uint16_t length);
 void my_polling_program();
 
+void poll_the_timer();
+
+
 /* Your code will start executing here */
 int main(void)
 {
@@ -59,13 +62,22 @@ void my_polling_program()
 		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
 		if (*TIMER1_CNT >= SAMPLE_PERIOD - 100) {
 			*GPIO_PA_DOUT = 0x0F00;
-		} else if (!(*GPIO_PC_DIN & 1)) {
+		} else if (!(*GPIO_PC_DIN & (1<<0))) {
 			runTimerOnce(150, SAMPLE_PERIOD);
-		} else if (!(*GPIO_PC_DIN & 2)) {
+		} else if (!(*GPIO_PC_DIN & (1<<1))) {
 			runTimerOnce(450, SAMPLE_PERIOD);
-		} else if (!(*GPIO_PC_DIN & 4)) {
+		} else if (!(*GPIO_PC_DIN & (1<<2))) {
 			*GPIO_PA_DOUT = 0xAA00;
 			playArray(*a4, 100);
+		} else if (!(*GPIO_PC_DIN & (1<<3))) {
+			runTimerOnce(600, SAMPLE_PERIOD);
+			runTimerOnce(800, SAMPLE_PERIOD);
+		} else if (!(*GPIO_PC_DIN & (1<<4))) {
+			poll_the_timer();
+		} else if (!(*GPIO_PC_DIN & (1<<5))) {
+			
+		} else if (!(*GPIO_PC_DIN & (1<<6))) {
+			
 		}
 	}
 }
