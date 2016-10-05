@@ -25,7 +25,7 @@ int a4[] = {101, 127, 135, 143, 151, 159, 166, 174, 181, 188, 195, 202, 208, 214
 int a5[] = {51, 127, 143, 159, 174, 188, 202, 214, 225, 234, 242, 248, 252, 254, 254, 252, 248, 243, 235, 226, 215, 203, 189, 175, 160, 144, 128, 112, 96, 81, 67, 53, 41, 30, 20, 12, 6, 2, 0, 0, 2, 5, 11, 19, 28, 39, 51, 64, 78, 94, 109 };
 int a4_length = 100;
 int a5_length = 50;
-int empty[] = {2, 0};
+int empty[] = {101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int * testsong[] = {(int*) 13, a4, a5, empty, a5, a4, a5, a4, a5, empty, a4, a5, a4};
 
@@ -76,15 +76,21 @@ void runTimerOnce(uint16_t DAC_Freq, int sample_period)
 void nextNote()
 {
 	current_note++;
-	current_note_duration = SAMPLE_FREQUENCY / (int)current_song[current_note][0];
+	if (current_note >= (int) current_song[0])
+	{
+		current_song = 0;
+	}
+	int tempFix = 1.4;
+	current_note_duration = tempFix * SAMPLE_FREQUENCY / (int)current_song[current_note][0];
 }
 
 void setSong(int ** input_song)
 {
 	current_note = 0;
-	current_song = input_song;
+	current_song = testsong;//input_song;
 	current_sample = 0;
 	nextNote();
+	*GPIO_PA_DOUT = 0xFE00;
 	//enable something timer?
 }
 
@@ -97,12 +103,6 @@ void playSampleList(int * note)
 	}
 }
 
-
-
-
-/* more temp functions. */
-
-
 void playNote()
 {
 	playSampleList(current_song[current_note]);
@@ -113,24 +113,28 @@ void playNote()
 	}
 }
 
+
+/* more temp functions. */
 void playSong()
 {
-	while (current_song == 0){
-		*GPIO_PA_DOUT = 0x3C00;	//error
-	}
-	
-	for (int i = 1; i< (int)current_song[0]; i++)
+	if (current_song <= 0)
 	{
-		current_note = i -1;
-		nextNote();
-
-		for (int j = 0; j < current_note_duration; j++){
-			playSampleList(current_song[i]);
-	}}
-	//check if the song is done.  
+		//*GPIO_PA_DOUT = 0x3C00;
+		return;
+	}
+	playNote();
 }
 
-void sendSample()
+
+void playEntireSong()
+{
+	while (!(current_song == 0)){
+		playNote();
+	}
+	//*GPIO_PA_DOUT = 0x3C00;	
+}
+
+void playSample()
 {
 	/* Varies a lot from TIMER1 period and other program functions. */
 	*DAC0_CH0DATA = a4[current_sample++ % a4_length];
@@ -155,7 +159,8 @@ void runThis()
 	
 	//playSampleList(a4);
 	
-	setSong(testsong);
-	playSong();
+	playEntireSong();
+	
+	//playSong();
 }
 

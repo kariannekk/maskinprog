@@ -4,13 +4,10 @@
 #include "efm32gg.h"
 
 /* 
-  TODO calculate the appropriate sample period for the sound wave(s) 
-  you want to generate. The core clock (which the timer clock is derived
-  from) runs at 14 MHz by default. Also remember that the timer counter
-  registers are 16 bits.
+  TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
 */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   317
+#define   SAMPLE_PERIOD   0xFFF
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();
@@ -27,6 +24,7 @@ void runDAC(uint16_t sampleAmount);
 void runTimerOnce(uint16_t DAC_Freq, int sample_period);
 
 void runThis();
+void setSong(int ** input_song);
 
 
 
@@ -45,7 +43,7 @@ int main(void)
 	//setupSleepMode();
 
 	/* Run polling program. */
-	//my_polling_programA();	//For easier toggling of interrupt vs polling.
+	//my_polling_programA();	//For easier toggling of interrupt vs polling. Also for seeing what worked earlier. 
 	my_polling_programB();
 
 	return 0;
@@ -79,22 +77,41 @@ int main(void)
 	}
 }*/
 
+void lightStroll()
+{
+	*GPIO_PA_DOUT = (*GPIO_PA_DOUT << 1);
+}
+
 void my_polling_programB()
 {
+	//*GPIO_PA_DOUT = 0xFEFF;
+	//*TIMER1_CTRL = 0xa000000;	//Prescale clock for slower counting. 
 	while (1)
 	{
-		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-		if (*TIMER1_CNT <= 10)
+		//*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+		if (*TIMER1_CNT <= 0)
 		{
-			//runThis();
+			//lightStroll();
+			runThis();
 		}
-		if (!(*GPIO_PC_DIN & 1))
-		{
+		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
+		{	//button pair: 1, 2
 			while (1) {}
 		}
-		if (!(*GPIO_PC_DIN & 2))
-		{
-			runThis();
+		if (!(*GPIO_PC_DIN & 2))	//set song. 
+		{	//button pair: 1, 2
+			setSong((int**)1);
+		}
+		while (!(*GPIO_PC_DIN & 4))	//move the one light.
+		{	//button pair: 3, 4
+			if (*GPIO_PC_DIN & 4)
+			{
+				lightStroll();
+			}
+		}
+		if (!(*GPIO_PC_DIN & 8))	//set one light only.
+		{	//button pair: 3, 4
+			*GPIO_PA_DOUT = 0xFEFF;
 		}
 	}
 }
