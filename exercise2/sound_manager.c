@@ -5,17 +5,29 @@
 
 
 
-/* temp define. removed 'D' to prevent multi-instance. */
-#define SAMPLE_PERIO 0xFFF0
+/* temp define. */
+#define SAMPLE_FREQUENCY 44100 //samples per second.
 
 
 
 /* Global variables for tracking. */
-int current_song;
+int ** current_song;
 int current_note;
 int current_sample;
+int current_note_duration;
 //current period of note
 //volume
+
+
+
+/* temp inputs. */
+int a4[] = {101, 127, 135, 143, 151, 159, 166, 174, 181, 188, 195, 202, 208, 214, 220, 225, 230, 234, 239, 242, 245, 248, 250, 252, 253, 254, 254, 254, 254, 252, 251, 248, 246, 243, 239, 235, 231, 226, 220, 215, 209, 203, 196, 189, 182, 175, 167, 160, 152, 144, 136, 128, 120, 112, 104, 96, 89, 81, 74, 67, 60, 53, 47, 41, 35, 30, 25, 20, 16, 12, 9, 6, 4, 2, 1, 0, 0, 0, 0, 2, 3, 5, 8, 11, 15, 19, 23, 28, 33, 39, 44, 51, 57, 64, 71, 78, 86, 94, 101, 109, 117 };
+int a5[] = {51, 127, 143, 159, 174, 188, 202, 214, 225, 234, 242, 248, 252, 254, 254, 252, 248, 243, 235, 226, 215, 203, 189, 175, 160, 144, 128, 112, 96, 81, 67, 53, 41, 30, 20, 12, 6, 2, 0, 0, 2, 5, 11, 19, 28, 39, 51, 64, 78, 94, 109 };
+int a4_length = 100;
+int a5_length = 50;
+int empty[] = {2, 0};
+
+int * testsong[] = {(int*) 13, a4, a5, empty, a5, a4, a5, a4, a5, empty, a4, a5, a4};
 
 
 
@@ -54,44 +66,96 @@ void runTimerOnce(uint16_t DAC_Freq, int sample_period)
 	*TIMER1_CTRL = 0x0000000;	//Restore unscaled counting. 
 }
 
-void playArray(uint32_t *inputList, uint16_t length)
+
+
+/* INIT */
+
+
+
+/* Functions to use after testing. May remove those above. */
+void nextNote()
 {
-	for (int i=0; i<length; i++)
-	{
-		*DAC0_CH0DATA = inputList[i];
-	}
+	current_note++;
+	current_note_duration = SAMPLE_FREQUENCY / (int)current_song[current_note][0];
 }
 
-void setSong(int input_song)
+void setSong(int ** input_song)
 {
 	current_note = 0;
 	current_song = input_song;
+	current_sample = 0;
+	nextNote();
+	//enable something timer?
 }
 
-void poll_the_timer()
+void playSampleList(int * note)
 {
-	if (*TIMER1_CNT >= (SAMPLE_PERIO - 100))
+	//for (int i=0; i<length; i++)	//Yields faster freq.
+	for (int i=1; i<note[0]; i++)
 	{
-		runDAC(300);
+		*DAC0_CH0DATA = note[i];
 	}
 }
 
+
+
+
+/* more temp functions. */
+
+
+void playNote()
+{
+	playSampleList(current_song[current_note]);
+	current_note_duration--;
+	if (current_note_duration <= 0)
+	{
+		nextNote();
+	}
+}
 
 void playSong()
 {
 	while (current_song == 0){
-		*GPIO_PA_DOUT = 0x3D00;	//error
+		*GPIO_PA_DOUT = 0x3C00;	//error
 	}
-	//send current_song[current_sample] til DAC.
-	//current_sample++;
-	//sjekk om sang er ferdig. 
+	
+	for (int i = 1; i< (int)current_song[0]; i++)
+	{
+		current_note = i -1;
+		nextNote();
+
+		for (int j = 0; j < current_note_duration; j++){
+			playSampleList(current_song[i]);
+	}}
+	//check if the song is done.  
 }
 
+void sendSample()
+{
+	/* Varies a lot from TIMER1 period and other program functions. */
+	*DAC0_CH0DATA = a4[current_sample++ % a4_length];
+	//current_sample++;
+	/*if (current_sample >= a4_length)
+	{
+		current_sample = 0;
+	}*/
+	
+	
+	
+	/* Sounds good, but reduces program flexibility. */
+	/*for (int i=1; i<a4[0]; i++)
+	{
+		*DAC0_CH0DATA = a4[i];
+	}*/
+}
 
-/* temp inputs. */
-/*
-uint32_t a4[] = { 127, 135, 143, 151, 159, 166, 174, 181, 188, 195, 202, 208, 214, 220, 225, 230, 234, 239, 242, 245, 248, 250, 252, 253, 254, 254, 254, 254, 252, 251, 248, 246, 243, 239, 235, 231, 226, 220, 215, 209, 203, 196, 189, 182, 175, 167, 160, 152, 144, 136, 128, 120, 112, 104, 96, 89, 81, 74, 67, 60, 53, 47, 41, 35, 30, 25, 20, 16, 12, 9, 6, 4, 2, 1, 0, 0, 0, 0, 2, 3, 5, 8, 11, 15, 19, 23, 28, 33, 39, 44, 51, 57, 64, 71, 78, 86, 94, 101, 109, 117 };
-uint32_t a5[] = { 127, 143, 159, 174, 188, 202, 214, 225, 234, 242, 248, 252, 254, 254, 252, 248, 243, 235, 226, 215, 203, 189, 175, 160, 144, 128, 112, 96, 81, 67, 53, 41, 30, 20, 12, 6, 2, 0, 0, 2, 5, 11, 19, 28, 39, 51, 64, 78, 94, 109 };
-uint16_t a_length = 50; //100;
-*/
+void runThis()
+{
+	//sendSample();
+	
+	//playSampleList(a4);
+	
+	setSong(testsong);
+	playSong();
+}
 
