@@ -4,34 +4,23 @@
 #include "efm32gg.h"
 
 /* 
-  TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
+  TODO calculate the appropriate sample period for the sound wave(s) 
+  you want to generate. The core clock (which the timer clock is derived
+  from) runs at 14 MHz by default. Also remember that the timer counter
+  registers are 16 bits.
 */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   0xFFF
+#define   SAMPLE_PERIOD   100
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();
-void setupGPIOinterrupts();
-void setGPIOLight(int buttonNumber);
-int readGPIOInput(int GPIOButton);
-
 void setupTimer(uint32_t period);
-void setupTimerInterrupts();
 void setupDAC();
+void runDAC(uint16_t sampleAmount);
 void setupNVIC();
-void setupInterrupt();
+void setupGPIOinterrupts();
 void setupSleepMode();
 void __attribute__ ((interrupt)) TIMER1_IRQHandler();
-
-void my_polling_programB();
-
-void runDAC(uint16_t sampleAmount);
-void runTimerOnce(uint16_t DAC_Freq, int sample_period);
-
-void runThis();
-void setSong(int ** input_song);
-
-
 
 /* Your code will start executing here */
 int main(void)
@@ -47,49 +36,49 @@ int main(void)
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
-	my_polling_program();
+//      while (1)
+//      {
+//              runDAC(120);
+//              while (*GPIO_PC_DIN & 1)
+//              {
+//                      *GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+//              }
+//      }
+	while (1) {
+		if (*TIMER1_CNT == 0) {
+			*GPIO_PA_DOUT = 0xF000;
+			*TIMER1_CMD = 0x1;
+//                      runDAC(120);
+		}
+//              *GPIO_PA_DOUT = 0xFF00;
+		if (*TIMER1_CNT == SAMPLE_PERIOD / 2) {
+			*GPIO_PA_DOUT = 0xFF00;
+		}
+		if (*TIMER1_CNT == SAMPLE_PERIOD / 4) {
+			*GPIO_PA_DOUT = 0x0000;
+		}
+//      TIMER1_IRQHandler();
+//      *GPIO_PA_DOUT = 0xFF00;
+	}
 
 	return 0;
 }
 
-	
-void my_polling_program()
-{
-	int buttonNumber = 0;
-	
-	/* Play opening song*/
-	setSong((int**)1);
-	runThis();
-	
-	//*GPIO_PA_DOUT = 0xFEFF;
-	//*TIMER1_CTRL = 0xa000000;	//Prescale clock for slower counting. 
-
-	/* Play buttonsound */
-	while (1)
-	{
-		if (*TIMER1_CNT <= 0)
-		{
-			runThis();
-		}
-
-		if(buttonNumber = readGPIOInput(*GPIO_PC_DIN))
-		{
-			setSong((int**)1);
-			continue;
-		}
-	}
-}
-
-void setupInterrupt(){
-	setupGPIOinterrupts();
-	setupTimerInterrupts();
-	setupNVIC();
-}
-
 void setupNVIC()
 {
+	/* TODO use the NVIC ISERx registers to enable handling of interrupt(s)
+	   remember two things are necessary for interrupt handling:
+	   - the peripheral must generate an interrupt signal
+	   - the NVIC must be configured to make the CPU handle the signal
+	   You will need TIMER1, GPIO odd and GPIO even interrupt handling for this
+	   assignment.
+	 */
+
+	//setupGPIOinterrupts();
+	//setupTimer(SAMPLE_PERIOD);    //Consider moving from main().
+
 	/* Set NVIC ISERx register for interrupt enable. */
-	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts, and TIMER1 interrupts. 
+	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts. 
 }
 
 void setupSleepMode()
@@ -98,10 +87,7 @@ void setupSleepMode()
 	*SCR |= 0x6;		//Enables sleep mode for CPU.
 
 	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
-	//TODO Disable timer & dac.
 }
-
-
 
 /* if other interrupt handlers are needed, use the following names: 
    NMI_Handler

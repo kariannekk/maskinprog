@@ -90,7 +90,7 @@ void setSong(int ** input_song)
 	current_song = testsong;//input_song;
 	current_sample = 0;
 	nextNote();
-	*GPIO_PA_DOUT = 0xFE00;
+//	*GPIO_PA_DOUT = 0xFE00;
 	//enable something timer?
 }
 

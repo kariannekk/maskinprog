@@ -80,7 +80,7 @@ void nextNote()
 	{
 		current_song = 0;
 	}
-	int tempFix = 1.3;
+	int tempFix = 1.4;
 	current_note_duration = tempFix * SAMPLE_FREQUENCY / (int)current_song[current_note][0];
 }
 

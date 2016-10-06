@@ -11,13 +11,18 @@
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();
+void setupGPIOinterrupts();
+void setGPIOLight(int buttonNumber);
+int readGPIOInput(int GPIOButton);
+
 void setupTimer(uint32_t period);
+void setupTimerInterrupts();
 void setupDAC();
 void setupNVIC();
+void setupInterrupt();
 void setupSleepMode();
 void __attribute__ ((interrupt)) TIMER1_IRQHandler();
 
-void my_polling_programA();
 void my_polling_programB();
 
 void runDAC(uint16_t sampleAmount);
@@ -42,78 +47,44 @@ int main(void)
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
-	/* Run polling program. */
-	//my_polling_programA();	//For easier toggling of interrupt vs polling. Also for seeing what worked earlier. 
-	my_polling_programB();
+	my_polling_program();
 
 	return 0;
 }
 
-
-/* Scans the buttons. */
-/*void my_polling_programA()
+	
+void my_polling_program()
 {
-	while (1) {
-		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-		if (*TIMER1_CNT >= SAMPLE_PERIOD - 100) {
-			*GPIO_PA_DOUT = 0x0F00;
-		} else if (!(*GPIO_PC_DIN & (1<<0))) {
-			runTimerOnce(150, SAMPLE_PERIOD);
-		} else if (!(*GPIO_PC_DIN & (1<<1))) {
-			runTimerOnce(450, SAMPLE_PERIOD);
-		} else if (!(*GPIO_PC_DIN & (1<<2))) {
-			*GPIO_PA_DOUT = 0xAA00;
-			playArray(*a4, 100);
-		} else if (!(*GPIO_PC_DIN & (1<<3))) {
-			runTimerOnce(600, SAMPLE_PERIOD);
-			runTimerOnce(800, SAMPLE_PERIOD);
-		} else if (!(*GPIO_PC_DIN & (1<<4))) {
-			poll_the_timer();
-		} else if (!(*GPIO_PC_DIN & (1<<5))) {
-			
-		} else if (!(*GPIO_PC_DIN & (1<<6))) {
-			
-		}
-	}
-}*/
-
-void lightStroll()
-{
-	*GPIO_PA_DOUT = (*GPIO_PA_DOUT << 1);
-}
-
-void my_polling_programB()
-{
+	int buttonNumber = 0;
+	
+	/* Play opening song*/
+	setSong((int**)1);
+	runThis();
+	
 	//*GPIO_PA_DOUT = 0xFEFF;
 	//*TIMER1_CTRL = 0xa000000;	//Prescale clock for slower counting. 
+
+	/* Play buttonsound */
 	while (1)
 	{
-		//*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
 		if (*TIMER1_CNT <= 0)
 		{
-			//lightStroll();
 			runThis();
+//			setGPIOLight(0); //turn-off light
 		}
-		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
-		{	//button pair: 1, 2
-			while (1) {}
-		}
-		if (!(*GPIO_PC_DIN & 2))	//set song. 
-		{	//button pair: 1, 2
+
+		if(buttonNumber = readGPIOInput(*GPIO_PC_DIN))
+		{
 			setSong((int**)1);
-		}
-		while (!(*GPIO_PC_DIN & 4))	//move the one light.
-		{	//button pair: 3, 4
-			if (*GPIO_PC_DIN & 4)
-			{
-				lightStroll();
-			}
-		}
-		if (!(*GPIO_PC_DIN & 8))	//set one light only.
-		{	//button pair: 3, 4
-			*GPIO_PA_DOUT = 0xFEFF;
+			continue;
 		}
 	}
+}
+
+void setupInterrupt(){
+	setupGPIOinterrupts();
+	setupTimerInterrupts();
+	setupNVIC();
 }
 
 void setupNVIC()

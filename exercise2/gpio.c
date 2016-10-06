@@ -3,8 +3,6 @@
 
 #include "efm32gg.h"
 
-void setupGPIOinterrupts();
-
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
 {
@@ -26,9 +24,63 @@ void setupGPIO()
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
 	*GPIO_PC_DOUT = 0xFF;	//Enables pull-up resistors. 
 
+	/* Turn of all lights */
+	*GPIO_PA_DOUT = 0xFF00;
+
+
+}
+
+void setupGPIOinterrupts(){
 	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
-	*GPIO_EXTIFALL = 0xFF;	//Enables falling edge detection.
-	//*GPIO_IFC = 0xFF;                             //Clears external interrupt flags. 
-	*GPIO_IEN = 0xFF;	//Enables external interrupts.
+	*GPIO_EXTIFALL = 0xFF;			//Enables falling edge detection.
+	*GPIO_IFC = 0xFF;				//Clears external interrupt flags. 
+	*GPIO_IEN = 0xFF;				//Enables external interrupts.
 }
+
+void setGPIOLight(int GPIOButton){
+	*GPIO_PA_DOUT = (GPIOButton << 8);
+}
+
+
+int inputGPIOButton(int GPIOButton){
+	int buttonNumber;
+	switch(GPIOButton) {
+		case 0xFE :
+			return 1;
+		
+		case 0xFD :
+			return 2;
+		
+		case 0xFB :
+			return 3;
+		
+		case 0xF7 :
+			return 4;
+		
+		case 0xEF :
+			return 5;
+		
+		case 0xDF :
+			return 6;
+		
+		case 0xBF :
+			return 7;
+		
+		case 0x7F :
+			return 8;
+		
+		default :		//Returns 0 if no button is pushed, or multiple buttons are pushed
+			return 0;
+	}
+
+}
+
+
+int readGPIOInput(int GPIOButton){
+	int buttonNumber;
+	buttonNumber = inputGPIOButton(GPIOButton);
+	setGPIOLight(GPIOButton);
+	return buttonNumber;
+}
+
