@@ -80,7 +80,7 @@ int inputGPIOButton(int GPIOButton){
 int readGPIOInput(int GPIOButton){
 	int buttonNumber;
 	buttonNumber = inputGPIOButton(GPIOButton);
-	setGPIOLight(buttonNumber);
+	setGPIOLight(GPIOButton);
 	return buttonNumber;
 }
 

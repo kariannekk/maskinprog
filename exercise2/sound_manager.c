@@ -8,7 +8,8 @@
 /* temp define. */
 #define SAMPLE_FREQUENCY 44100 //samples per second.
 
-
+void startTimer();
+void stopTimer();
 
 /* Global variables for tracking. */
 int ** current_song;
@@ -28,6 +29,9 @@ int a5_length = 50;
 int empty[] = {101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int * testsong[] = {(int*) 13, a4, a5, empty, a5, a4, a5, a4, a5, empty, a4, a5, a4};
+//int * testsong[] = {(int*) 31, a4, a5, a5, a4, a5, a4, a5, a4, a4, a4,
+//							   a4, a5, a5, a4, a5, a4, a5, a5, a4, a5,
+//							   a4, a5, a5, a4, a5, a4, a5, a5, a4, a5};
 
 
 
@@ -137,24 +141,49 @@ void playEntireSong()
 void playSample()
 {
 	/* Varies a lot from TIMER1 period and other program functions. */
-	*DAC0_CH0DATA = a4[current_sample++ % a4_length];
-	//current_sample++;
+	*DAC0_CH0DATA = a4[current_sample];
+	current_sample = (current_sample + 1) % a4_length;
 	/*if (current_sample >= a4_length)
 	{
 		current_sample = 0;
 	}*/
 	
 	
-	
-	/* Sounds good, but reduces program flexibility. */
+	/* Sounds better, but reduces program flexibility. */
 	/*for (int i=1; i<a4[0]; i++)
 	{
 		*DAC0_CH0DATA = a4[i];
 	}*/
 }
 
+void playTestNote(int tone){
+	*DAC0_CH0DATA = tone;// * 6;
+}
+
+void playTestSong(){
+	setSong((int**)1);
+	startTimer();
+	int samples = 0;
+	//current_note = 1;
+	while(current_song != 0){
+		//while(samples <= current_song[current_note][0]){
+		while(samples <= current_note_duration){
+			if(*TIMER1_CNT == *TIMER1_TOP){
+				playNote(current_song[current_note]);	
+				//playTestNote(current_song[current_note][samples]);
+				samples++;
+			}
+		}
+		//}
+		samples = 0;
+		nextNote();
+	}
+	stopTimer();
+}
+
 void runThis()
 {
+	setSong((int**)1);
 	//sendSample();
 	
 	//playSampleList(a4);
