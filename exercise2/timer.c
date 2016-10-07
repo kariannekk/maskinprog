@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #include "efm32gg.h"
+void startTimer();
 
 /* function to setup the timer. Maximum input period is 0xFFFF. */
 void setupTimer(uint16_t period)
@@ -15,7 +16,8 @@ void setupTimer(uint16_t period)
 
 	/* Set number of count ticks */
 	*TIMER1_TOP = period;	//Sets timer period. Max is 0xFFFF.
-
+	
+	startTimer();
 }
 
 void setupTimerInterrupts(){

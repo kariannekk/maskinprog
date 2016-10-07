@@ -44,7 +44,6 @@ void setGPIOLight(int GPIOButton){
 
 
 int inputGPIOButton(int GPIOButton){
-	int buttonNumber;
 	switch(GPIOButton) {
 		case 0xFE :
 			return 1;

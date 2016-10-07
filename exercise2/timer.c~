@@ -36,6 +36,7 @@ void stopTimer(){
 void disableTimer(){
 	/* Disable Timer clock. */
 	*CMU_HFPERCLKEN0 &= ~CMU2_HFPERCLKEN0_TIMER1;
+	/* Disable interrupt */
 	*TIMER1_IEN = 0x1;
 }
 

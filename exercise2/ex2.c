@@ -7,7 +7,7 @@
   TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
 */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   410//0xFFF
+#define   SAMPLE_PERIOD   440//0xFFF
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();
@@ -25,7 +25,8 @@ void setupSleepMode();
 void playTestSong();
 void __attribute__ ((interrupt)) TIMER1_IRQHandler();
 
-void my_polling_program();
+void my_polling_programA();
+void my_polling_programB();
 
 void runDAC(uint16_t sampleAmount);
 void runTimerOnce(uint16_t DAC_Freq, int sample_period);
@@ -49,30 +50,29 @@ int main(void)
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
-	my_polling_program();
+	my_polling_programB();
 
 	return 0;
 }
 
 	
-void my_polling_program()
+void my_polling_programA()
 {
 	int buttonNumber = 0;
 	int lastButton = 0;
 	
 	/* Play opening song*/
-//	runThis();
-	//playTestSong();
+	//runThis();
 
 //	startTimer();
 	/* Play buttonsound */
 	while (1)
 	{
-		if(buttonNumber = readGPIOInput(*GPIO_PC_DIN))
+		if((buttonNumber = readGPIOInput(*GPIO_PC_DIN)))
 		{
 			if(lastButton != buttonNumber){
-				//runThis();
-				playTestSong();
+				runThis();
+				//playTestSong();
 			}
 			lastButton = buttonNumber;
 			continue;
@@ -80,6 +80,25 @@ void my_polling_program()
 		else{
 			lastButton = 0;
 			continue;
+		}
+	}
+}
+
+void my_polling_programB(){
+	while (1)
+	{
+		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
+		if (*TIMER1_CNT == *TIMER1_TOP)
+		{
+			runThis();
+		}
+		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
+		{	//button pair: 1, 2		//e.g. stop noise.
+			while (1) {}
+		}
+		if (!(*GPIO_PC_DIN & 2))	//set song. 
+		{	//button pair: 1, 2
+			setSong((int**)1);
 		}
 	}
 }
