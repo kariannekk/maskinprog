@@ -32,8 +32,8 @@ int d4[] = { 150, 127, 132, 138, 143, 148, 153, 159, 164, 169, 174, 179, 184, 18
 
 
 //int * testsong[] = {(int*) 12, a4, a5, empty, a5, a4, a5, a4, a5, empty, a4, a5, a4};
-//int * testsong[] = {(int*) 12, a4, d4, empty, d4, a4, d4, a4, d4, empty, a4, d4, a4};
-int * testsong[] = {(int*) 12, a4, a4, a4, a4, a4, a4, a4, a4, a4, a4, a4, a4};
+int * testsong[] = {(int*) 12, a4, d4, empty, d4, a4, d4, a4, d4, empty, a4, d4, a4};
+//int * testsong[] = {(int*) 12, a4, a4, a4, a4, a4, a4, a4, a4, a4, a4, a4, a4};
 //int * testsong[] = {(int*) 30, a4, a5, a5, a4, a5, a4, a5, a4, a4, a4, a4, a5, a5, a4, a5, a4, a5, a5, a4, a5, a4, a5, a5, a4, a5, a4, a5, a5, a4, a5};
 
 
@@ -83,7 +83,7 @@ void nextNote()
 		current_song = 0;
 		return;
 	}
-	double tempFix = 16;
+	double tempFix = 8;
 	current_note_duration = (SAMPLE_FREQUENCY / tempFix) / (int)current_song[current_note][0];
 }
 
