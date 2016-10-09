@@ -9,41 +9,49 @@ void runThis();
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
-	/*
-	   TODO feed new samples to the DAC
-	   remember to clear the pending interrupt by writing 1 to TIMER1_IFC
-	 */
-	setSong((int**)1);
-    runThis();
-    
-    
-	*GPIO_PA_DOUT = 0x1100;	//temp signal. 
+	/* Remove timer interrupt flag */
+	*TIMER1_IFC = 1;
 
-	*TIMER1_CMD = 0x2;
+	/* Play next sample */
+	runThis();
 
-	*TIMER1_IFC = 1;	//altern: = *TIMER1_IF;         //Clears all interrupt flags.
+	/* Stop timer when song is finished*/
+	//if(current_song == 0){
+	//	*TIMER1_CMD = 0x2;
+	//}
+
 }
 
 /* GPIO even pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 {
-	/* TODO handle button pressed event, remember to clear pending interrupt */
-
-	*GPIO_PA_DOUT = 0xAA00;	//temp signal.
-	
-	*TIMER1_CMD = 0x1;
-
 	*GPIO_IFC |= 0xAA;	//Clears even numbered interrupt flags (1-indexed).
+	
+	GPIOHandler();
 }
 
 /* GPIO odd pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 {
-	/* TODO handle button pressed event, remember to clear pending interrupt */
-
-	*GPIO_PA_DOUT = 0x5500;	//temp signal.
-
-	*TIMER1_CMD = 0x1;
-
 	*GPIO_IFC |= 0x55;	//Clears odd numbered interrupt flags (1-indexed).
+	
+	GPIOHandler();
+}
+
+void GPIOHandler(){
+	
+	buttonNumber = readGPIOInput();
+	
+	/* If only one button is pushed, continue */
+	if(buttonNumber != 0){
+		/* Set song */
+		
+		if(current_song != 0){
+			/* Start timer */
+			*TIMER1_CMD = 0x1;
+		}
+		
+
+		
+	}
 }
