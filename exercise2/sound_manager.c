@@ -91,7 +91,28 @@ void setSong(int ** input_song)
 {
 	current_note = 0;
 	current_sample = 1;
-	current_song = testsong;//input_song;
+	switch(input_song){
+		case 2 :
+			current_song = testsong;
+			break;
+		case 4 :
+			current_song = testsong;
+			break;
+		case 5 :
+			current_song = testsong;
+			break;
+		case 6 :
+			current_song = testsong;
+			break;
+		case 7 :
+			current_song = testsong;
+			break;
+		case 8 :
+			current_song = testsong;
+			break;
+		default :
+			currrent_song = 0;
+	}	
 	nextNote();
 	//enable something timer?
 }
@@ -157,15 +178,11 @@ void playSong()
 }
 
 
-
-
-
-
-
-void runThis()
+int runThis()
 {
 	//playEntireSong();		//Remember to set tempFix = 1 for current_note_duration. 
 	
 	playSong();
+	return current_song;
 }
 

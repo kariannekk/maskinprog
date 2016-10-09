@@ -3,6 +3,8 @@
 
 #include "efm32gg.h"
 
+int position = 0;
+
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
 {
@@ -24,8 +26,8 @@ void setupGPIO()
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
 	*GPIO_PC_DOUT = 0xFF;	//Enables pull-up resistors. 
 
-	/* Turn of all lights */
-	*GPIO_PA_DOUT = 0xFF00;
+	/* Set startpositon of lights */
+	*GPIO_PA_DOUT = 0xFE00;
 
 
 }
@@ -38,12 +40,14 @@ void setupGPIOinterrupts(){
 	*GPIO_IEN = 0xFF;				//Enables external interrupts.
 }
 
-void setGPIOLight(int GPIOButton){
-	*GPIO_PA_DOUT = (GPIOButton << 8);
+
+void moveLight(int direction){
+	position = (position+direction) % 8;
+	*GPIO_PA_DOUT = (0xFEFF << position);
 }
 
 
-int inputGPIOButton(int GPIOButton){
+int readGPIOInput(int GPIOButton){
 	switch(GPIOButton) {
 		case 0xFE :
 			return 1;
@@ -73,13 +77,5 @@ int inputGPIOButton(int GPIOButton){
 			return 0;
 	}
 
-}
-
-
-int readGPIOInput(int GPIOButton){
-	int buttonNumber;
-	buttonNumber = inputGPIOButton(GPIOButton);
-	setGPIOLight(GPIOButton);
-	return buttonNumber;
 }
 
