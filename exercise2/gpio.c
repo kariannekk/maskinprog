@@ -47,8 +47,8 @@ void moveLight(int direction){
 }
 
 
-int readGPIOInput(int GPIOButton){
-	switch(GPIOButton) {
+int readGPIOInput(){
+	switch(*GPIO_PC_DIN) {
 		case 0xFE :
 			return 1;
 		

@@ -35,37 +35,6 @@ int * testsong[] = {(int*) 12, a4, d4, empty, d4, a4, d4, a4, d4, empty, a4, d4,
 
 
 
-/* Creates a simple, naive triangle-wave. */
-void runDAC(uint16_t sampleAmount)
-{
-	uint16_t SAMPLE_MIN = 0x400;	//Appears to be 'dont-care' value. This is the min-value of the wave. 
-	uint16_t amplitudeStep = 0x1;	//Volume-ish. Actually the step added sampleAmount times to the min-value. 
-	//uint16_t sampleAmount = 800;          //Frequency, somewhat. Approximate min: 30. Approximate max: 1500. will make ugly noise further than 1500. 
-
-	for (int i = 0; i < sampleAmount; i++) {
-		*DAC0_CH0DATA = SAMPLE_MIN + (i * amplitudeStep);
-		//*DAC0_CH1DATA = SAMPLE_MEDIAN + 0x200 + (i * 2 * amplitudeStep);
-	}
-	for (int i = sampleAmount; i > 0; i--) {
-		*DAC0_CH0DATA = SAMPLE_MIN + (i * amplitudeStep);
-		//*DAC0_CH1DATA = SAMPLE_MEDIAN + 0x200 + (i * 2 * amplitudeStep);
-	}
-}
-
-void runTimerOnce(uint16_t DAC_Freq, int sample_period)
-{
-	*TIMER1_CTRL = 0x9000000;	//Prescale clock for slower counting. 
-	*TIMER1_CNT = 0x0000;	//Ensures we get a full Timer1 delay. 
-
-	while (*TIMER1_CNT < (sample_period * 4 / 5)) {
-		runDAC(DAC_Freq);
-	}
-
-	*TIMER1_CTRL = 0x0000000;	//Restore unscaled counting. 
-}
-
-
-
 /* INIT */
 void playSample();
 
@@ -88,32 +57,37 @@ void setSong(int ** input_song)
 {
 	current_note = 0;
 	current_sample = 1;
-	switch(input_song){
-		case 2 :
-			current_song = testsong;
-			break;
-		case 4 :
-			current_song = testsong;
-			break;
-		case 5 :
-			current_song = testsong;
-			break;
-		case 6 :
-			current_song = testsong;
-			break;
-		case 7 :
-			current_song = testsong;
-			break;
-		case 8 :
-			current_song = testsong;
-			break;
-		default :
-			currrent_song = 0;
-	}	
+	current_song = input_song;
 	nextNote();
-	//enable something timer?
 }
 
+void buttonSongSelector(int input_button){
+	if (current_song > 0){
+		return;
+	}
+	switch(input_button){
+		case 2 :
+			setSong(testsong);
+			break;
+		case 4 :
+			setSong(testsong);
+			break;
+		case 5 :
+			setSong(testsong);
+			break;
+		case 6 :
+			setSong(testsong);
+			break;
+		case 7 :
+			setSong(testsong);
+			break;
+		case 8 :
+			setSong(testsong);
+			break;
+		default :
+			return;
+	}
+}	
 
 
 void playSampleList(int * input_note)
@@ -136,10 +110,10 @@ void playNoteList()
 
 void playEntireSong()
 {
-	while (!(current_song == 0)){
+	while (!(current_song == 0))
+	{
 		playNoteList();
 	}
-	//*GPIO_PA_DOUT = 0x3C00;	
 }
 
 
@@ -168,18 +142,16 @@ void playSong()
 {
 	if (current_song <= 0)
 	{
-		//*GPIO_PA_DOUT = 0x3C00;
 		return;
 	}
 	playNote();
 }
 
 
-int runThis()
+void runThis()
 {
 	//playEntireSong();		//Remember to set tempFix = 1 for current_note_duration. 
 	
 	playSong();
-	return current_song;
 }
 
