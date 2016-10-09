@@ -61,31 +61,31 @@ void setSong(int ** input_song)
 	nextNote();
 }
 
-void buttonSongSelector(int input_button){
+int buttonSongSelector(int input_button){
 	if (current_song > 0){
-		return;
+		return 0;
 	}
 	switch(input_button){
 		case 2 :
 			setSong(testsong);
-			break;
+			return 1;
 		case 4 :
 			setSong(testsong);
-			break;
+			return 1;
 		case 5 :
 			setSong(testsong);
-			break;
+			return 1;
 		case 6 :
 			setSong(testsong);
-			break;
+			return 1;
 		case 7 :
 			setSong(testsong);
-			break;
+			return 1;
 		case 8 :
 			setSong(testsong);
-			break;
+			return 1;
 		default :
-			return;
+			return 0;
 	}
 }	
 

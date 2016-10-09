@@ -46,7 +46,7 @@ void moveLight(int direction){
 	*GPIO_PA_DOUT = (0xFEFF << position);
 }
 
-
+// TODO only one button at a time, because multiple buttons at once makes no sense with our functionality. --report stuff
 int readGPIOInput(){
 	switch(*GPIO_PC_DIN) {
 		case 0xFE :
@@ -76,6 +76,5 @@ int readGPIOInput(){
 		default :		//Returns 0 if no button is pushed, or multiple buttons are pushed
 			return 0;
 	}
-
 }
 
