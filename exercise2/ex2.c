@@ -9,6 +9,9 @@
 /* The period between sound samples, in clock cycles */
 #define   SAMPLE_PERIOD   16
 
+#define RIGHT 1
+#define LEFT -1
+
 /* Declaration of peripheral setup functions */
 void setupGPIO();
 void setupGPIOinterrupts();
@@ -35,7 +38,6 @@ void runThis();
 void setSong(int ** input_song);
 
 
-
 /* Your code will start executing here */
 int main(void)
 {
@@ -59,7 +61,8 @@ int main(void)
 void my_polling_programA()
 {
 	int buttonNumber = 0;
-	int lastButton = 0;
+	int buttonReleased = 0;
+	int playing = 0;
 	
 	/* Play opening song*/
 	//runThis();
@@ -68,18 +71,28 @@ void my_polling_programA()
 	/* Play buttonsound */
 	while (1)
 	{
+		if (*TIMER1_CNT == *TIMER1_TOP)
+		{
+			playing = runThis();
+		}
 		if((buttonNumber = readGPIOInput(*GPIO_PC_DIN)))
 		{
-			if(lastButton != buttonNumber){
-				runThis();
-				//playTestSong();
+			if(buttonReleased){
+				buttonReleased = 0;
+				if(!(playing)){
+					playing = 1;
+					setSong((int**)buttonNumber);
+				}
+				if(buttonNumber == 1){
+					moveLight(LEFT);
+				}
+				else if(buttonNumber == 3){
+					moveLight(RIGHT);
+				}
 			}
-			lastButton = buttonNumber;
-			continue;
 		}
 		else{
-			lastButton = 0;
-			continue;
+			buttonReleased = 1;
 		}
 	}
 }
