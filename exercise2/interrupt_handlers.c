@@ -3,61 +3,61 @@
 
 #include "efm32gg.h"
 
-void setSong(int ** inpit_song);
-void runThis();
+#define RIGHT 1
+#define LEFT -1
 
-int playing = 0;
+int playSong();	//From file "sound_manager.c".
+int selectSongFromButton(int input_button);
+
+int readGPIOInput();	//From file "gpio.c".
+void moveLight(int direction);
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
-	
-	/* Remove timer interrupt flag */
+	/* Clear timer interrupt flag */
 	*TIMER1_IFC = 1;
-
+	
 	/* Play next sample */
-	playing = playSong();
-
-	/* Stop timer when song is finished */
-	if(playing == 0){
-		*TIMER1_CMD = 0x2;
-	}
+	playSong();
 }
 
 /* GPIO even pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 {
-	GPIOHandler();
-
-	*GPIO_IFC |= 0xAA;	//Clears even numbered interrupt flags (1-indexed).
+	/* Clear even numbered interrupt flags (0-indexed). */
+	*GPIO_IFC |= 0x55;
+	
+	/* Read input. */
+	int input_button = readGPIOInput();	//Prevents several simultaneous buttons. 
+	switch (input_button){
+	case 0:
+		return;
+	case 1:
+		moveLight(LEFT);
+		break;
+	case 3:
+		moveLight(RIGHT);
+		break;
+	default:
+		selectSongFromButton(input_button);
+		break;
+	}
 }
 
 /* GPIO odd pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 {
-	GPIOHandler();
+	/* Clear odd numbered interrupt flags (0-indexed). */
+	*GPIO_IFC |= 0xAA;
 	
-	*GPIO_IFC |= 0x55;	//Clears odd numbered interrupt flags (1-indexed).
-}
-
-void GPIOHandler(){
-	
-	buttonNumber = readGPIOInput();
-	
-	/* If only one button is pushed, continue */
-	if(buttonNumber != 0){
-		/* Set song */
-		if(buttonSongSelector(buttonNumber)){ //checks button
-			if(playing != 0){	//Start timer if no song is playing
-				*TIMER1_CMD = 0x1;
-			}
-		}
-		/* Set light movement */
-		if(buttonNumber == 1){
-			moveLight(LEFT);
-		}
-		else if(buttonNumber == 3){
-			moveLight(RIGHT);
-		}
+	/* Read input. */
+	int input_button = readGPIOInput();	//Prevents several simultaneous buttons. 
+	switch (input_button){
+	case 0:
+		return;
+	default:
+		selectSongFromButton(input_button);
+		break;
 	}
 }

@@ -6,35 +6,37 @@
 /* 
   TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
 */
+
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   8
+#define   SAMPLE_PERIOD   250
+
+#define RIGHT 1			//Consider making enumerator.
+#define LEFT -1
 
 /* Declaration of peripheral setup functions */
-void setupGPIO();
+void setupGPIO();		//From file "gpio.c"
 void setupGPIOinterrupts();
-void setGPIOLight(int buttonNumber);
-int readGPIOInput(int GPIOButton);
+int readGPIOInput();
 
-void setupTimer(uint32_t period);
+void setupTimer(uint32_t period);	//From file "timer.c"
 void setupTimerInterrupts();
 void startTimer();
-void setupDAC();
-void setupNVIC();
-void setupInterrupt();
-void setupSleepMode();
-void playTestSong();
-void __attribute__ ((interrupt)) TIMER1_IRQHandler();
 
+void setupDAC();		//From file "dac.c"
+
+void setupInterrupt();		//From file "ex2.c"
+void setupSleepMode();
+
+void setSong(int **input_song);	//From file "sound_manager.c"
+
+/* Temporary peripheral decalrations. */
 void my_polling_programA();
 void my_polling_programB();
 
-void runDAC(uint16_t sampleAmount);
-void runTimerOnce(uint16_t DAC_Freq, int sample_period);
-
 void runThis();
-void setSong(int ** input_song);
 
-
+void moveLight(int direction);
+void selectSongFromButton(int input_button);
 
 /* Your code will start executing here */
 int main(void)
@@ -42,77 +44,83 @@ int main(void)
 	/* Call the peripheral setup functions */
 	setupGPIO();
 	setupDAC();
-	setupTimer(SAMPLE_PERIOD);	//Consider moving to setupNVIC().
+	setupTimer(SAMPLE_PERIOD);
 
 	/* Enable interrupt handling */
-	//setupNVIC();
+	setupInterrupt();
 
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
-	my_polling_programB();
+	/* Run main program. */
+	while (1) {
+	};
+	//my_polling_programA();
 
 	return 0;
 }
 
-	
 void my_polling_programA()
 {
-	int buttonNumber = 0;
-	int lastButton = 0;
-	
-	/* Play opening song*/
-	//runThis();
+	int input_button = 0;
+	int buttonReleased = 1;
 
-//	startTimer();
-	/* Play buttonsound */
-	while (1)
-	{
-		if((buttonNumber = readGPIOInput(*GPIO_PC_DIN)))
-		{
-			if(lastButton != buttonNumber){
-				runThis();
-				//playTestSong();
-			}
-			lastButton = buttonNumber;
-			continue;
+	/* Play opening song */
+	//setSong();
+	//set variables = no other buttons pressed. 
+
+//      startTimer();
+	/* Play sound from button presses. */
+	while (1) {
+		if (*TIMER1_CNT == *TIMER1_TOP) {
+			runThis();
 		}
-		else{
-			lastButton = 0;
-			continue;
+		if ((input_button = readGPIOInput())) {
+			if (buttonReleased) {
+				buttonReleased = 0;
+				selectSongFromButton(input_button);
+				if (input_button == 1) {
+					moveLight(LEFT);
+				} else if (input_button == 3) {
+					moveLight(RIGHT);
+				}
+			}
+		} else {
+			buttonReleased = 1;
 		}
 	}
 }
 
-void my_polling_programB(){
-	while (1)
-	{
+void my_polling_programB()
+{
+	while (1) {
 		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-		if (*TIMER1_CNT == *TIMER1_TOP)
-		{
+		if (*TIMER1_CNT == *TIMER1_TOP) {
 			runThis();
 		}
 		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
-		{	//button pair: 1, 2		//e.g. stop noise.
-			while (1) {}
+		{		//button pair: 1, 2             //e.g. stop noise.
+			while (1) {
+			}
 		}
 		if (!(*GPIO_PC_DIN & 2))	//set song. 
-		{	//button pair: 1, 2
-			setSong((int**)1);
+		{		//button pair: 1, 2
+			setSong((int **)1);	//testsong);
 		}
 	}
-}
-
-void setupInterrupt(){
-	setupGPIOinterrupts();
-	setupTimerInterrupts();
-	setupNVIC();
 }
 
 void setupNVIC()
 {
 	/* Set NVIC ISERx register for interrupt enable. */
 	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts, and TIMER1 interrupts. 
+}
+
+void setupInterrupt()
+{
+	setupGPIOinterrupts();
+	setupTimerInterrupts();
+	setupNVIC();
 }
 
 void setupSleepMode()
@@ -123,8 +131,6 @@ void setupSleepMode()
 	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
 	//TODO Disable timer & dac.
 }
-
-
 
 /* if other interrupt handlers are needed, use the following names: 
    NMI_Handler

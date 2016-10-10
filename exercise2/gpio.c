@@ -3,7 +3,7 @@
 
 #include "efm32gg.h"
 
-int position = 0;
+unsigned int LED_offset = 0;
 
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
@@ -29,52 +29,52 @@ void setupGPIO()
 	/* Set startpositon of lights */
 	*GPIO_PA_DOUT = 0xFE00;
 
-
 }
 
-void setupGPIOinterrupts(){
+void setupGPIOinterrupts()
+{
 	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
-	*GPIO_EXTIFALL = 0xFF;			//Enables falling edge detection.
-	*GPIO_IFC = 0xFF;				//Clears external interrupt flags. 
-	*GPIO_IEN = 0xFF;				//Enables external interrupts.
+	*GPIO_EXTIFALL = 0xFF;	//Enables falling edge detection.
+	*GPIO_IFC = 0xFF;	//Clears external interrupt flags. 
+	*GPIO_IEN = 0xFF;	//Enables external interrupts.
 }
 
-
-void moveLight(int direction){
-	position = (position+direction) % 8;
-	*GPIO_PA_DOUT = (0xFEFF << position);
+void moveLight(int direction)
+{
+	LED_offset = (LED_offset + direction) % 8;
+	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
 }
 
 // TODO only one button at a time, because multiple buttons at once makes no sense with our functionality. --report stuff
-int readGPIOInput(){
-	switch(*GPIO_PC_DIN) {
-		case 0xFE :
-			return 1;
-		
-		case 0xFD :
-			return 2;
-		
-		case 0xFB :
-			return 3;
-		
-		case 0xF7 :
-			return 4;
-		
-		case 0xEF :
-			return 5;
-		
-		case 0xDF :
-			return 6;
-		
-		case 0xBF :
-			return 7;
-		
-		case 0x7F :
-			return 8;
-		
-		default :		//Returns 0 if no button is pushed, or multiple buttons are pushed
-			return 0;
+int readGPIOInput()
+{
+	switch (*GPIO_PC_DIN) {
+	case 0xFE:
+		return 1;
+
+	case 0xFD:
+		return 2;
+
+	case 0xFB:
+		return 3;
+
+	case 0xF7:
+		return 4;
+
+	case 0xEF:
+		return 5;
+
+	case 0xDF:
+		return 6;
+
+	case 0xBF:
+		return 7;
+
+	case 0x7F:
+		return 8;
+
+	default:		//Returns 0 if no button is pushed, or multiple buttons are pushed
+		return 0;
 	}
 }
-

@@ -3,45 +3,60 @@
 
 #include "efm32gg.h"
 
-void setSong(int ** inpit_song);
-void runThis();
+#define RIGHT 1
+#define LEFT -1
+
+int playSong();	//From file "sound_manager.c".
+int selectSongFromButton(int input_button);
+
+int readGPIOInput();	//From file "gpio.c".
+void moveLight(int direction);
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
-	/*
-	   TODO feed new samples to the DAC
-	   remember to clear the pending interrupt by writing 1 to TIMER1_IFC
-	 */
-	setSong((int**)1);
-    runThis();
-    
-    
-	*GPIO_PA_DOUT = 0x1100;	//temp signal. 
-
-	*TIMER1_CMD = 0x2;
-
-	*TIMER1_IFC = 1;	//altern: = *TIMER1_IF;         //Clears all interrupt flags.
+	/* Clear timer interrupt flag */
+	*TIMER1_IFC = 1;
+	
+	/* Play next sample */
+	playSong();
 }
 
 /* GPIO even pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 {
-	/* TODO handle button pressed event, remember to clear pending interrupt */
-
-	*GPIO_PA_DOUT = 0xAA00;	//temp signal.
+	/* Clear even numbered interrupt flags (0-indexed). */
+	*GPIO_IFC |= 0x55;
 	
-	*TIMER1_CMD = 0x1;
-
-	*GPIO_IFC |= 0xAA;	//Clears even numbered interrupt flags (1-indexed).
+	int input_button = readGPIOInput();	//Prevents several simultaneous buttons. 
+	switch (input_button){
+	case 0:
+		return;
+	case 1:
+		moveLight(LEFT);
+		break;
+	case 3:
+		moveLight(RIGHT);
+		break;
+	default:
+		selectSongFromButton(input_button);
+		break;
+	}
 }
 
 /* GPIO odd pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 {
-	/* TODO handle button pressed event, remember to clear pending interrupt */
-
-	*GPIO_PA_DOUT = 0x5500;	//temp signal.
-
-	*GPIO_IFC |= 0x55;	//Clears odd numbered interrupt flags (1-indexed).
+	/* Clear odd numbered interrupt flags (0-indexed). */
+	*GPIO_IFC |= 0xAA;
+	
+	/* Read input. */
+	int input_button = readGPIOInput();	//Prevents several simultaneous buttons. 
+	switch (input_button){
+	case 0:
+		return;
+	default:
+		selectSongFromButton(input_button);
+		break;
+	}
 }

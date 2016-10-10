@@ -6,14 +6,15 @@
 /* 
   TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
 */
-/* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   16
 
-#define RIGHT 1
+/* The period between sound samples, in clock cycles */
+#define   SAMPLE_PERIOD   317
+
+#define RIGHT 1			//Consider making enumerator.
 #define LEFT -1
 
 /* Declaration of peripheral setup functions */
-void setupGPIO();	//From file "gpio.c"
+void setupGPIO();		//From file "gpio.c"
 void setupGPIOinterrupts();
 int readGPIOInput();
 
@@ -21,13 +22,12 @@ void setupTimer(uint32_t period);	//From file "timer.c"
 void setupTimerInterrupts();
 void startTimer();
 
-void setupDAC();	//From file "dac.c"
+void setupDAC();		//From file "dac.c"
 
-void setupInterrupt();	//From file "ex2.c"
+void setupInterrupt();		//From file "ex2.c"
 void setupSleepMode();
 
-void setSong(int ** input_song);	//From file "sound_manager.c"
-
+void setSong(int **input_song);	//From file "sound_manager.c"
 
 /* Temporary peripheral decalrations. */
 void my_polling_programA();
@@ -36,10 +36,7 @@ void my_polling_programB();
 void runThis();
 
 void moveLight(int direction);
-void buttonSongSelector(int input_button);
-
-
-
+void selectSongFromButton(int input_button);
 
 /* Your code will start executing here */
 int main(void)
@@ -50,70 +47,65 @@ int main(void)
 	setupTimer(SAMPLE_PERIOD);
 
 	/* Enable interrupt handling */
-	//setupNVIC();
+	setupInterrupt();
 
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
-
 	/* Run main program. */
-	my_polling_programA();
+	while (1) {
+	};
+	//my_polling_programA();
 
 	return 0;
 }
 
-	
 void my_polling_programA()
 {
-	int buttonNumber = 0;
+	int input_button = 0;
 	int buttonReleased = 1;
-	
-	/* Play opening song*/
+
+	/* Play opening song */
 	//setSong();
 	//set variables = no other buttons pressed. 
 
-//	startTimer();
-	/* Play buttonsound */
-	while (1)
-	{
-		if (*TIMER1_CNT == *TIMER1_TOP)
-		{
+//      startTimer();
+	/* Play sound from button presses. */
+	while (1) {
+		if (*TIMER1_CNT == *TIMER1_TOP) {
 			runThis();
 		}
-		if ((buttonNumber = readGPIOInput()))
-		{
-			if(buttonReleased){
+		if ((input_button = readGPIOInput())) {
+			if (buttonReleased) {
 				buttonReleased = 0;
-				buttonSongSelector(buttonNumber);
-				if(buttonNumber == 1){
+				selectSongFromButton(input_button);
+				if (input_button == 1) {
 					moveLight(LEFT);
-				}
-				else if(buttonNumber == 3){
+				} else if (input_button == 3) {
 					moveLight(RIGHT);
 				}
 			}
-		}
-		else{
+		} else {
 			buttonReleased = 1;
 		}
 	}
 }
 
-void my_polling_programB(){
-	while (1)
-	{
+void my_polling_programB()
+{
+	while (1) {
 		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-		if (*TIMER1_CNT == *TIMER1_TOP)
-		{
+		if (*TIMER1_CNT == *TIMER1_TOP) {
 			runThis();
 		}
 		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
-		{	//button pair: 1, 2		//e.g. stop noise.
-			while (1) {}
+		{		//button pair: 1, 2             //e.g. stop noise.
+			while (1) {
+			}
 		}
 		if (!(*GPIO_PC_DIN & 2))	//set song. 
-		{	//button pair: 1, 2
-			setSong((int**)1);
+		{		//button pair: 1, 2
+			setSong((int **)1);	//testsong);
 		}
 	}
 }
@@ -124,7 +116,8 @@ void setupNVIC()
 	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts, and TIMER1 interrupts. 
 }
 
-void setupInterrupt(){
+void setupInterrupt()
+{
 	setupGPIOinterrupts();
 	setupTimerInterrupts();
 	setupNVIC();
@@ -138,8 +131,6 @@ void setupSleepMode()
 	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
 	//TODO Disable timer & dac.
 }
-
-
 
 /* if other interrupt handlers are needed, use the following names: 
    NMI_Handler

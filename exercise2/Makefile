@@ -42,3 +42,15 @@ redo :
 debug : 
 	gnome-terminal -x JLinkGDBServer
 	arm-none-eabi-gdb ex2.elf
+	
+.PHONY : help
+help :
+	@echo "--------------------------------------------------------------"
+	@echo "Available commands: "
+	@echo "<none>, help, upload, clean, pretty, debug.\n"
+	@echo "--------------------------------------------------------------"
+	@echo "help - displays this."
+	@echo "upload - uploads .elf file to the EFM32GG circuit board."
+	@echo "clean - removes .o, .elf, .bin and .hex files from directory."
+	@echo "pretty - adjusts the files' indentations and format."
+	@echo "debug - runs the debug program."

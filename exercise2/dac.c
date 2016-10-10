@@ -19,5 +19,3 @@ void setupDAC()
 	*DAC0_CH1CTRL = 0x1;	//Enable right audio channels. 
 	//Guessed left vs right. Still no knowledge regarding this, after trying to turn on and off one and the other. Neither from reading DAC sections 29.0 to 29.4. Ideas, anyone?
 }
-
-
