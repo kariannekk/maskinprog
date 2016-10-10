@@ -2,8 +2,8 @@
 
 
 /* 
-Arrays contain a sampled sinus signal where each represents a tone, array size = number of samples for each array. 
-Frequency for each tone commented below 
+All arrays each contain a sampled sinus signal over one period where each array represents a note, array size = number of samples for each array. 
+Frequency for each note commented below 
 */
 
 
