@@ -9,30 +9,35 @@
 /* The period between sound samples, in clock cycles */
 #define   SAMPLE_PERIOD   16
 
-/* Declaration of peripheral setup functions */
-void setupGPIO();
-void setupGPIOinterrupts();
-void setGPIOLight(int buttonNumber);
-int readGPIOInput(int GPIOButton);
+#define RIGHT 1
+#define LEFT -1
 
-void setupTimer(uint32_t period);
+/* Declaration of peripheral setup functions */
+void setupGPIO();	//From file "gpio.c"
+void setupGPIOinterrupts();
+int readGPIOInput();
+
+void setupTimer(uint32_t period);	//From file "timer.c"
 void setupTimerInterrupts();
 void startTimer();
-void setupDAC();
-void setupNVIC();
-void setupInterrupt();
-void setupSleepMode();
-void playTestSong();
-void __attribute__ ((interrupt)) TIMER1_IRQHandler();
 
+void setupDAC();	//From file "dac.c"
+
+void setupInterrupt();	//From file "ex2.c"
+void setupSleepMode();
+
+void setSong(int ** input_song);	//From file "sound_manager.c"
+
+
+/* Temporary peripheral decalrations. */
 void my_polling_programA();
 void my_polling_programB();
 
-void runDAC(uint16_t sampleAmount);
-void runTimerOnce(uint16_t DAC_Freq, int sample_period);
-
 void runThis();
-void setSong(int ** input_song);
+
+void moveLight(int direction);
+void buttonSongSelector(int input_button);
+
 
 
 
@@ -42,7 +47,7 @@ int main(void)
 	/* Call the peripheral setup functions */
 	setupGPIO();
 	setupDAC();
-	setupTimer(SAMPLE_PERIOD);	//Consider moving to setupNVIC().
+	setupTimer(SAMPLE_PERIOD);
 
 	/* Enable interrupt handling */
 	//setupNVIC();
@@ -50,7 +55,9 @@ int main(void)
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
-	my_polling_programB();
+
+	/* Run main program. */
+	my_polling_programA();
 
 	return 0;
 }
@@ -59,27 +66,35 @@ int main(void)
 void my_polling_programA()
 {
 	int buttonNumber = 0;
-	int lastButton = 0;
+	int buttonReleased = 1;
 	
 	/* Play opening song*/
-	//runThis();
+	//setSong();
+	//set variables = no other buttons pressed. 
 
 //	startTimer();
 	/* Play buttonsound */
 	while (1)
 	{
-		if((buttonNumber = readGPIOInput(*GPIO_PC_DIN)))
+		if (*TIMER1_CNT == *TIMER1_TOP)
 		{
-			if(lastButton != buttonNumber){
-				runThis();
-				//playTestSong();
+			runThis();
+		}
+		if ((buttonNumber = readGPIOInput()))
+		{
+			if(buttonReleased){
+				buttonReleased = 0;
+				buttonSongSelector(buttonNumber);
+				if(buttonNumber == 1){
+					moveLight(LEFT);
+				}
+				else if(buttonNumber == 3){
+					moveLight(RIGHT);
+				}
 			}
-			lastButton = buttonNumber;
-			continue;
 		}
 		else{
-			lastButton = 0;
-			continue;
+			buttonReleased = 1;
 		}
 	}
 }
@@ -103,16 +118,16 @@ void my_polling_programB(){
 	}
 }
 
-void setupInterrupt(){
-	setupGPIOinterrupts();
-	setupTimerInterrupts();
-	setupNVIC();
-}
-
 void setupNVIC()
 {
 	/* Set NVIC ISERx register for interrupt enable. */
 	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts, and TIMER1 interrupts. 
+}
+
+void setupInterrupt(){
+	setupGPIOinterrupts();
+	setupTimerInterrupts();
+	setupNVIC();
 }
 
 void setupSleepMode()
