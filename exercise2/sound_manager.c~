@@ -31,7 +31,7 @@ void nextNote()
 		*TIMER1_CMD = 0x2;	//Stops the timer. 
 		return;
 	}
-	int tempFix = 1;	//TODO.
+	int tempFix = 8;	//TODO.
 	current_note_duration =
 	    (SAMPLES_PER_SECOND / tempFix) / (int)current_song[current_note][0];
 }

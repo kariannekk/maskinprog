@@ -103,6 +103,9 @@ int selectSongFromButton(int input_button)
 	case 8:
 		setSong(SONG_DOWN);
 		return 1;
+	case 9:
+		setSong(SONG_INTRO);
+		return 1;
 	default:
 		return 0;
 	}
