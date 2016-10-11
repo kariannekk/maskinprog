@@ -11,6 +11,9 @@ int selectSongFromButton(int input_button);
 
 int readGPIOInput();	//From file "gpio.c".
 void moveLight(int direction);
+void toggleLEDsON();
+void toggleLEDsOFF();
+
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()

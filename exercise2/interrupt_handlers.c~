@@ -11,6 +11,9 @@ int selectSongFromButton(int input_button);
 
 int readGPIOInput();	//From file "gpio.c".
 void moveLight(int direction);
+void toggleLEDsON();
+void toggleLEDsOFF();
+
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
@@ -18,8 +21,12 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 	/* Clear timer interrupt flag */
 	*TIMER1_IFC = 0x1;
 	
+	toggleLEDsON();
+	
 	/* Play next sample */
 	playSong();
+	
+	toggleLEDsOFF();
 }
 
 /* GPIO even pin interrupt handler */
@@ -36,9 +43,11 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 		return;
 	case 1:
 		moveLight(LEFT);
+		toggleLEDsOFF();
 		break;
 	case 3:
 		moveLight(RIGHT);
+		toggleLEDsOFF();
 		break;
 	default:
 		selectSongFromButton(input_button);

@@ -21,13 +21,19 @@ void setupTimer(uint16_t period)
 void setupTimerInterrupt()
 {
 	*TIMER1_IFC = 0x1;
-	*TIMER1_IEN = 0x1;	//Enables overflow interrupt. Read more 20.5.4 [13].
+	*TIMER1_IEN = 0x1;	//Enables overflow interrupt.
 }
 
-//void disableTimer()
-//{
-//	/* Disable Timer clock. */
-//	*CMU_HFPERCLKEN0 &= ~(CMU2_HFPERCLKEN0_TIMER1);
-//	/* Disable interrupt */
-//	*TIMER1_IEN = 0x1;
-//}
+void enableTimer()
+{
+	/* Enable Timer clock. */
+	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_TIMER1;
+}
+
+void disableTimer()
+{
+	/* Disable Timer clock. */
+	*CMU_HFPERCLKEN0 &= ~(CMU2_HFPERCLKEN0_TIMER1);
+	/* Disable interrupt */
+	//*TIMER1_IEN = 0x0;
+}

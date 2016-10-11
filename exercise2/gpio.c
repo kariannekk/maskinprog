@@ -4,16 +4,11 @@
 #include "efm32gg.h"
 
 unsigned int LED_offset = 0;
+int LED_value;
 
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
 {
-	/* TODO set input and output pins for the joystick */
-	//Joystick = GPIO board?
-	/* Example of HW access from C code: turn on joystick LEDs D4-D8
-	   check efm32gg.h for other useful register definitions
-	 */
-
 	/* Enable GPIO clock. */
 	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_GPIO;
 
@@ -26,9 +21,8 @@ void setupGPIO()
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
 	*GPIO_PC_DOUT = 0xFF;	//Enables pull-up resistors. 
 
-	/* Set startpositon of lights */
+	/* Set start position of lights. */
 	*GPIO_PA_DOUT = 0xFE00;
-
 }
 
 void setupGPIOInterrupts()
@@ -47,6 +41,7 @@ void moveLight(int direction)
 }
 
 // TODO only one button at a time, because multiple buttons at once makes no sense with our functionality. --report stuff
+/* Return a single pushed button. Multiple are regarded as none. */
 int readGPIOInput()
 {
 	switch (*GPIO_PC_DIN) {
@@ -66,7 +61,19 @@ int readGPIOInput()
 		return 7;
 	case 0x7F:
 		return 8;
-	default:		//Returns 0 if no button is pushed, or multiple buttons are pushed
+	default:
 		return 0;
 	}
 }
+
+/* Use these two to get a weaker LED output light. This saves power and is more relaxing to the eye. */
+void toggleLEDsON()
+{
+	*GPIO_PA_DOUT = LED_value;
+}
+void toggleLEDsOFF()
+{
+	LED_value = *GPIO_PA_DOUT;
+	*GPIO_PA_DOUT = 0xFF00;
+}
+
