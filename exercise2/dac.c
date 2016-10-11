@@ -17,5 +17,4 @@ void setupDAC()
 	*DAC0_CTRL = 0x50010;	//Prescale DAC clock with CMU clock divided by factor of 2⁵. DAC output to pin enabled. Add 0x4 for sample/hold instead of continuous conversion mode. 
 	*DAC0_CH0CTRL = 0x1;	//Enable right audio channels. 
 	*DAC0_CH1CTRL = 0x1;	//Enable left audio channels. 
-	//Guessed left vs right. Still no knowledge regarding this, after trying to turn on and off one and the other. Neither from reading DAC sections 29.0 to 29.4. Ideas, anyone?
 }
