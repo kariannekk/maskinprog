@@ -15,11 +15,11 @@
 
 /* Declaration of peripheral setup functions */
 void setupGPIO();		//From file "gpio.c"
-void setupGPIOinterrupts();
+void setupGPIOInterrupts();
 int readGPIOInput();
 
 void setupTimer(uint32_t period);	//From file "timer.c"
-void setupTimerInterrupts();
+void setupTimerInterrupt();
 void startTimer();
 
 void setupDAC();		//From file "dac.c"
@@ -28,17 +28,15 @@ void setupInterrupt();		//From file "ex2.c"
 void setupSleepMode();
 
 void setSong(int **input_song);	//From file "sound_manager.c"
+int playSong();
 
 /* Temporary peripheral decalrations. */
 void my_polling_programA();
 void my_polling_programB();
-
-void runThis();
-
 void moveLight(int direction);
 void selectSongFromButton(int input_button);
 
-/* Your code will start executing here */
+/* Main program code. */
 int main(void)
 {
 	/* Call the peripheral setup functions */
@@ -65,15 +63,15 @@ void my_polling_programA()
 	int input_button = 0;
 	int buttonReleased = 1;
 
-	/* Play opening song */
-	//setSong();
+	/* Play opening song. */
+	//setSong((int**)1);
 	//set variables = no other buttons pressed. 
 
 //      startTimer();
 	/* Play sound from button presses. */
 	while (1) {
 		if (*TIMER1_CNT == *TIMER1_TOP) {
-			runThis();
+			playSong();
 		}
 		if ((input_button = readGPIOInput())) {
 			if (buttonReleased) {
@@ -96,7 +94,7 @@ void my_polling_programB()
 	while (1) {
 		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
 		if (*TIMER1_CNT == *TIMER1_TOP) {
-			runThis();
+			playSong();
 		}
 		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
 		{		//button pair: 1, 2             //e.g. stop noise.
@@ -118,8 +116,8 @@ void setupNVIC()
 
 void setupInterrupt()
 {
-	setupGPIOinterrupts();
-	setupTimerInterrupts();
+	setupGPIOInterrupts();
+	setupTimerInterrupt();
 	setupNVIC();
 }
 
@@ -129,7 +127,7 @@ void setupSleepMode()
 	*SCR |= 0x6;		//Enables sleep mode for CPU.
 
 	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
-	//TODO Disable timer & dac.
+	//TODO Disable timer & dac. Or use sleep mode for automatic. 
 }
 
 /* if other interrupt handlers are needed, use the following names: 

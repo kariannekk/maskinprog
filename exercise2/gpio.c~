@@ -3,7 +3,7 @@
 
 #include "efm32gg.h"
 
-unsigned int LED_position = 0;
+unsigned int LED_offset = 0;
 
 /* function to set up GPIO mode and interrupts*/
 void setupGPIO()
@@ -31,7 +31,7 @@ void setupGPIO()
 
 }
 
-void setupGPIOinterrupts()
+void setupGPIOInterrupts()
 {
 	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
@@ -42,8 +42,8 @@ void setupGPIOinterrupts()
 
 void moveLight(int direction)
 {
-	LED_position = (LED_position + direction) % 8;
-	*GPIO_PA_DOUT = (0xFEFF << LED_position);
+	LED_offset = (LED_offset + direction) % 8;
+	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
 }
 
 // TODO only one button at a time, because multiple buttons at once makes no sense with our functionality. --report stuff

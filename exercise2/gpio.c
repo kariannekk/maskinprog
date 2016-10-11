@@ -31,7 +31,7 @@ void setupGPIO()
 
 }
 
-void setupGPIOinterrupts()
+void setupGPIOInterrupts()
 {
 	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
@@ -52,28 +52,20 @@ int readGPIOInput()
 	switch (*GPIO_PC_DIN) {
 	case 0xFE:
 		return 1;
-
 	case 0xFD:
 		return 2;
-
 	case 0xFB:
 		return 3;
-
 	case 0xF7:
 		return 4;
-
 	case 0xEF:
 		return 5;
-
 	case 0xDF:
 		return 6;
-
 	case 0xBF:
 		return 7;
-
 	case 0x7F:
 		return 8;
-
 	default:		//Returns 0 if no button is pushed, or multiple buttons are pushed
 		return 0;
 	}

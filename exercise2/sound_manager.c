@@ -6,9 +6,6 @@
 /* temp define. */
 #define SAMPLE_FREQUENCY 44100	//samples per second.
 
-void startTimer();
-void stopTimer();
-
 /* Global variables for tracking. */
 int **current_song;
 int current_note;
@@ -74,7 +71,7 @@ int *testsong[] =
 //int * testsong[] = {(int*) 30, a4, a5, a5, a4, a5, a4, a5, a4, a4, a4, a4, a5, a5, a4, a5, a4, a5, a5, a4, a5, a4, a5, a5, a4, a5, a4, a5, a5, a4, a5};
 
 /* INIT */
-void playSample();
+void moveLight(int direction);
 
 /* Functions to use after testing. May remove those above. */
 void nextNote()
@@ -82,10 +79,11 @@ void nextNote()
 	current_note++;
 	if (current_note > (int)current_song[0]) {
 		current_song = 0;
+		moveLight(0);	//TODO remove when we receive new physical board. 
 		*TIMER1_CMD = 0x2;	//Stops the timer.
 		return;
 	}
-	double tempFix = 8;
+	double tempFix = 8;	//TODO.
 	current_note_duration =
 	    (SAMPLE_FREQUENCY / tempFix) / (int)current_song[current_note][0];
 }
@@ -153,7 +151,7 @@ void playEntireSong()
 
 void playSample()
 {
-	*DAC0_CH0DATA = current_song[current_note][current_sample] * 10;
+	*DAC0_CH0DATA = current_song[current_note][current_sample] * 10;	//TODO move volume constant someplace else. 
 	current_sample = (current_sample + 1);
 	if (current_sample > current_song[current_note][0]) {
 		current_note_duration--;
@@ -174,6 +172,7 @@ int playSong()
 	if (current_song == 0) {
 		return 0;
 	}
+	*GPIO_PA_DOUT = 0x3F00;	//TODO remove when we receive new physical board. 
 	playNote();
 	return 1;
 }
