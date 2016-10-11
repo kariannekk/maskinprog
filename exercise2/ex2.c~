@@ -28,7 +28,7 @@ void setupInterrupt();		//From file "ex2.c"
 void setupSleepMode();
 
 void setSong(int **input_song);	//From file "sound_manager.c"
-void playSong();
+int playSong();
 
 /* Temporary peripheral decalrations. */
 void my_polling_programA();
@@ -64,10 +64,9 @@ void my_polling_programA()
 	int buttonReleased = 1;
 
 	/* Play opening song. */
-	//setSong((int**)1);
+	selectSongFromButton(9);
 	//set variables = no other buttons pressed. 
 
-//      startTimer();
 	/* Play sound from button presses. */
 	while (1) {
 		if (*TIMER1_CNT == *TIMER1_TOP) {

@@ -50,6 +50,9 @@ int main(void)
 	/* Enable energy efficiency. */
 	//setupSleepMode();
 
+	/* Play opening song. */
+	selectSongFromButton(9);
+
 	/* Run main program. */
 	while (1) {
 	};
@@ -64,10 +67,9 @@ void my_polling_programA()
 	int buttonReleased = 1;
 
 	/* Play opening song. */
-	//setSong((int**)1);
+	selectSongFromButton(9);
 	//set variables = no other buttons pressed. 
 
-//      startTimer();
 	/* Play sound from button presses. */
 	while (1) {
 		if (*TIMER1_CNT == *TIMER1_TOP) {
