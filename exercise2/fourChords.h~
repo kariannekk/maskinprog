@@ -6,6 +6,7 @@ Frequency for each note commented below
 
 
 /*Songs*/
+int intro[]
 int up[] = {f3, f4, f5, f6};
 int right[] = {c5, d5, e5, f5, g5, a5, b5};
 int down[] = {f6, f5, f4, f3};
