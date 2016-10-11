@@ -20,7 +20,7 @@ void setupTimer(uint16_t period)
 
 void setupTimerInterrupt()
 {
-	*TIMER1_IFC = 0x1;
+	*TIMER1_IFC = 0x1;	//Clears overflow interrupt.
 	*TIMER1_IEN = 0x1;	//Enables overflow interrupt.
 }
 

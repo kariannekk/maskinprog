@@ -24,16 +24,16 @@ void setupTimerInterrupt()
 	*TIMER1_IEN = 0x1;	//Enables overflow interrupt.
 }
 
-void enableTimer()
-{
-	/* Enable Timer clock. */
-	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_TIMER1;
-}
+//void enableTimer()
+//{
+//	/* Enable Timer clock. */
+//	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_TIMER1;
+//}
 
-void disableTimer()
-{
-	/* Disable Timer clock. */
-	*CMU_HFPERCLKEN0 &= ~(CMU2_HFPERCLKEN0_TIMER1);
-	/* Disable interrupt */
-	//*TIMER1_IEN = 0x0;
-}
+//void disableTimer()
+//{
+//	/* Disable Timer clock. */
+//	*CMU_HFPERCLKEN0 &= ~(CMU2_HFPERCLKEN0_TIMER1);
+//	/* Disable interrupt */
+//	//*TIMER1_IEN = 0x0;
+//}
