@@ -29,6 +29,7 @@ void setupSleepMode();
 
 void setSong(int **input_song);	//From file "sound_manager.c"
 int playSong();
+void playIntroSong();
 
 /* Temporary peripheral decalrations. */
 void my_polling_programA();
@@ -49,14 +50,17 @@ int main(void)
 
 	/* Enable energy efficiency. */
 	//setupSleepMode();
-
+	
 	/* Play opening song. */
-	selectSongFromButton(9);
+	playIntroSong();
 
 	/* Run main program. */
-	while (1) {
-	};
+	//while(1) {};
+	
+	__asm("wfi");	//Wait for interrupt. 
+
 	//my_polling_programA();
+
 
 	return 0;
 }
@@ -67,9 +71,8 @@ void my_polling_programA()
 	int buttonReleased = 1;
 
 	/* Play opening song. */
-	selectSongFromButton(9);
-	//set variables = no other buttons pressed. 
-
+	playIntroSong();
+	
 	/* Play sound from button presses. */
 	while (1) {
 		if (*TIMER1_CNT == *TIMER1_TOP) {
@@ -110,12 +113,13 @@ void my_polling_programB()
 	}
 }
 
+/* Set NVIC ISERx register for interrupt enable. */
 void setupNVIC()
 {
-	/* Set NVIC ISERx register for interrupt enable. */
 	*ISER0 |= 0x1802;	//Enables GPIO odd and even interrupts, and TIMER1 interrupts. 
 }
 
+/* Activate interrupt mode. */
 void setupInterrupt()
 {
 	setupGPIOInterrupts();
@@ -123,13 +127,17 @@ void setupInterrupt()
 	setupNVIC();
 }
 
+
+//TODO fix deep sleep mode. Currently unavailable. 
+/* Activate sleep mode. */
 void setupSleepMode()
 {
-	/* Sleep mode */
-	*SCR |= 0x6;		//Enables sleep mode for CPU.
+	*SCR = 0x2;		//Enables sleep mode for CPU.
+}
 
-	//wfi;          //What is the non-assembler version of this? Do we have alternatives?
-	//TODO Disable timer & dac. Or use sleep mode for automatic. 
+void setupDeepSleepMode()
+{
+	*SCR = 0x6;		//Enables deep sleep mode for CPU.
 }
 
 /* if other interrupt handlers are needed, use the following names: 
