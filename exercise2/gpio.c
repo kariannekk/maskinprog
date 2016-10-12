@@ -6,7 +6,6 @@
 unsigned int LED_offset = 0;
 int LED_value;
 
-/* function to set up GPIO mode and interrupts*/
 void setupGPIO()
 {
 	/* Enable GPIO clock. */
@@ -27,23 +26,23 @@ void setupGPIO()
 
 void setupGPIOInterrupts()
 {
-	/* Enable interrupts. */
 	*GPIO_EXTIPSELL = 0x22222222;	//Selects port C for interrupts. 
 	*GPIO_EXTIFALL = 0xFF;	//Enables falling edge detection.
 	*GPIO_IFC = 0xFF;	//Clears external interrupt flags. 
 	*GPIO_IEN = 0xFF;	//Enables external interrupts.
 }
 
-void moveLight(int direction)
+/* Move a LED, 'direction' amount of steps, right (+) or left (-). */
+void moveSingleLED(int direction)
 {
 	LED_offset = (LED_offset + direction) % 8;
 	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
 }
 
-// TODO only one button at a time, because multiple buttons at once makes no sense with our functionality. --report stuff
-/* Return a single pushed button. Multiple are regarded as none. */
+/* Return a single pushed button. Multiple are regarded as none. When successfull, output value is the button number. */
 int readGPIOInput()
 {
+	/* Pins are 0-indexed. Buttons are 1-indexed. */
 	switch (*GPIO_PC_DIN) {
 	case 0xFE:
 		return 1;
@@ -67,6 +66,7 @@ int readGPIOInput()
 }
 
 /* Use these two to get a weaker LED output light. This saves power and is more relaxing to the eye. */
+//TODO remove these, or use them within LETIMER or similar. 
 void toggleLEDsON()
 {
 	*GPIO_PA_DOUT = LED_value;
