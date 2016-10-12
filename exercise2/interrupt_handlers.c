@@ -9,13 +9,7 @@
 int playSong();	//From file "sound_manager.c".
 int selectSongFromButton(int input_button);
 
-int readGPIOInput();	//From file "gpio.c".
-void moveLight(int direction);
-void toggleLEDsON();
-void toggleLEDsOFF();
-
-
-//TODO Disable timer & dac. Or use sleep mode for automatic. 
+void moveSingleLED(int direction);	//From file "gpio.c".
 
 
 /* TIMER1 interrupt handler */
@@ -37,10 +31,10 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 	/* Act on input. Buttons are 1-indexed. */
 	switch (*GPIO_PC_DIN) {
 		case 0xFE:	//Button SW1. 
-			moveLight(LEFT);
+			moveSingleLED(LEFT);
 			return;
 		case 0xFB:	//Button SW3. 
-			moveLight(RIGHT);
+			moveSingleLED(RIGHT);
 			return;
 		case 0xEF:	//Button SW5. 
 			selectSongFromButton(5);	
