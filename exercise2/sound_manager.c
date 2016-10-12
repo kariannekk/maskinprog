@@ -6,6 +6,7 @@
 
 /* temp define. */
 #define SAMPLES_PER_SECOND 44100
+#define EIGHT_NOTE (SAMPLES_PER_SECOND / 8)
 
 /* Global variables for tracking. */
 int **current_song;
@@ -17,11 +18,8 @@ int current_note_duration;
 
 
 /* INIT */
-void disableTimer();	//From file "timer.c".
-void enableTimer();
-
-void setupSleepMode();	
-void setupDeepSleepMode();
+void setNormalSleepMode();	
+void setDeepSleepMode();
 
 
 /* Functions to use after testing. May remove those above. */
@@ -32,16 +30,13 @@ void nextNote()
 	current_note++;
 	if (current_note > (int)current_song[0]) {
 		current_song = 0;
-		*TIMER1_CMD = 0x2;	//Stops the timer. 
-		setupDeepSleepMode();
-
+		setDeepSleepMode();
 		return;
 	}
 	
-	/* Make every note last for the same time, even when the note vectors have differing lengths. */
-	int tempFix = 8;	//TODO.
-	current_note_duration =
-	    (SAMPLES_PER_SECOND / tempFix) / (int)current_song[current_note][0];
+	/* Make every note last for the same time duration, even when the note vectors have different lengths. */
+	
+	current_note_duration = EIGHT_NOTE / (int)current_song[current_note][0];
 }
 
 /* Add a song to the now playing queue (queue size = one song). */
@@ -51,8 +46,7 @@ void setSong(int **input_song)
 	current_sample = 1;
 	current_song = input_song;
 	nextNote();
-	setupSleepMode();
-	*TIMER1_CMD = 0x1;	//Starts the timer.
+	setNormalSleepMode();
 }
 
 /* Send one sample to the DAC, and track the sample list length. */
