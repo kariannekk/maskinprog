@@ -25,7 +25,7 @@ void startTimer();
 void setupDAC();		//From file "dac.c"
 
 void setupInterrupt();		//From file "ex2.c"
-void setupSleepMode();
+void setNormalSleepMode();
 
 void setSong(int **input_song);	//From file "sound_manager.c"
 int playSong();
@@ -49,10 +49,10 @@ int main(void)
 	setupInterrupt();
 
 	/* Enable energy efficiency. */
-	//setupSleepMode();
+	//setNormalSleepMode();
 	
 	/* Play opening song. */
-	playIntroSong();
+	//playIntroSong();	//TODO disabled while coding, because it is annoying when repeated. 
 
 	/* Run main program. */
 	//while(1) {};
@@ -102,12 +102,12 @@ void my_polling_programB()
 			playSong();
 		}
 		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
-		{		//button pair: 1, 2             //e.g. stop noise.
+		{	//button pair: 1, 2   //e.g. stop noise.
 			while (1) {
 			}
 		}
 		if (!(*GPIO_PC_DIN & 2))	//set song. 
-		{		//button pair: 1, 2
+		{	//button pair: 1, 2
 			setSong((int **)1);	//testsong);
 		}
 	}
@@ -128,16 +128,25 @@ void setupInterrupt()
 }
 
 
-//TODO fix deep sleep mode. Currently unavailable. 
-/* Activate sleep mode. */
-void setupSleepMode()
+/* Activate sleep mode (EM1). This does not disable TIMER1. */
+void setNormalSleepMode()
 {
 	*SCR = 0x2;		//Enables sleep mode for CPU.
+	*DAC0_CH0CTRL = 0x1;	//Enable right audio channels. 
+	*DAC0_CH1CTRL = 0x1;	//Enable left audio channels.
+	
+	
+	*TIMER1_CMD = 0x1;	//Starts the timer.
 }
 
-void setupDeepSleepMode()
+/* Activate deep sleep mode (EM2). This disables TIMER1. */
+void setDeepSleepMode()
 {
+	*TIMER1_CMD = 0x2;	//Stops the timer. 
 	*SCR = 0x6;		//Enables deep sleep mode for CPU.
+	*DAC0_CH0CTRL = 0x0;	//Disable right audio channels. 
+	*DAC0_CH1CTRL = 0x0;	//Disable left audio channels. 
+	
 }
 
 /* if other interrupt handlers are needed, use the following names: 
