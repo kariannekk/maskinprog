@@ -98,5 +98,5 @@ int * SONG_UP[] = {(int*) 4, f3, f4, f5, f6};
 int * SONG_RIGHT[] = {(int*) 7, c5, d5, e5, f5, g5, a5, b5};
 int * SONG_DOWN[] = {(int*) 4, f6, f5, f4, f3};
 int * SONG_LEFT[] = {(int*) 7, b5, a5, g5, f5, e5, d5, c5};
-int * SONG_INTRO[] = {(int *) 12, a4, d4, silence, d4, a4, d4, a4, d4, silence, a4, d4, a4};
+int * SONG_INTRO[] = {(int*) 12, a4, d4, silence, d4, a4, d4, a4, d4, silence, a4, d4, a4};
 
