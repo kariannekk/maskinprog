@@ -28,24 +28,24 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 	playSong();
 }
 
-/* GPIO even pin interrupt handler */
+/* GPIO even pin interrupt handler. Pins are 0-indexed. */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 {
 	/* Clear even numbered interrupt flags (0-indexed). */
 	*GPIO_IFC |= 0x55;
 	
-	/* Act on input. */
+	/* Act on input. Buttons are 1-indexed. */
 	switch (*GPIO_PC_DIN) {
-		case 0xFE:
+		case 0xFE:	//Button SW1. 
 			moveLight(LEFT);
 			return;
-		case 0xFB:
+		case 0xFB:	//Button SW3. 
 			moveLight(RIGHT);
 			return;
-		case 0xEF:
+		case 0xEF:	//Button SW5. 
 			selectSongFromButton(5);	
 			return;
-		case 0xBF:
+		case 0xBF:	//Button SW7. 
 			selectSongFromButton(7);
 			return;
 		default:
@@ -53,24 +53,24 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 	}
 }
 
-/* GPIO odd pin interrupt handler */
+/* GPIO odd pin interrupt handler. Pins are 0-indexed. */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 {
 	/* Clear odd numbered interrupt flags (0-indexed). */
 	*GPIO_IFC |= 0xAA;
 	
-	/* Act on input. */
+	/* Act on input. Buttons are 1-indexed. */
 	switch (*GPIO_PC_DIN) {
-		case 0xFD:
+		case 0xFD:	//Button SW2. 
 			selectSongFromButton(2);
 			return;
-		case 0xF7:
+		case 0xF7:	//Button SW4. 
 			selectSongFromButton(4);
 			return;
-		case 0xDF:
+		case 0xDF:	//Button SW6. 
 			selectSongFromButton(6);
 			return;
-		case 0x7F:
+		case 0x7F:	//Button SW8. 
 			selectSongFromButton(8);
 			return;
 		default:
