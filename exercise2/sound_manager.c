@@ -20,6 +20,10 @@ int current_note_duration;
 void disableTimer();	//From file "timer.c".
 void enableTimer();
 
+void setupSleepMode();	
+void setupDeepSleepMode();
+
+
 /* Functions to use after testing. May remove those above. */
 
 /* Track the song note, duration and end of the song. */
@@ -29,8 +33,12 @@ void nextNote()
 	if (current_note > (int)current_song[0]) {
 		current_song = 0;
 		*TIMER1_CMD = 0x2;	//Stops the timer. 
+		setupDeepSleepMode();
+
 		return;
 	}
+	
+	/* Make every note last for the same time, even when the note vectors have differing lengths. */
 	int tempFix = 8;	//TODO.
 	current_note_duration =
 	    (SAMPLES_PER_SECOND / tempFix) / (int)current_song[current_note][0];
@@ -43,6 +51,7 @@ void setSong(int **input_song)
 	current_sample = 1;
 	current_song = input_song;
 	nextNote();
+	setupSleepMode();
 	*TIMER1_CMD = 0x1;	//Starts the timer.
 }
 
@@ -78,7 +87,7 @@ int playSong()
 	return 1;
 }
 
-/* Set song corresponding to button press, without overwriting a song that is already playing. */
+/* Set song corresponding to button press, without overwriting a song that is already playing. (1-indexed buttons.) */
 int selectSongFromButton(int input_button)
 {
 	if (current_song != 0) {
@@ -103,12 +112,14 @@ int selectSongFromButton(int input_button)
 	case 8:
 		setSong(SONG_DOWN);
 		return 1;
-	case 9:
-		setSong(SONG_INTRO);
-		return 1;
 	default:
 		return 0;
 	}
+}
+
+void playIntroSong()
+{
+	setSong(SONG_INTRO);
 }
 
 /* Test function. Send entire wave list sequentially. */
