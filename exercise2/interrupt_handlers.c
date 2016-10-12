@@ -15,6 +15,9 @@ void toggleLEDsON();
 void toggleLEDsOFF();
 
 
+//TODO Disable timer & dac. Or use sleep mode for automatic. 
+
+
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
@@ -32,37 +35,22 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 	*GPIO_IFC |= 0x55;
 	
 	/* Act on input. */
-	//TODO choose method a:
-	int input_button = readGPIOInput();	//Prevents several simultaneous buttons. 
-	switch (input_button){
-	case 0:
-		return;
-	case 1:
-		moveLight(LEFT);
-		break;
-	case 3:
-		moveLight(RIGHT);
-		break;
-	default:
-		selectSongFromButton(input_button);
-		break;
+	switch (*GPIO_PC_DIN) {
+		case 0xFE:
+			moveLight(LEFT);
+			return;
+		case 0xFB:
+			moveLight(RIGHT);
+			return;
+		case 0xEF:
+			selectSongFromButton(5);	
+			return;
+		case 0xBF:
+			selectSongFromButton(7);
+			return;
+		default:
+			return;
 	}
-	
-	//TODO or method b: (may choose setSong(song) instead of selectSongFromButton(button).)
-/*	switch (*GPIO_PC_DIN) {
-	case 0xFE:
-		moveLight(LEFT);
-		return;
-	case 0xFB:
-		moveLight(RIGHT);
-		return;
-	case 0xEF:
-		selectSongFromButton(5);	
-		return;
-	case 0xBF:
-		selectSongFromButton(7);
-		return;
-	}*/
 }
 
 /* GPIO odd pin interrupt handler */
@@ -72,29 +60,20 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 	*GPIO_IFC |= 0xAA;
 	
 	/* Act on input. */
-	//TODO choose method a:
-	int input_button = readGPIOInput();	//Prevents several simultaneous buttons. 
-	switch (input_button){
-	case 0:
-		return;
-	default:
-		selectSongFromButton(input_button);
-		break;
+	switch (*GPIO_PC_DIN) {
+		case 0xFD:
+			selectSongFromButton(2);
+			return;
+		case 0xF7:
+			selectSongFromButton(4);
+			return;
+		case 0xDF:
+			selectSongFromButton(6);
+			return;
+		case 0x7F:
+			selectSongFromButton(8);
+			return;
+		default:
+			return;
 	}
-	
-	//TODO or method b:
-/*	switch (*GPIO_PC_DIN) {
-	case 0xFD:
-		selectSongFromButton(2);
-		return;
-	case 0xF7:
-		selectSongFromButton(4);
-		return;
-	case 0xDF:
-		selectSongFromButton(6);
-		return;
-	case 0x7F:
-		selectSongFromButton(8);
-		return;
-	}*/
 }
