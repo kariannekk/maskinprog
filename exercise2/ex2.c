@@ -3,15 +3,8 @@
 
 #include "efm32gg.h"
 
-/* 
-  TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
-*/
-
 /* The period between sound samples, in clock cycles. */
 #define   SAMPLE_PERIOD   317
-
-#define RIGHT 1			//Consider making enumerator.
-#define LEFT -1
 
 /* Declaration of peripheral setup functions. */
 void setupGPIO();		//From file "gpio.c"
@@ -28,7 +21,6 @@ void playSong();		//From file "sound_manager.c"
 void playIntroSong();
 
 void setupInterrupt();		//From file "ex2.c"
-void setNormalSleepMode();
 void pollingProgram();
 
 /* Main program code. */
@@ -40,18 +32,15 @@ int main(void)
 	setupTimer(SAMPLE_PERIOD);
 
 	/* Enable interrupt handling */
-	setupInterrupt();
-
-	/* Enable energy efficiency. */
-	//setNormalSleepMode();
+	//setupInterrupt();
 
 	/* Play opening song. */
-	playIntroSong();      //TODO disabled while coding, because it is annoying when repeated. 
+	playIntroSong();
 
 	/* Run main program. */
-	__asm("wfi"); //Wait for interrupt. 
+	//__asm("wfi"); //Wait for interrupt. 
 
-	//pollingProgram();
+	pollingProgram();
 
 	return 0;
 }
