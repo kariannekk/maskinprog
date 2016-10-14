@@ -25,7 +25,7 @@ void nextNote()
 	current_note++;
 	if (current_note > (int)current_song[0]) {
 		current_song = 0;
-		setDeepSleepMode();
+		setDeepSleepMode();	//Disables Timer, etc. 
 		return;
 	}
 
@@ -40,7 +40,7 @@ void setSong(int **input_song)
 	current_sample = 1;
 	current_song = input_song;
 	nextNote();
-	setNormalSleepMode();	//TODO polling = TimerStart.
+	setNormalSleepMode();	//Enables Timer, etc. 
 }
 
 /* Send one sample to the DAC, and track the sample list length. */
@@ -49,7 +49,7 @@ void playSample()
 	/* Upload sample to DAC. */
 	*DAC0_CH0DATA = current_song[current_note][current_sample] * VOLUME;
 	*DAC0_CH1DATA = current_song[current_note][current_sample] * VOLUME;
-	
+
 	/* Find the next sample. */
 	current_sample = (current_sample + 1);
 	if (current_sample > current_song[current_note][0]) {
@@ -83,10 +83,10 @@ int selectSongFromButton(int input_button)
 	}
 	switch (input_button) {
 	case 2:
-		setSong(SONG_UP);
+		setSong(SONG_MORE_PEW);
 		return 1;
 	case 4:
-		setSong(SONG_UP);
+		setSong(SONG_PEW);
 		return 1;
 	case 5:
 		setSong(SONG_LEFT);
@@ -108,30 +108,4 @@ int selectSongFromButton(int input_button)
 void playIntroSong()
 {
 	setSong(SONG_INTRO);
-}
-
-/* Test function. Send entire wave list sequentially. */
-void playSampleList(int *input_note)
-{
-	for (int i = 1; i < (input_note[0] + 1); i++) {
-		*DAC0_CH0DATA = input_note[i];
-	}
-}
-
-/* Test function. Track the duration of repeating a note. */
-void playNoteList()
-{
-	playSampleList(current_song[current_note]);
-	current_note_duration--;
-	if (current_note_duration <= 0) {
-		nextNote();
-	}
-}
-
-/* Test function. Sequentially run the song, non-stop. */
-void playEntireSong()
-{				//Remember to set tempFix = 1 for current_note_duration. 
-	while ((current_song != 0)) {
-		playNoteList();
-	}
 }
