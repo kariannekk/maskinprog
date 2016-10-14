@@ -7,22 +7,17 @@
 /* temp define. */
 #define SAMPLES_PER_SECOND 44100
 #define EIGHT_NOTE (SAMPLES_PER_SECOND / 8)
+#define VOLUME 10
+
+/* Declaration of peripheral setup functions. */
+void setNormalSleepMode();
+void setDeepSleepMode();
 
 /* Global variables for tracking. */
 int **current_song;
 int current_note;
 int current_sample;
 int current_note_duration;
-//volume
-
-
-
-/* INIT */
-void setNormalSleepMode();	
-void setDeepSleepMode();
-
-
-/* Functions to use after testing. May remove those above. */
 
 /* Track the song note, duration and end of the song. */
 void nextNote()
@@ -33,9 +28,8 @@ void nextNote()
 		setDeepSleepMode();
 		return;
 	}
-	
+
 	/* Make every note last for the same time duration, even when the note vectors have different lengths. */
-	
 	current_note_duration = EIGHT_NOTE / (int)current_song[current_note][0];
 }
 
@@ -46,15 +40,17 @@ void setSong(int **input_song)
 	current_sample = 1;
 	current_song = input_song;
 	nextNote();
-	setNormalSleepMode();
+	setNormalSleepMode();	//TODO polling = TimerStart.
 }
 
 /* Send one sample to the DAC, and track the sample list length. */
 void playSample()
 {
-	*DAC0_CH0DATA = current_song[current_note][current_sample] * 10;	//TODO move volume constant someplace else. Actually possible to hear without it, in interrupt mode. May create a function for this. 
+	/* Upload sample to DAC. */
+	*DAC0_CH0DATA = current_song[current_note][current_sample] * VOLUME;
+	*DAC0_CH1DATA = current_song[current_note][current_sample] * VOLUME;
 	
-	*DAC0_CH1DATA = current_song[current_note][current_sample] * 10;	//TODO Same for ch1 as well?
+	/* Find the next sample. */
 	current_sample = (current_sample + 1);
 	if (current_sample > current_song[current_note][0]) {
 		current_note_duration--;
@@ -72,13 +68,11 @@ void playNote()
 }
 
 /* Play one sample of a song if there is any song. */
-int playSong()
+void playSong()
 {
-	if (current_song == 0) {
-		return 0;
+	if (current_song != 0) {
+		playNote();
 	}
-	playNote();
-	return 1;
 }
 
 /* Set song corresponding to button press, without overwriting a song that is already playing. (1-indexed buttons.) */
@@ -136,7 +130,7 @@ void playNoteList()
 
 /* Test function. Sequentially run the song, non-stop. */
 void playEntireSong()
-{	//Remember to set tempFix = 1 for current_note_duration. 
+{				//Remember to set tempFix = 1 for current_note_duration. 
 	while ((current_song != 0)) {
 		playNoteList();
 	}

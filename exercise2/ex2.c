@@ -7,38 +7,29 @@
   TODO calculate the appropriate sample period for the sound waves you want to generate. The core clock (which the timer clock is derived from) runs at 14 MHz by default. Also remember that the timer counter registers are 16 bits.
 */
 
-/* The period between sound samples, in clock cycles */
+/* The period between sound samples, in clock cycles. */
 #define   SAMPLE_PERIOD   317
 
 #define RIGHT 1			//Consider making enumerator.
 #define LEFT -1
 
-/* Declaration of peripheral setup functions */
+/* Declaration of peripheral setup functions. */
 void setupGPIO();		//From file "gpio.c"
 void setupGPIOInterrupts();
-int readGPIOInput();
-
-void setupTimer(uint32_t period);	//From file "timer.c"
-void setupTimerInterrupt();
-void startTimer();
-
-void setupDAC();		//From file "dac.c"
-
-void setupInterrupt();		//From file "ex2.c"
-void setNormalSleepMode();
-
-void setSong(int **input_song);	//From file "sound_manager.c"
-int playSong();
-void playIntroSong();
-
 void GPIOOddInput();
 void GPIOEvenInput();
 
-/* Temporary peripheral decalrations. */
+void setupTimer(uint32_t period);	//From file "timer.c"
+void setupTimerInterrupt();
+
+void setupDAC();		//From file "dac.c"
+
+void playSong();		//From file "sound_manager.c"
+void playIntroSong();
+
+void setupInterrupt();		//From file "ex2.c"
+void setNormalSleepMode();
 void pollingProgram();
-void my_polling_programB();
-void moveLight(int direction);
-void selectSongFromButton(int input_button);
 
 /* Main program code. */
 int main(void)
@@ -53,29 +44,23 @@ int main(void)
 
 	/* Enable energy efficiency. */
 	//setNormalSleepMode();
-	
+
 	/* Play opening song. */
-	//playIntroSong();	//TODO disabled while coding, because it is annoying when repeated. 
+	playIntroSong();      //TODO disabled while coding, because it is annoying when repeated. 
 
 	/* Run main program. */
-	//while(1) {};
-	
-	__asm("wfi");	//Wait for interrupt. 
+	__asm("wfi"); //Wait for interrupt. 
 
-	//my_polling_programA();
-
+	//pollingProgram();
 
 	return 0;
 }
 
 void pollingProgram()
 {
-	int buttonReleased = 1; //Ensures buttons must be re-pressed to restart their action. 
+	bool buttonReleased = true;	//Ensures buttons must be re-pressed to restart their action. 
 
-	/* Play opening song. */
-	playIntroSong();
-	
-	while (1) {
+	while (true) {
 		/* Play sound when there is a song. */
 		if (*TIMER1_CNT == *TIMER1_TOP) {
 			playSong();
@@ -83,31 +68,12 @@ void pollingProgram()
 		/* Set songs and operate LEDs. */
 		if (*GPIO_PC_DIN != 0xFF) {
 			if (buttonReleased) {
-				buttonReleased = 0;
+				buttonReleased = false;
 				GPIOOddInput();
 				GPIOEvenInput();
 			}
 		} else {
-			buttonReleased = 1;
-		}
-	}
-}
-
-void my_polling_programB()
-{
-	while (1) {
-		*GPIO_PA_DOUT = (*GPIO_PC_DIN << 8);
-		if (*TIMER1_CNT == *TIMER1_TOP) {
-			playSong();
-		}
-		if (!(*GPIO_PC_DIN & 1))	//stop all actions.
-		{	//button pair: 1, 2   //e.g. stop noise.
-			while (1) {
-			}
-		}
-		if (!(*GPIO_PC_DIN & 2))	//set song. 
-		{	//button pair: 1, 2
-			setSong((int **)1);	//testsong);
+			buttonReleased = true;
 		}
 	}
 }
@@ -126,15 +92,12 @@ void setupInterrupt()
 	setupNVIC();
 }
 
-
 /* Activate sleep mode (EM1). This does not disable TIMER1. */
 void setNormalSleepMode()
 {
 	*SCR = 0x2;		//Enables sleep mode for CPU.
 	*DAC0_CH0CTRL = 0x1;	//Enable right audio channels. 
 	*DAC0_CH1CTRL = 0x1;	//Enable left audio channels.
-	
-	
 	*TIMER1_CMD = 0x1;	//Starts the timer.
 }
 
@@ -145,7 +108,6 @@ void setDeepSleepMode()
 	*SCR = 0x6;		//Enables deep sleep mode for CPU.
 	*DAC0_CH0CTRL = 0x0;	//Disable right audio channels. 
 	*DAC0_CH1CTRL = 0x0;	//Disable left audio channels. 
-	
 }
 
 /* if other interrupt handlers are needed, use the following names: 

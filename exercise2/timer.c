@@ -1,7 +1,6 @@
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "efm32gg.h"
+
+/* TIMER1 is started when a song is set. It is stopped when the song is finished. See sound_manager.c. */
 
 /* Enable internal timer in the program. Maximum input period is 0xFFFF. */
 void setupTimer(uint16_t period)

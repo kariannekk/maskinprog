@@ -1,6 +1,4 @@
-# Example Makefile
-#
-# Exercise 2, TDT4258
+# Exercise 2, TDT4258, fall 2016.
 
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-gcc
@@ -55,8 +53,12 @@ help :
 	@echo "Available commands: "
 	@echo "<none>, help, upload, clean, pretty, debug, interrupt, polling.\n"
 	@echo "---------------------------------------------------------------"
+	@echo "<none> - make from ex2.c."
 	@echo "help - displays this."
 	@echo "upload - uploads .elf file to the EFM32GG circuit board."
 	@echo "clean - removes .o, .elf, .bin and .hex files from directory."
 	@echo "pretty - adjusts the files' indentations and format."
 	@echo "debug - runs the debug program."
+	@echo "interrupt - make from ex2_interrupt."
+	@echo "polling - make from ex2_polling."
+	@echo ""

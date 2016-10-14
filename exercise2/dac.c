@@ -1,15 +1,7 @@
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "efm32gg.h"
 
 void setupDAC()
 {
-	/*
-	   TODO *When entering Energy Mode 4, both DAC channels must be stopped. [s712; 13]
-	   *One conversion takes 2 DAC_CLK cycles and the DAC_CLK should not be set higher than 1 MHz. [s712; 13]
-	 */
-
 	/* Enable clock. */
 	*CMU_HFPERCLKEN0 |= CMU2_HFPERCLKEN0_DAC0;
 

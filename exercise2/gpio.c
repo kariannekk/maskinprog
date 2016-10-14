@@ -1,6 +1,3 @@
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "efm32gg.h"
 
 #define RIGHT 1
@@ -8,10 +5,10 @@
 
 void selectSongFromButton();
 
-
 unsigned int LED_offset = 0;
 int LED_value;
 
+/* Enable LEDs and buttons. */
 void setupGPIO()
 {
 	/* Enable GPIO clock. */
@@ -38,57 +35,31 @@ void setupGPIOInterrupts()
 	*GPIO_IEN = 0xFF;	//Enables external interrupts.
 }
 
-/* Move a LED, 'direction' amount of steps, right (+) or left (-). */
+/* Move a lit LED, 'direction' amount of steps, right (+) or left (-). */
 void moveSingleLED(int direction)
 {
 	LED_offset = (LED_offset + direction) % 8;
 	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
 }
 
-/* Return a single pushed button. Multiple are regarded as none. When successfull, output value is the button number. */
-int readGPIOInput()
-{
-	/* Pins are 0-indexed. Buttons are 1-indexed. */
-	switch (*GPIO_PC_DIN) {
-	case 0xFE:
-		return 1;
-	case 0xFD:
-		return 2;
-	case 0xFB:
-		return 3;
-	case 0xF7:
-		return 4;
-	case 0xEF:
-		return 5;
-	case 0xDF:
-		return 6;
-	case 0xBF:
-		return 7;
-	case 0x7F:
-		return 8;
-	default:
-		return 0;
-	}
-}
-
 /* Act on a single pushed odd GPIO button. Multiple are regarded as none. Buttons are 1-indexed. */
 void GPIOOddInput()
 {
 	switch (*GPIO_PC_DIN) {
-		case 0xFD:	//Button SW2. 
-			selectSongFromButton(2);
-			return;
-		case 0xF7:	//Button SW4. 
-			selectSongFromButton(4);
-			return;
-		case 0xDF:	//Button SW6. 
-			selectSongFromButton(6);
-			return;
-		case 0x7F:	//Button SW8. 
-			selectSongFromButton(8);
-			return;
-		default:
-			return;
+	case 0xFD:		//Button SW2. 
+		selectSongFromButton(2);
+		return;
+	case 0xF7:		//Button SW4. 
+		selectSongFromButton(4);
+		return;
+	case 0xDF:		//Button SW6. 
+		selectSongFromButton(6);
+		return;
+	case 0x7F:		//Button SW8. 
+		selectSongFromButton(8);
+		return;
+	default:
+		return;
 	}
 }
 
@@ -96,23 +67,22 @@ void GPIOOddInput()
 void GPIOEvenInput()
 {
 	switch (*GPIO_PC_DIN) {
-		case 0xFE:	//Button SW1. 
-			moveSingleLED(LEFT);
-			return;
-		case 0xFB:	//Button SW3. 
-			moveSingleLED(RIGHT);
-			return;
-		case 0xEF:	//Button SW5. 
-			selectSongFromButton(5);	
-			return;
-		case 0xBF:	//Button SW7. 
-			selectSongFromButton(7);
-			return;
-		default:
-			return;
+	case 0xFE:		//Button SW1. 
+		moveSingleLED(LEFT);
+		return;
+	case 0xFB:		//Button SW3. 
+		moveSingleLED(RIGHT);
+		return;
+	case 0xEF:		//Button SW5. 
+		selectSongFromButton(5);
+		return;
+	case 0xBF:		//Button SW7. 
+		selectSongFromButton(7);
+		return;
+	default:
+		return;
 	}
 }
-
 
 /* Use these two to get a weaker LED output light. This saves power and is more relaxing to the eye. */
 //TODO remove these, or use them within LETIMER or similar. 
@@ -120,9 +90,9 @@ void toggleLEDsON()
 {
 	*GPIO_PA_DOUT = LED_value;
 }
+
 void toggleLEDsOFF()
 {
 	LED_value = *GPIO_PA_DOUT;
 	*GPIO_PA_DOUT = 0xFF00;
 }
-
