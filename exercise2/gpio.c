@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "efm32gg.h"
 
 #define RIGHT 1
@@ -25,6 +28,7 @@ void setupGPIO()
 
 	/* Set start position of lights. */
 	*GPIO_PA_DOUT = 0xFE00;
+	LED_value = 0xFE00;
 }
 
 void setupGPIOInterrupts()
@@ -39,7 +43,8 @@ void setupGPIOInterrupts()
 void moveSingleLED(int direction)
 {
 	LED_offset = (LED_offset + direction) % 8;
-	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
+	//*GPIO_PA_DOUT = (0xFEFF << LED_offset);
+	LED_value = (0xFEFF << LED_offset);
 }
 
 /* Act on a single pushed odd GPIO button. Multiple are regarded as none. Buttons are 1-indexed. */
@@ -85,7 +90,6 @@ void GPIOEvenInput()
 }
 
 /* Use these two to get a weaker LED output light. This saves power and is more relaxing to the eye. */
-//TODO remove these, or use them within LETIMER or similar. 
 void toggleLEDsON()
 {
 	*GPIO_PA_DOUT = LED_value;
