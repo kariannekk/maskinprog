@@ -31,8 +31,11 @@ void setSong(int **input_song);	//From file "sound_manager.c"
 int playSong();
 void playIntroSong();
 
+void GPIOOddInput();
+void GPIOEvenInput();
+
 /* Temporary peripheral decalrations. */
-void my_polling_programA();
+void pollingProgram();
 void my_polling_programB();
 void moveLight(int direction);
 void selectSongFromButton(int input_button);
@@ -65,28 +68,24 @@ int main(void)
 	return 0;
 }
 
-void my_polling_programA()
+void pollingProgram()
 {
-	int input_button = 0;
-	int buttonReleased = 1;
+	int buttonReleased = 1; //Ensures buttons must be re-pressed to restart their action. 
 
 	/* Play opening song. */
 	playIntroSong();
 	
-	/* Play sound from button presses. */
 	while (1) {
+		/* Play sound when there is a song. */
 		if (*TIMER1_CNT == *TIMER1_TOP) {
 			playSong();
 		}
-		if ((input_button = readGPIOInput())) {
+		/* Set songs and operate LEDs. */
+		if (*GPIO_PC_DIN != 0xFF) {
 			if (buttonReleased) {
 				buttonReleased = 0;
-				selectSongFromButton(input_button);
-				if (input_button == 1) {
-					moveLight(LEFT);
-				} else if (input_button == 3) {
-					moveLight(RIGHT);
-				}
+				GPIOOddInput();
+				GPIOEvenInput();
 			}
 		} else {
 			buttonReleased = 1;

@@ -3,6 +3,12 @@
 
 #include "efm32gg.h"
 
+#define RIGHT 1
+#define LEFT -1
+
+void selectSongFromButton();
+
+
 unsigned int LED_offset = 0;
 int LED_value;
 
@@ -64,6 +70,49 @@ int readGPIOInput()
 		return 0;
 	}
 }
+
+/* Act on a single pushed odd GPIO button. Multiple are regarded as none. Buttons are 1-indexed. */
+void GPIOOddInput()
+{
+	switch (*GPIO_PC_DIN) {
+		case 0xFD:	//Button SW2. 
+			selectSongFromButton(2);
+			return;
+		case 0xF7:	//Button SW4. 
+			selectSongFromButton(4);
+			return;
+		case 0xDF:	//Button SW6. 
+			selectSongFromButton(6);
+			return;
+		case 0x7F:	//Button SW8. 
+			selectSongFromButton(8);
+			return;
+		default:
+			return;
+	}
+}
+
+/* Act on a single pushed even GPIO button. Multiple are regarded as none. Buttons are 1-indexed. */
+void GPIOEvenInput()
+{
+	switch (*GPIO_PC_DIN) {
+		case 0xFE:	//Button SW1. 
+			moveSingleLED(LEFT);
+			return;
+		case 0xFB:	//Button SW3. 
+			moveSingleLED(RIGHT);
+			return;
+		case 0xEF:	//Button SW5. 
+			selectSongFromButton(5);	
+			return;
+		case 0xBF:	//Button SW7. 
+			selectSongFromButton(7);
+			return;
+		default:
+			return;
+	}
+}
+
 
 /* Use these two to get a weaker LED output light. This saves power and is more relaxing to the eye. */
 //TODO remove these, or use them within LETIMER or similar. 

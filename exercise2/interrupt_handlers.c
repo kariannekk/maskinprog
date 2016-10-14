@@ -3,8 +3,8 @@
 
 #include "efm32gg.h"
 
-#define RIGHT 1
-#define LEFT -1
+void GPIOOddInput();
+void GPIOEvenInput();
 
 int playSong();	//From file "sound_manager.c".
 int selectSongFromButton(int input_button);
@@ -29,22 +29,7 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 	*GPIO_IFC |= 0x55;
 	
 	/* Act on input. Buttons are 1-indexed. */
-	switch (*GPIO_PC_DIN) {
-		case 0xFE:	//Button SW1. 
-			moveSingleLED(LEFT);
-			return;
-		case 0xFB:	//Button SW3. 
-			moveSingleLED(RIGHT);
-			return;
-		case 0xEF:	//Button SW5. 
-			selectSongFromButton(5);	
-			return;
-		case 0xBF:	//Button SW7. 
-			selectSongFromButton(7);
-			return;
-		default:
-			return;
-	}
+	GPIOEvenInput();
 }
 
 /* GPIO odd pin interrupt handler. Pins are 0-indexed. */
@@ -54,20 +39,5 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 	*GPIO_IFC |= 0xAA;
 	
 	/* Act on input. Buttons are 1-indexed. */
-	switch (*GPIO_PC_DIN) {
-		case 0xFD:	//Button SW2. 
-			selectSongFromButton(2);
-			return;
-		case 0xF7:	//Button SW4. 
-			selectSongFromButton(4);
-			return;
-		case 0xDF:	//Button SW6. 
-			selectSongFromButton(6);
-			return;
-		case 0x7F:	//Button SW8. 
-			selectSongFromButton(8);
-			return;
-		default:
-			return;
-	}
+	GPIOOddInput();
 }
