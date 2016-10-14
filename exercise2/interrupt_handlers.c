@@ -1,12 +1,17 @@
+#include <stdint.h>
+#include <stdbool.h>
+
 #include "efm32gg.h"
 
 /* Declaration of peripheral setup functions. */
 void playSong();		//From file "sound_manager.c".
 
-void GPIOOddInput();	//From file "gpio.c".
+void GPIOOddInput();		//From file "gpio.c".
 void GPIOEvenInput();
+void toggleLEDsON();
+void toggleLEDsOFF();
 
-/* TIMER1 interrupt handler */
+/* TIMER1 interrupt handler. */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
 	/* Clear timer interrupt flag */
@@ -34,4 +39,12 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 
 	/* Act on input. Buttons are 1-indexed. */
 	GPIOOddInput();
+}
+
+/* LETIMER0 interrupt handler. */
+void __attribute__ ((interrupt)) LETIMER0_IRQHandler()
+{
+	*LETIMER0_IFC = LETIMER0_IFC_UNDERFLOW;
+	toggleLEDsON();
+	toggleLEDsOFF();
 }
