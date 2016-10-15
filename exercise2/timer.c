@@ -5,7 +5,7 @@
 
 /* TIMER1 is started when a song is set. It is stopped when the song is finished. See sound_manager.c. */
 
-/* Enable internal timer in the program. Maximum input period is 0xFFFF. */
+/* Enable Timer1. It uses the HF Clock at 14 MHz. */
 void setupTimer(uint16_t period)
 {
 	/* Enable Timer clock. */
@@ -21,10 +21,11 @@ void setupTimerInterrupt()
 	*TIMER1_IEN = 0x1;	//Enables overflow interrupt.
 }
 
+/* Enable Low Energy Timer0. It uses the LF Clock at 32,768 kHz. */
 void setupLETimer(uint16_t period)
 {
 	/* Activate LFRCO clock. */
-	*CMU_OSCENCMD |= (1 << 6);
+	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_ACTIVATE;
 
 	/* Select LFRCO as LF clock source. */
 	*CMU_LFCLKSEL &= ~((1 << 16) | (1 << 1) | (1 << 0));
@@ -47,9 +48,6 @@ void setupLETimer(uint16_t period)
 
 	/* Enable interrupt. */
 	*LETIMER0_IEN = LETIMER0_IEN_UNDERFLOW;
-
-	/* Enable NVIC interrupt. */
-	//*ISER0 |= 0x4000000;  //Enables LETIMER0 interrupt. 
 
 	/* Start LETIMER0. */
 	*LETIMER0_CMD = LETIMER0_CMD_START;
