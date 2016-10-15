@@ -8,8 +8,8 @@
 
 void selectSongFromButton();
 
-unsigned int LED_offset = 0;
-int LED_value;
+unsigned int LED_offset = 0;	//Tracks the current location of the single LED in moveSingleLED().
+int LED_value = 0xFE00;		//Tracks the LEDs' previous value. Used in toggleLEDsON() and toggleLEDsOFF() to conserve power. 
 
 /* Enable LEDs and buttons. */
 void setupGPIO()
@@ -26,9 +26,8 @@ void setupGPIO()
 	*GPIO_PC_MODEL = 0x33333333;	//Enables input with filter. 
 	*GPIO_PC_DOUT = 0xFF;	//Enables pull-up resistors. 
 
-	/* Set start position of lights. */
-	*GPIO_PA_DOUT = 0xFE00;
-	LED_value = 0xFE00;
+	/* Set start position of LEDs. */
+	*GPIO_PA_DOUT = 0xFE00;	//D1 is ON.
 }
 
 void setupGPIOInterrupts()
@@ -43,7 +42,7 @@ void setupGPIOInterrupts()
 void moveSingleLED(int direction)
 {
 	LED_offset = (LED_offset + direction) % 8;
-	//*GPIO_PA_DOUT = (0xFEFF << LED_offset);
+	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
 	LED_value = (0xFEFF << LED_offset);
 }
 
