@@ -83,7 +83,7 @@ int selectSongFromButton(int input_button)
 	}
 	switch (input_button) {
 	case 2:
-		setSong(SONG_MORE_PEW);
+		setSong(SONG_FANFARE);
 		return 1;
 	case 4:
 		setSong(SONG_PEW);
