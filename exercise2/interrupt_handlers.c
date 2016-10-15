@@ -41,10 +41,16 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 	GPIOOddInput();
 }
 
-/* LETIMER0 interrupt handler. */
+/* LETIMER0 interrupt handler. This is built to run either 'blink LEDs' or 'play song', not both simultaneously. It may still function with both. */
 void __attribute__ ((interrupt)) LETIMER0_IRQHandler()
 {
+	/* Clear timer interrupt flag */
 	*LETIMER0_IFC = LETIMER0_IFC_UNDERFLOW;
-	toggleLEDsON();
-	toggleLEDsOFF();
+
+	/* Blink LEDs to conserve power. */
+	//toggleLEDsON();
+	//toggleLEDsOFF();
+
+	/* Play next sample */
+	playSong();
 }

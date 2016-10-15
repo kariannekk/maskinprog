@@ -3,9 +3,12 @@
 
 #include "efm32gg.h"
 
+/* Select timer for sending samples. Use TIMER1 if true, LETIMER0 if false. Notes are optimized for TIMER1. */
+#define SOUND_FROM_TIMER1		true
+
 /* The period between sound samples, in clock cycles. */
-#define		SAMPLE_PERIOD	317
-#define		LETIMER0_PERIOD	5
+#define		SAMPLE_PERIOD		317
+#define		LETIMER0_PERIOD		0
 
 /* Declaration of peripheral setup functions. */
 void setupGPIO();		//From file "gpio.c"
@@ -31,7 +34,9 @@ int main(void)
 	/* Call the peripheral setup functions */
 	setupGPIO();
 	setupDAC();
+#if SOUND_FROM_TIMER1
 	setupTimer(SAMPLE_PERIOD);
+#endif
 
 	/* Enable interrupt handling */
 	setupInterrupt();
@@ -48,16 +53,25 @@ int main(void)
 /* Set NVIC ISERx register for interrupt enable. */
 void setupNVIC()
 {
-	*ISER0 |= 0x4001802;	//Enables GPIO odd and even interrupts, and TIMER1 and LETIMER0 interrupts. 
+	*ISER0 |= NVIC_ISER0_GPIO_EVEN | NVIC_ISER0_GPIO_ODD
+#if SOUND_FROM_TIMER1
+	    | NVIC_ISER0_TIMER1
+#else
+	    | NVIC_ISER0_LETIMER0
+#endif
+	    ;			//Enables GPIO odd and even interrupts, and TIMER1 and LETIMER0 interrupts. 
 }
 
 /* Activate interrupt mode. */
 void setupInterrupt()
 {
 	setupGPIOInterrupts();
+#if SOUND_FROM_TIMER1
 	setupTimerInterrupt();
-	setupNVIC();
+#else
 	setupLETimer(LETIMER0_PERIOD);
+#endif
+	setupNVIC();
 }
 
 /* Activate sleep mode (EM1). This does not disable TIMER1. */
@@ -66,16 +80,27 @@ void setNormalSleepMode()
 	*SCR = 0x2;		//Enables sleep mode for CPU.
 	*DAC0_CH0CTRL = 0x1;	//Enable right audio channels. 
 	*DAC0_CH1CTRL = 0x1;	//Enable left audio channels.
-	*TIMER1_CMD = 0x1;	//Starts the timer.
+#if SOUND_FROM_TIMER1
+	*TIMER1_CMD = TIMER1_CMD_START;
+#else
+	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_ACTIVATE;
+	*LETIMER0_CMD = LETIMER0_CMD_START;
+#endif
 }
 
 /* Activate deep sleep mode (EM2). This disables TIMER1. */
 void setDeepSleepMode()
 {
-	*TIMER1_CMD = 0x2;	//Stops the timer. 
+#if SOUND_FROM_TIMER1
+	*TIMER1_CMD = TIMER1_CMD_STOP;
+#else
+	*LETIMER0_CMD = LETIMER0_CMD_STOP;
+	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_DEACTIVATE;
+#endif
 	*SCR = 0x6;		//Enables deep sleep mode for CPU.
 	*DAC0_CH0CTRL = 0x0;	//Disable right audio channels. 
-	*DAC0_CH1CTRL = 0x0;	//Disable left audio channels. 
+	*DAC0_CH1CTRL = 0x0;	//Disable left audio channels.
+
 }
 
 /* if other interrupt handlers are needed, use the following names: 
