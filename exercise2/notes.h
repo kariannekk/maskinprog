@@ -465,14 +465,11 @@ int b6[] =
 int silence[] = { 1, 0 };
 
 /*Songs*/
-int *SONG_UP[] = { (int *)5, f3, f4, f5, f6, silence };
-int *SONG_RIGHT[] = { (int *)8, c5, d5, e5, f5, g5, a5, b5, silence };
-
+int *SONG_UP[] = { (int *)4, f3, f4, f5, f6 };
+int *SONG_RIGHT[] = { (int *)7, c5, d5, e5, f5, g5, a5, b5 };
 int *SONG_DOWN[] =
-    { (int *)13, a4, d4, silence, d4, a4, d4, a4, d4, silence, a4, d4, a4,
-	silence
-};
-int *SONG_LEFT[] = { (int *)8, b5, a5, g5, f5, e5, d5, c5, silence };
-int *SONG_INTRO[] = { (int *)5, f5, g5, e5, a5, silence };
-int *SONG_PEW[] = { (int *)4, f5, f5, a5, silence };
-int *SONG_FANFARE[] = { (int *)8, b5, f6, f6, e6, e6, a5, b5, silence };
+    { (int *)12, a4, d4, silence, d4, a4, d4, a4, d4, silence, a4, d4, a4 };
+int *SONG_LEFT[] = { (int *)7, b5, a5, g5, f5, e5, d5, c5 };
+int *SONG_INTRO[] = { (int *)4, f5, g5, e5, a5 };
+int *SONG_PEW[] = { (int *)3, f5, f5, a5 };
+int *SONG_FANFARE[] = { (int *)7, b5, f6, f6, e6, e6, a5, b5 };
