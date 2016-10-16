@@ -43,7 +43,7 @@ void moveSingleLED(int direction)
 {
 	LED_offset = (LED_offset + direction) % 8;
 	*GPIO_PA_DOUT = (0xFEFF << LED_offset);
-	LED_value = (0xFEFF << LED_offset);
+	LED_value = (0xFEFF << LED_offset);		//Only necessary if toggleLED-functions are used. 
 }
 
 /* Act on a single pushed odd GPIO button. Multiple are regarded as none. Buttons are 1-indexed. */
