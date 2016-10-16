@@ -14,7 +14,7 @@ TARGET=ex2.c
 ex2.bin : ex2.elf
 	${OBJCOPY} -O binary $< $@
 
-ex2.elf : $(TARGET:.c=.o) timer.o dac.o gpio.o interrupt_handlers.o sound_manager.o
+ex2.elf : $(TARGET:.c=.o) timer.o dac.o gpio.o interrupt_handlers.o sound_manager.o letimer.o
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 %.o : %.c
