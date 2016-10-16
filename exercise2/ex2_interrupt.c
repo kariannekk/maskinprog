@@ -18,14 +18,15 @@ void GPIOEvenInput();
 
 void setupTimer(uint32_t period);	//From file "timer.c"
 void setupTimerInterrupt();
-void setupLETimer();
 
 void setupDAC();		//From file "dac.c"
 
 void playSong();		//From file "sound_manager.c"
 void playIntroSong();
 
-void setupInterrupt();		//From file "ex2.c"
+void setupLETimer();		//From file "letimer.c"
+
+void setupInterrupt();		//From file "ex2_interrupt.c"
 void pollingProgram();
 
 /* Main program code. */
@@ -37,6 +38,9 @@ int main(void)
 #if SOUND_FROM_TIMER1
 	setupTimer(SAMPLE_PERIOD);
 #endif
+
+	/* Set sleep mode and activate DAC + Timer. */
+	setNormalSleepMode();
 
 	/* Enable interrupt handling */
 	setupInterrupt();
@@ -78,8 +82,8 @@ void setupInterrupt()
 void setNormalSleepMode()
 {
 	*SCR = 0x2;		//Enables sleep mode for CPU.
-	*DAC0_CH0CTRL = 0x1;	//Enable right audio channels. 
-	*DAC0_CH1CTRL = 0x1;	//Enable left audio channels.
+	*DAC0_CH0CTRL |= 0x1;	//Enable right audio channels. 
+	*DAC0_CH1CTRL |= 0x1;	//Enable left audio channels.
 #if SOUND_FROM_TIMER1
 	*TIMER1_CMD = TIMER1_CMD_START;
 #else
@@ -98,9 +102,8 @@ void setDeepSleepMode()
 	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_DEACTIVATE;
 #endif
 	*SCR = 0x6;		//Enables deep sleep mode for CPU.
-	*DAC0_CH0CTRL = 0x0;	//Disable right audio channels. 
-	*DAC0_CH1CTRL = 0x0;	//Disable left audio channels.
-
+	*DAC0_CH0CTRL &= ~(0x1);	//Disable right audio channel. 
+	*DAC0_CH1CTRL &= ~(0x1);	//Disable left audio channel.
 }
 
 /* if other interrupt handlers are needed, use the following names: 
