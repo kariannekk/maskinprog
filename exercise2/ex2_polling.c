@@ -3,7 +3,7 @@
 
 #include "efm32gg.h"
 
-/* The period between sound samples, in clock cycles. */
+/* The period between sound samples, in clock cycles. This is highly dependent on the code run time, which makes it inaccurate to label this 'period'. */
 #define   SAMPLE_PERIOD   10
 
 /* Declaration of peripheral setup functions. */
@@ -18,7 +18,7 @@ void setupDAC();		//From file "dac.c"
 void playSong();		//From file "sound_manager.c"
 void playIntroSong();
 
-void pollingProgram();		//From file "ex2.c"
+void pollingProgram();		//From file "ex2_polling.c"
 
 /* Main program code. */
 int main(void)
@@ -63,18 +63,18 @@ void pollingProgram()
 void setNormalSleepMode()
 {
 	/* Polling version never enters sleep mode anyway. */
-	//*SCR = 0x2;           //Enables sleep mode for CPU.
-	*DAC0_CH0CTRL = 0x1;	//Enable right audio channels. 
-	*DAC0_CH1CTRL = 0x1;	//Enable left audio channels.
-	*TIMER1_CMD = 0x1;	//Starts the timer.
+	//*SCR = 0x2;		//Enables sleep mode for CPU.
+	*DAC0_CH0CTRL |= 0x1;	//Enable right audio channels. 
+	*DAC0_CH1CTRL |= 0x1;	//Enable left audio channels.
+	*TIMER1_CMD = TIMER1_CMD_START;
 }
 
 /* Activate deep sleep mode (EM2). This disables TIMER1. */
 void setDeepSleepMode()
 {
 	/* Polling version never enters sleep mode anyway. */
-	*TIMER1_CMD = 0x2;	//Stops the timer. 
-	//*SCR = 0x6;           //Enables deep sleep mode for CPU.
-	*DAC0_CH0CTRL = 0x0;	//Disable right audio channels. 
-	*DAC0_CH1CTRL = 0x0;	//Disable left audio channels. 
+	*TIMER1_CMD = TIMER1_CMD_STOP;
+	//*SCR = 0x6;		//Enables deep sleep mode for CPU.
+	*DAC0_CH0CTRL &= ~(0x1);	//Disable right audio channel. 
+	*DAC0_CH1CTRL &= ~(0x1);	//Disable left audio channel.
 }
