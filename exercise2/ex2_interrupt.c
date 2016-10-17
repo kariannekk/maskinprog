@@ -105,6 +105,7 @@ void activateTimer()
 #else
 	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_ACTIVATE;
 	*LETIMER0_CMD = LETIMER0_CMD_START;
+	/* LETIMER0 is in EM2 from setup in main(). */
 #endif
 }
 
@@ -117,6 +118,7 @@ void deactivateTimer()
 #else
 	*LETIMER0_CMD = LETIMER0_CMD_STOP;
 	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_DEACTIVATE;
+	/* LETIMER0 is in EM2 from setup in main(). */
 #endif
 	*DAC0_CH0CTRL &= ~(0x1);	//Disable right audio channel. 
 	*DAC0_CH1CTRL &= ~(0x1);	//Disable left audio channel.

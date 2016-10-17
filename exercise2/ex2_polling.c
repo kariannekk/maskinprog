@@ -73,7 +73,6 @@ void deactivateTimer()
 {
 	/* Polling version never enters sleep mode anyway. */
 	*TIMER1_CMD = TIMER1_CMD_STOP;
-	//*SCR = 0x6;           //Enables deep sleep mode for CPU.
 	*DAC0_CH0CTRL &= ~(0x1);	//Disable right audio channel. 
 	*DAC0_CH1CTRL &= ~(0x1);	//Disable left audio channel.
 }
