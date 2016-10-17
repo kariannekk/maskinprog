@@ -27,7 +27,9 @@ void playIntroSong();
 void setupLETimer();		//From file "letimer.c"
 
 void setupInterrupt();		//From file "ex2_interrupt.c"
-void pollingProgram();
+void setNormalSleepMode();
+void setDeepSleepMode();
+void activateTimer();
 
 /* Main program code. */
 int main(void)
@@ -35,12 +37,16 @@ int main(void)
 	/* Call the peripheral setup functions */
 	setupGPIO();
 	setupDAC();
+
+	/* Set sleep mode and activate Timer. */
 #if SOUND_FROM_TIMER1
 	setupTimer(SAMPLE_PERIOD);
+	setNormalSleepMode();	//Enables EM1 for CPU.
+#else
+	setupLETimer(LETIMER0_PERIOD);
+	setDeepSleepMode();	//Enables EM2 for CPU.
 #endif
-
-	/* Set sleep mode and activate DAC + Timer. */
-	setNormalSleepMode();
+	activateTimer();
 
 	/* Enable interrupt handling */
 	setupInterrupt();
@@ -72,19 +78,29 @@ void setupInterrupt()
 	setupGPIOInterrupts();
 #if SOUND_FROM_TIMER1
 	setupTimerInterrupt();
-#else
-	setupLETimer(LETIMER0_PERIOD);
 #endif
 	setupNVIC();
 }
 
-/* Activate sleep mode (EM1). This does not disable TIMER1. */
+/* Activate sleep mode (EM1). This does not disable TIMER1's clock. */
 void setNormalSleepMode()
 {
 	*SCR = 0x2;		//Enables sleep mode for CPU.
+}
+
+/* Activate deep sleep mode (EM2). This disables TIMER1's clock. */
+void setDeepSleepMode()
+{
+	*SCR = 0x6;		//Enables deep sleep mode for CPU.
+}
+
+/* Activate timer and disable energy savings that prevent the timer. */
+void activateTimer()
+{
 	*DAC0_CH0CTRL |= 0x1;	//Enable right audio channels. 
 	*DAC0_CH1CTRL |= 0x1;	//Enable left audio channels.
 #if SOUND_FROM_TIMER1
+	setNormalSleepMode();	//Wakes the CPU from EM2 to EM1. 
 	*TIMER1_CMD = TIMER1_CMD_START;
 #else
 	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_ACTIVATE;
@@ -92,16 +108,16 @@ void setNormalSleepMode()
 #endif
 }
 
-/* Activate deep sleep mode (EM2). This disables TIMER1. */
-void setDeepSleepMode()
+/* Deactivate timer and enable energy savings that prevent the timer. */
+void deactivateTimer()
 {
 #if SOUND_FROM_TIMER1
 	*TIMER1_CMD = TIMER1_CMD_STOP;
+	setDeepSleepMode();	//Sets the CPU from EM1 to EM2. 
 #else
 	*LETIMER0_CMD = LETIMER0_CMD_STOP;
 	*CMU_OSCENCMD |= CMU_OSCENCMD_LFRCO_DEACTIVATE;
 #endif
-	*SCR = 0x6;		//Enables deep sleep mode for CPU.
 	*DAC0_CH0CTRL &= ~(0x1);	//Disable right audio channel. 
 	*DAC0_CH1CTRL &= ~(0x1);	//Disable left audio channel.
 }
