@@ -59,22 +59,21 @@ void pollingProgram()
 	}
 }
 
-/* Activate sleep mode (EM1). This does not disable TIMER1. */
-void setNormalSleepMode()
+/* Activate timer and disable energy savings that prevent the timer. */
+void activateTimer()
 {
 	/* Polling version never enters sleep mode anyway. */
-	//*SCR = 0x2;		//Enables sleep mode for CPU.
 	*DAC0_CH0CTRL |= 0x1;	//Enable right audio channels. 
 	*DAC0_CH1CTRL |= 0x1;	//Enable left audio channels.
 	*TIMER1_CMD = TIMER1_CMD_START;
 }
 
-/* Activate deep sleep mode (EM2). This disables TIMER1. */
-void setDeepSleepMode()
+/* Deactivate timer and enable energy savings that prevent the timer. */
+void deactivateTimer()
 {
 	/* Polling version never enters sleep mode anyway. */
 	*TIMER1_CMD = TIMER1_CMD_STOP;
-	//*SCR = 0x6;		//Enables deep sleep mode for CPU.
+	//*SCR = 0x6;           //Enables deep sleep mode for CPU.
 	*DAC0_CH0CTRL &= ~(0x1);	//Disable right audio channel. 
 	*DAC0_CH1CTRL &= ~(0x1);	//Disable left audio channel.
 }
