@@ -1,8 +1,11 @@
-
 /* 
-All arrays each contain a sampled sinus signal over one period where each array represents a note, array size = number of samples for each array. 
-Frequency for each note commented below 
+Each array contain a sampled sinus signal over one period. They represent a note each. The first list element is the array size = number of samples. The rest are samples, scaled to an amplitude of 127 and offset to non-negative range from 0 to 255. 
+Frequency for each note commented below.
 */
+
+#define SAMPLES_PER_SECOND 	44100
+#define EIGHT_NOTE 			(SAMPLES_PER_SECOND / 8)	//Eight notes allow more song designs to be implemented. It is more flexible than one second long notes. Repeat eight times in song to create one second long notes.
+#define VOLUME 				10	//1 or 10 are fine for earplugs or speakers respectively. Difference is about 0.2 mA (same voltage).
 
 //Frequency 131
 int c3[] =
@@ -462,7 +465,11 @@ int b6[] =
 	31, 11, 1, 1, 11, 31, 58, 91
 };
 
-int silence[] = { 1, 0 };
+int silence[] =
+    { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 /*Songs*/
 int *SONG_UP[] = { (int *)4, f3, f4, f5, f6 };
