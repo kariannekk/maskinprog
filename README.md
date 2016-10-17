@@ -4,9 +4,6 @@
 #If you wish you may look at the command:
 make help
 
-
-#To use, type in terminal:
-
 #For baseline solution:
 make polling
 make upload
@@ -16,12 +13,7 @@ make interrupt
 make upload
 
 
-#Inspiration:
-https://github.com/mathiasose/TDT4258/tree/master/exercise2
-https://github.com/evegard/tdt4258/blob/master/ex2/
-
-
-#Questions:
-Why do we want to stop the timer? To save energy. Then why don't we disable the timer instead? Is there really a difference in energy consumption from only disabling its iteration?
-
+#Additional info:
+* Within notes.h there is a #define VOLUME. Set it lower if the sound is too high. The current value was ideal for our setup. 
+* Within ex2_interrupt.c there is a #define SOUND_FROM_TIMER1. Set it to "false" to use LETIMER0, and to "true" to use TIMER1. The sample rate is tuned for TIMER1 usage.
 
