@@ -1,17 +1,12 @@
-#include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #include "efm32gg.h"
 #include "notes.h"
 
-/* temp define. */
-#define SAMPLES_PER_SECOND 44100
-#define EIGHT_NOTE (SAMPLES_PER_SECOND / 8)
-#define VOLUME 10
-
 /* Declaration of peripheral setup functions. */
-void setNormalSleepMode();
-void setDeepSleepMode();
+void activateTimer();
+void deactivateTimer();
 
 /* Global variables for tracking. */
 int **current_song;
@@ -25,35 +20,26 @@ void nextNote()
 	current_note++;
 	if (current_note > (int)current_song[0]) {
 		current_song = 0;
-		setDeepSleepMode();	//Disables Timer, etc. 
+		deactivateTimer();
 		return;
 	}
 
-	/* Make every note last for the same time duration, even when the note vectors have different lengths. */
-	current_note_duration = EIGHT_NOTE / (int)current_song[current_note][0];
-}
-
-/* Add a song to the now playing queue (queue size = one song). */
-void setSong(int **input_song)
-{
-	current_note = 0;
-	current_sample = 1;
-	current_song = input_song;
-	nextNote();
-	setNormalSleepMode();	//Enables Timer, etc. 
+	/* Make every note last for the same time duration, even when the note vectors have different lengths. EIGHT_NOTE is set in "notes.h". */
+	current_note_duration = EIGHT_NOTE;
 }
 
 /* Send one sample to the DAC, and track the sample list length. */
 void playSample()
 {
-	/* Upload sample to DAC. */
+	/* Upload sample to DAC. VOLUME is set in "notes.h". */
 	*DAC0_CH0DATA = current_song[current_note][current_sample] * VOLUME;
 	*DAC0_CH1DATA = current_song[current_note][current_sample] * VOLUME;
 
 	/* Find the next sample. */
-	current_sample = (current_sample + 1);
+	current_sample++;
 	if (current_sample > current_song[current_note][0]) {
-		current_note_duration--;
+		current_note_duration =
+		    current_note_duration - (int)current_song[current_note][0];
 		current_sample = 1;
 	}
 }
@@ -73,6 +59,16 @@ void playSong()
 	if (current_song != 0) {
 		playNote();
 	}
+}
+
+/* Add a song to the now playing queue (queue size = one song). */
+void setSong(int **input_song)
+{
+	current_note = 0;
+	current_sample = 1;
+	current_song = input_song;
+	nextNote();
+	activateTimer();
 }
 
 /* Set song corresponding to button press, without overwriting a song that is already playing. (1-indexed buttons.) */
