@@ -1,0 +1,8 @@
+linux-3.12-rc4.tar.xz : 
+kernel.get : linux-3.12-rc4.tar.xz
+kernel.extract : kernel.get
+base.get : 
+base.extract : base.get
+cross-dummy-strip.get : 
+cross-dummy-strip.extract : cross-dummy-strip.get
+pkg-config-0.25.tar.gz : 
