@@ -55,7 +55,7 @@ libfakeroot.lo: libfakeroot.c config.h communicate.h fakerootconfig.h \
  /usr/include/errno.h /usr/include/i386-linux-gnu/bits/errno.h \
  /usr/include/linux/errno.h /usr/include/i386-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/sys/acl.h \
+ /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/sys/acl.h \
  /usr/include/fts.h wrapped.h wraptmpf.h wrapdef.h wrapstruct.h
 
 config.h:
@@ -218,7 +218,7 @@ message.h:
 
 /usr/include/asm-generic/errno-base.h:
 
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/sys/acl.h:
+/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/sys/acl.h:
 
 /usr/include/fts.h:
 

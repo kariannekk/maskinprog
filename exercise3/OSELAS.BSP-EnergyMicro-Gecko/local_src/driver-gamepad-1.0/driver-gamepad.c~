@@ -62,6 +62,13 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	printk(KERN_ALERT "\n Memory area DAC\n");
 	printk(KERN_ALERT "Start:%lx, End:%lx, Size:%d", (unsigned long)resDAC->start, (unsigned long)resDAC->end, resource_size(resDAC));
 	
+	/* Find the size of address space(memory size) with (res->end (end address) - res->start (start address) + 1) */
+	//unsigned long resGPIOEvenMapSize = resGPIOEven->end - resGPIOEven->start + 1;
+	//unsigned long resGPIOOddMapSize  = resGPIOOdd->end - resGPIOOdd->start + 1;
+	//unsigned long resTimer3MapSize   = resTimer3->end - resTimer3->start + 1;
+	//unsigned long resDMAMapSize      = resDMA->end - resDMA->start + 1;
+	//unsigned long resDACMapSize      = resDAC->end - resDAC->start + 1;
+	
 	/* I/O Memory Allocation */
 	if( (request_mem_region(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for GPIOEvenOdd\n");
