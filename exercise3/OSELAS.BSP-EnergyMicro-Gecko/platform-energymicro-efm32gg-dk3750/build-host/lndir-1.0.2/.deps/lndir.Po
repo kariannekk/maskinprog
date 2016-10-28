@@ -1,6 +1,6 @@
 lndir.o: lndir.c config.h \
- /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xos.h \
- /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xosdefs.h \
+ /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xos.h \
+ /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xosdefs.h \
  /usr/include/i386-linux-gnu/sys/types.h /usr/include/features.h \
  /usr/include/i386-linux-gnu/bits/predefs.h \
  /usr/include/i386-linux-gnu/sys/cdefs.h \
@@ -32,8 +32,8 @@ lndir.o: lndir.c config.h \
  /usr/include/i386-linux-gnu/bits/unistd.h \
  /usr/include/i386-linux-gnu/sys/time.h \
  /usr/include/i386-linux-gnu/bits/timex.h \
- /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xarch.h \
- /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xfuncproto.h \
+ /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xarch.h \
+ /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xfuncproto.h \
  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
  /usr/include/wchar.h /usr/lib/gcc/i686-linux-gnu/4.6/include/stdarg.h \
  /usr/include/i386-linux-gnu/bits/stdio_lim.h \
@@ -59,9 +59,9 @@ lndir.o: lndir.c config.h \
 
 config.h:
 
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xos.h:
+/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xos.h:
 
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xosdefs.h:
+/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xosdefs.h:
 
 /usr/include/i386-linux-gnu/sys/types.h:
 
@@ -143,9 +143,9 @@ config.h:
 
 /usr/include/i386-linux-gnu/bits/timex.h:
 
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xarch.h:
+/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xarch.h:
 
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xfuncproto.h:
+/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/include/X11/Xfuncproto.h:
 
 /usr/include/stdio.h:
 

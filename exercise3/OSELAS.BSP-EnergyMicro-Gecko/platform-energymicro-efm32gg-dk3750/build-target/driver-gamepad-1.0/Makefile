@@ -1,1 +1,1 @@
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/local_src/driver-gamepad-1.0/Makefile
+/home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/local_src/driver-gamepad-1.0/Makefile

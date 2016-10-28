@@ -2,23 +2,17 @@
 # Simple development makefile
 #
 
-#
-# add more flags here,
-# but don't remove the "+="
-#
-CFLAGS += -O2 -g -Wall #-Wsign-compare -Wfloat-equal -Wformat-security #-Werror
-CPPFLAGS +=
-LDFLAGS +=
 
+game:
+	ptxdist clean game
+	ptxdist compile game
+	ptxdist targetinstall game
+	ptxdist image root.romfs
+	ptxdist test flash-rootfs
 
-all: game
+link:
+	miniterm.py -b 115200 -p /dev/ttyUSB0
 
-clean:
-	-rm -f game
-
-install:
-
-
-.PHONY: all install clean
+.PHONY: game link
 
 # end of development makefile

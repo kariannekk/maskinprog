@@ -27,10 +27,10 @@ uname -v = #140~precise1-Ubuntu SMP Tue Jul 19 19:56:32 UTC 2016
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
-PATH: /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper
-PATH: /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin
-PATH: /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/sbin
-PATH: /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/selected_toolchain
+PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper
+PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin
+PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/sbin
+PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/selected_toolchain
 PATH: /opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin
 PATH: /usr/lib/lightdm/lightdm
 PATH: /usr/local/sbin
@@ -83,7 +83,7 @@ configure:2988: result: gnutar
 configure:3007: checking for style of include used by make
 configure:3035: result: GNU
 configure:3106: checking for gcc
-configure:3122: found /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/gcc
+configure:3122: found /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/gcc
 configure:3133: result: gcc
 configure:3362: checking for C compiler version
 configure:3371: gcc --version >&5
@@ -95,7 +95,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 configure:3382: $? = 0
 configure:3371: gcc -v >&5
 Using built-in specs.
-COLLECT_GCC=/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/gcc
+COLLECT_GCC=/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/gcc
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/i686-linux-gnu/4.6/lto-wrapper
 Target: i686-linux-gnu
 Configured with: ../src/configure -v --with-pkgversion='Ubuntu/Linaro 4.6.3-1ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.6/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.6 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.6 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --enable-targets=all --disable-werror --with-arch-32=i686 --with-tune=generic --enable-checking=release --build=i686-linux-gnu --host=i686-linux-gnu --target=i686-linux-gnu
@@ -685,7 +685,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 configure:12479: $? = 0
 configure:12468: gcc -v >&5
 Using built-in specs.
-COLLECT_GCC=/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/gcc
+COLLECT_GCC=/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/gcc
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/i686-linux-gnu/4.6/lto-wrapper
 Target: i686-linux-gnu
 Configured with: ../src/configure -v --with-pkgversion='Ubuntu/Linaro 4.6.3-1ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.6/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.6 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.6 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --enable-targets=all --disable-werror --with-arch-32=i686 --with-tune=generic --enable-checking=release --build=i686-linux-gnu --host=i686-linux-gnu --target=i686-linux-gnu
@@ -825,8 +825,8 @@ configure:13427: result: no
 configure:13446: checking for a sed that does not truncate output
 configure:13510: result: /opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/sed
 configure:13570: checking for pkg-config
-configure:13588: found /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config
-configure:13600: result: /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config
+configure:13588: found /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config
+configure:13600: result: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config
 configure:13625: checking pkg-config is at least version 0.9.0
 configure:13628: result: yes
 configure:13648: checking for __xstat
@@ -839,8 +839,8 @@ configure:13648: $? = 0
 configure:13648: result: yes
 configure:13648: checking for secure_getenv
 configure:13648: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/cceoNImd.o: In function `main':
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/conftest.c:66: undefined reference to `secure_getenv'
+/tmp/ccXOMAyc.o: In function `main':
+/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/conftest.c:66: undefined reference to `secure_getenv'
 collect2: ld returned 1 exit status
 configure:13648: $? = 1
 configure: failed program was:
@@ -916,8 +916,8 @@ configure: failed program was:
 configure:13648: result: no
 configure:13648: checking for finit_module
 configure:13648: gcc -std=gnu99 -o conftest -g -O2   conftest.c  >&5
-/tmp/ccgvIgK7.o: In function `main':
-/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/conftest.c:66: undefined reference to `finit_module'
+/tmp/ccB8Udeh.o: In function `main':
+/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/conftest.c:66: undefined reference to `finit_module'
 collect2: ld returned 1 exit status
 configure:13648: $? = 1
 configure: failed program was:
@@ -1323,13 +1323,13 @@ generated by GNU Autoconf 2.69.  Invocation command line was
 
 on tdt4258-VirtualBox
 
-config.status:1135: creating Makefile
-config.status:1135: creating man/Makefile
-config.status:1135: creating libkmod/docs/Makefile
-config.status:1135: creating libkmod/docs/version.xml
-config.status:1135: creating config.h
-config.status:1364: executing depfiles commands
-config.status:1364: executing libtool commands
+config.status:1130: creating Makefile
+config.status:1130: creating man/Makefile
+config.status:1130: creating libkmod/docs/Makefile
+config.status:1130: creating libkmod/docs/version.xml
+config.status:1130: creating config.h
+config.status:1359: executing depfiles commands
+config.status:1359: executing libtool commands
 configure:16933: result:
 	kmod 13
 	======
@@ -1378,7 +1378,7 @@ ac_cv_env_LDFLAGS_value=
 ac_cv_env_LIBS_set=
 ac_cv_env_LIBS_value=
 ac_cv_env_PKG_CONFIG_LIBDIR_set=set
-ac_cv_env_PKG_CONFIG_LIBDIR_value=/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/pkgconfig:/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/share/pkgconfig
+ac_cv_env_PKG_CONFIG_LIBDIR_value=/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/pkgconfig:/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/share/pkgconfig
 ac_cv_env_PKG_CONFIG_PATH_set=set
 ac_cv_env_PKG_CONFIG_PATH_value=
 ac_cv_env_PKG_CONFIG_set=
@@ -1422,7 +1422,7 @@ ac_cv_path_FGREP='/bin/grep -F'
 ac_cv_path_GREP=/bin/grep
 ac_cv_path_SED=/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/sed
 ac_cv_path_XSLTPROC=no
-ac_cv_path_ac_pt_PKG_CONFIG=/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config
+ac_cv_path_ac_pt_PKG_CONFIG=/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config
 ac_cv_path_install='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/install -c'
 ac_cv_path_mkdir=/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir
 ac_cv_prog_AWK=gawk
@@ -1521,7 +1521,7 @@ lt_cv_to_tool_file_cmd=func_convert_file_noop
 ## Output variables. ##
 ## ----------------- ##
 
-ACLOCAL='${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing aclocal-1.13'
+ACLOCAL='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing aclocal-1.13'
 AMDEPBACKSLASH='\'
 AMDEP_FALSE='#'
 AMDEP_TRUE=''
@@ -1531,9 +1531,9 @@ AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
 AM_DEFAULT_VERBOSITY='0'
 AM_V='$(V)'
 AR='ar'
-AUTOCONF='${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing autoconf'
-AUTOHEADER='${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing autoheader'
-AUTOMAKE='${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing automake-1.13'
+AUTOCONF='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing autoconf'
+AUTOHEADER='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing autoheader'
+AUTOMAKE='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing automake-1.13'
 AWK='gawk'
 BUILD_MANPAGES_FALSE=''
 BUILD_MANPAGES_TRUE='#'
@@ -1586,7 +1586,7 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 LIPO=''
 LN_S='ln -s'
 LTLIBOBJS=''
-MAKEINFO='${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing makeinfo'
+MAKEINFO='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/missing makeinfo'
 MANIFEST_TOOL=':'
 MKDIR_P='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p'
 NM='/usr/bin/nm -B'
@@ -1603,8 +1603,8 @@ PACKAGE_TARNAME='kmod'
 PACKAGE_URL='http://git.kernel.org/?p=utils/kernel/kmod/kmod.git'
 PACKAGE_VERSION='13'
 PATH_SEPARATOR=':'
-PKG_CONFIG='/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config'
-PKG_CONFIG_LIBDIR='/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/pkgconfig:/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/share/pkgconfig'
+PKG_CONFIG='/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config'
+PKG_CONFIG_LIBDIR='/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/pkgconfig:/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/share/pkgconfig'
 PKG_CONFIG_PATH=''
 RANLIB='ranlib'
 SED='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/sed'
@@ -1647,7 +1647,7 @@ host_vendor='pc'
 htmldir='${docdir}'
 includedir='${prefix}/include'
 infodir='${datarootdir}/info'
-install_sh='${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/install-sh'
+install_sh='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/kmod-13/build-aux/install-sh'
 libdir='${exec_prefix}/lib'
 libexecdir='${exec_prefix}/libexec'
 liblzma_CFLAGS=''

@@ -1,14 +1,7 @@
-linux-3.12-rc4.tar.xz : 
-kernel.get : linux-3.12-rc4.tar.xz
-kernel.extract : kernel.get
 base.get : 
 base.extract : base.get
 cross-dummy-strip.get : 
 cross-dummy-strip.extract : cross-dummy-strip.get
-pkg-config-0.25.tar.gz : 
-game.clean : 
-game.get : 
-game.extract : game.get
 pkg-config-0.25.tar.gz : 
 host-pkg-config.get : pkg-config-0.25.tar.gz
 host-pkg-config.extract : host-pkg-config.get
@@ -73,20 +66,6 @@ base.extract.post : virtual-cross-tools.install
 base.prepare : base.extract.post
 base.compile : base.prepare
 base.install : base.compile
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
 base.install.pack : base.install
 base.install.post : base.install.pack
 base.targetinstall : base.install.post
@@ -132,6 +111,7 @@ fbtest.install.pack : fbtest.install
 fbtest.install.post : fbtest.install.pack
 fbtest.targetinstall : fbtest.install.post
 fbtest.targetinstall.post : fbtest.targetinstall
+linux-3.12-rc4.tar.xz : 
 kernel.get : linux-3.12-rc4.tar.xz
 kernel.extract : kernel.get
 kmod-13.tar.xz : 
@@ -190,6 +170,16 @@ dtc.install.post : dtc.install.pack
 dtc.targetinstall : kernel.targetinstall
 dtc.targetinstall.post : dtc.targetinstall
 kernel.targetinstall.post : linuximage
+game.get : 
+game.extract : game.get
+game.extract.post : base.install
+game.prepare : game.extract.post
+game.compile : game.prepare
+game.install : game.compile
+game.install.pack : game.install
+game.install.post : game.install.pack
+game.targetinstall : game.install.post
+game.targetinstall.post : game.targetinstall
 host-system-perl.targetinstall.post : 
 busybox-1.21.0.tar.bz2 : 
 busybox.get : busybox-1.21.0.tar.bz2
@@ -248,6 +238,198 @@ host-energyawaretools.install : host-energyawaretools.compile
 host-energyawaretools.install.pack : host-energyawaretools.install
 host-energyawaretools.install.post : host-energyawaretools.install.pack
 world.targetinstall : base.targetinstall.post os-release.targetinstall.post geckoboot.targetinstall.post init.targetinstall.post fbtest.targetinstall.post driver-gamepad.targetinstall.post dtc.targetinstall.post kernel.targetinstall.post game.targetinstall.post host-system-perl.targetinstall.post busybox.targetinstall.post rootfs.targetinstall.post host-acl.install.post host-ipkg.install.post host-genromfs.install.post host-ipkg-utils.install.post host-fakeroot.install.post host-figlet.install.post host-pkg-config.install.post host-libkmod.install.post host-attr.install.post host-energyawaretools.install.post cross-pkg-config-wrapper.install.post cross-dummy-strip.install.post
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.install : driver-gamepad.compile
+driver-gamepad.install.pack : driver-gamepad.install
+driver-gamepad.install.post : driver-gamepad.install.pack
+driver-gamepad.targetinstall : driver-gamepad.install.post
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.install : driver-gamepad.compile
+driver-gamepad.install.pack : driver-gamepad.install
+driver-gamepad.install.post : driver-gamepad.install.pack
+driver-gamepad.targetinstall : driver-gamepad.install.post
+driver-gamepad.clean : FORCE
+driver-gamepad.get : 
+driver-gamepad.extract : host-lndir.install.post
+driver-gamepad.extract.post : base.install
+driver-gamepad.prepare : driver-gamepad.extract.post
+driver-gamepad.compile : driver-gamepad.prepare
+driver-gamepad.install : driver-gamepad.compile
+driver-gamepad.install.pack : driver-gamepad.install
+driver-gamepad.install.post : driver-gamepad.install.pack
+driver-gamepad.targetinstall : driver-gamepad.install.post
 game.clean : 
 game.get : 
 game.extract : game.get
@@ -255,10 +437,6 @@ game.extract.post : base.install
 game.prepare : game.extract.post
 game.compile : game.prepare
 game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
 game.clean : 
 game.get : 
 game.extract : game.get
@@ -266,261 +444,5 @@ game.extract.post : base.install
 game.prepare : game.extract.post
 game.compile : game.prepare
 game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
-game.clean : 
-game.get : 
-game.extract : game.get
-game.extract.post : base.install
-game.prepare : game.extract.post
-game.compile : game.prepare
-game.install : game.compile
-game.install.pack : game.install
-game.install.post : game.install.pack
-game.targetinstall : game.install.post
-game.targetinstall.post : game.targetinstall
+driver-gamepad.targetinstall : driver-gamepad.install.post
+driver-gamepad.targetinstall : driver-gamepad.install.post

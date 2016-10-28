@@ -448,7 +448,7 @@ Copyright (C) 2009 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2'
+ac_pwd='/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2'
 srcdir='.'
 INSTALL='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/install -c'
 MKDIR_P='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p'
@@ -622,7 +622,7 @@ S["am__EXEEXT_TRUE"]="#"
 S["LTLIBOBJS"]=""
 S["LIBOBJS"]=""
 S["XPROTO_LIBS"]=" "
-S["XPROTO_CFLAGS"]="-I/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/pkgconfig/../../include  "
+S["XPROTO_CFLAGS"]="-I/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/pkgconfig/../../include  "
 S["AM_BACKSLASH"]="\\"
 S["AM_DEFAULT_VERBOSITY"]="0"
 S["MAN_SUBSTS"]="	-e 's|__vendorversion__|\"$(PACKAGE_STRING)\" \"$(XORG_MAN_PAGE)\"|' 	-e 's|__xorgversion__|\"$(PACKAGE_STRING)\" \"$(XORG_MAN_PAGE)\"|' 	-e 's|__xserverna"\
@@ -653,7 +653,7 @@ S["build_cpu"]="i686"
 S["build"]="i686-pc-linux-gnu"
 S["INSTALL_CMD"]="(cp -f /INSTALL $(top_srcdir)/.INSTALL.tmp && mv $(top_srcdir)/.INSTALL.tmp $(top_srcdir)/INSTALL) || (rm -f $(top_srcdir)/.INSTALL.tmp; touch $(top"\
 "_srcdir)/INSTALL; echo 'util-macros \"pkgdatadir\" from xorg-macros.pc not found: installing possibly empty INSTALL.' >&2)"
-S["PKG_CONFIG"]="/home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config"
+S["PKG_CONFIG"]="/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config"
 S["CHANGELOG_CMD"]="(GIT_DIR=$(top_srcdir)/.git git log > $(top_srcdir)/.changelog.tmp && mv $(top_srcdir)/.changelog.tmp $(top_srcdir)/ChangeLog) || (rm -f $(top_srcdi"\
 "r)/.changelog.tmp; touch $(top_srcdir)/ChangeLog; echo 'git directory not found: installing possibly empty changelog.' >&2)"
 S["CWARNFLAGS"]="-Wall -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wnested-externs -fno-strict-aliasing -Wbad-function-cast -Wfo"\
@@ -682,8 +682,7 @@ S["MAINTAINER_MODE_FALSE"]=""
 S["MAINTAINER_MODE_TRUE"]="#"
 S["am__untar"]="${AMTAR} xf -"
 S["am__tar"]="${AMTAR} chof - \"$$tardir\""
-S["AMTAR"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run ta"\
-"r"
+S["AMTAR"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run tar"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
 S["AWK"]="gawk"
@@ -691,17 +690,12 @@ S["mkdir_p"]="/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p"
 S["MKDIR_P"]="/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/install-sh"
-S["MAKEINFO"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run ma"\
-"keinfo"
-S["AUTOHEADER"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run au"\
-"toheader"
-S["AUTOMAKE"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run au"\
-"tomake-1.11"
-S["AUTOCONF"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run au"\
-"toconf"
-S["ACLOCAL"]="${SHELL} /home/tdt4258/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run ac"\
-"local-1.11"
+S["install_sh"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/install-sh"
+S["MAKEINFO"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run automake-1.11"
+S["AUTOCONF"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/lndir-1.0.2/missing --run aclocal-1.11"
 S["VERSION"]="1.0.2"
 S["PACKAGE"]="lndir"
 S["CYGPATH_W"]="echo"
