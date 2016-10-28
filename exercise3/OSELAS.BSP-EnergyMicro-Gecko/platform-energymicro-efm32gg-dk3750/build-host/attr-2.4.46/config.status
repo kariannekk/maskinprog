@@ -449,7 +449,7 @@ Copyright (C) 2010 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/attr-2.4.46'
+ac_pwd='/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/attr-2.4.46'
 srcdir='.'
 AWK='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/awk'
 test -n "$AWK" || AWK=awk

@@ -449,7 +449,7 @@ Copyright (C) 2010 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23'
+ac_pwd='/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23'
 srcdir='.'
 INSTALL='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/install -c'
 MKDIR_P='/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p'
@@ -684,7 +684,7 @@ S["build_cpu"]="i686"
 S["build"]="i686-pc-linux-gnu"
 S["INSTALL_CMD"]="(cp -f /INSTALL $(top_srcdir)/.INSTALL.tmp && mv $(top_srcdir)/.INSTALL.tmp $(top_srcdir)/INSTALL) || (rm -f $(top_srcdir)/.INSTALL.tmp; touch $(top"\
 "_srcdir)/INSTALL; echo 'util-macros \"pkgdatadir\" from xorg-macros.pc not found: installing possibly empty INSTALL.' >&2)"
-S["PKG_CONFIG"]="/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config"
+S["PKG_CONFIG"]="/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin/pkg-config"
 S["CHANGELOG_CMD"]="(GIT_DIR=$(top_srcdir)/.git git log > $(top_srcdir)/.changelog.tmp && mv $(top_srcdir)/.changelog.tmp $(top_srcdir)/ChangeLog) || (rm -f $(top_srcdi"\
 "r)/.changelog.tmp; touch $(top_srcdir)/ChangeLog; echo 'git directory not found: installing possibly empty changelog.' >&2)"
 S["STRICT_CFLAGS"]=" -pedantic -Werror -Werror=attributes"
@@ -720,7 +720,7 @@ S["MAINTAINER_MODE_FALSE"]=""
 S["MAINTAINER_MODE_TRUE"]="#"
 S["am__untar"]="${AMTAR} xf -"
 S["am__tar"]="${AMTAR} chof - \"$$tardir\""
-S["AMTAR"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run tar"
+S["AMTAR"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run tar"
 S["am__leading_dot"]="."
 S["SET_MAKE"]=""
 S["AWK"]="gawk"
@@ -728,13 +728,13 @@ S["mkdir_p"]="/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p"
 S["MKDIR_P"]="/opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]=""
-S["install_sh"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/install-sh"
-S["MAKEINFO"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run autoheader"
-S["AUTOMAKE"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run automake-1."\
+S["install_sh"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/install-sh"
+S["MAKEINFO"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run autoheader"
+S["AUTOMAKE"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run automake-1."\
 "11"
-S["AUTOCONF"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run autoconf"
-S["ACLOCAL"]="${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run aclocal-1.1"\
+S["AUTOCONF"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run autoconf"
+S["ACLOCAL"]="${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/xproto-7.0.23/missing --run aclocal-1.1"\
 "1"
 S["VERSION"]="7.0.23"
 S["PACKAGE"]="xproto"

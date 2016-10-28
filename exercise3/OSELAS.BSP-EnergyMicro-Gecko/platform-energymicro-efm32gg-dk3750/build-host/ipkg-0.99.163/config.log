@@ -27,10 +27,10 @@ hostinfo               = unknown
 /usr/bin/oslevel       = unknown
 /bin/universe          = unknown
 
-PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper
-PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin
-PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/sbin
-PATH: /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/selected_toolchain
+PATH: /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper
+PATH: /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/bin
+PATH: /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/sbin
+PATH: /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/selected_toolchain
 PATH: /opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/bin
 PATH: /usr/lib/lightdm/lightdm
 PATH: /usr/local/sbin
@@ -68,7 +68,7 @@ configure:1987: result: i686-pc-linux-gnu
 configure:2007: checking for gawk
 configure:2033: result: gawk
 configure:2089: checking for gcc
-configure:2105: found /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/gcc
+configure:2105: found /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/gcc
 configure:2115: result: gcc
 configure:2359: checking for C compiler version
 configure:2362: gcc --version </dev/null >&5
@@ -80,7 +80,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 configure:2365: $? = 0
 configure:2367: gcc -v </dev/null >&5
 Using built-in specs.
-COLLECT_GCC=/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/gcc
+COLLECT_GCC=/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/gcc
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/i686-linux-gnu/4.6/lto-wrapper
 Target: i686-linux-gnu
 Configured with: ../src/configure -v --with-pkgversion='Ubuntu/Linaro 4.6.3-1ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.6/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.6 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.6 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --enable-targets=all --disable-werror --with-arch-32=i686 --with-tune=generic --enable-checking=release --build=i686-linux-gnu --host=i686-linux-gnu --target=i686-linux-gnu
@@ -317,7 +317,7 @@ configure:4596: result: yes
 configure:4631: checking for dlfcn.h
 configure:4638: result: yes
 configure:4703: checking for g++
-configure:4719: found /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/g++
+configure:4719: found /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/g++
 configure:4729: result: g++
 configure:4745: checking for C++ compiler version
 configure:4748: g++ --version </dev/null >&5
@@ -329,7 +329,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 configure:4751: $? = 0
 configure:4753: g++ -v </dev/null >&5
 Using built-in specs.
-COLLECT_GCC=/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/g++
+COLLECT_GCC=/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/sysroot-host/lib/wrapper/real/g++
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/i686-linux-gnu/4.6/lto-wrapper
 Target: i686-linux-gnu
 Configured with: ../src/configure -v --with-pkgversion='Ubuntu/Linaro 4.6.3-1ubuntu5' --with-bugurl=file:///usr/share/doc/gcc-4.6/README.Bugs --enable-languages=c,c++,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.6 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.6 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --enable-targets=all --disable-werror --with-arch-32=i686 --with-tune=generic --enable-checking=release --build=i686-linux-gnu --host=i686-linux-gnu --target=i686-linux-gnu
@@ -1073,9 +1073,9 @@ configure:21983: $? = 0
 configure:21995: result: yes
 configure:22002: checking for _doprnt
 configure:22059: gcc -o conftest -g -O2   conftest.c  >&5
-/tmp/ccaVYk6Q.o:(.data+0x0): undefined reference to `_doprnt'
-/tmp/ccaVYk6Q.o: In function `main':
-/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/conftest.c:89: undefined reference to `_doprnt'
+/tmp/cczhRx7n.o:(.data+0x0): undefined reference to `_doprnt'
+/tmp/cczhRx7n.o: In function `main':
+/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/conftest.c:89: undefined reference to `_doprnt'
 collect2: ld returned 1 exit status
 configure:22065: $? = 1
 configure: failed program was:
@@ -1480,15 +1480,15 @@ lt_lt_cv_sys_global_symbol_to_cdecl='"sed -n -e '\''s/^. .* \\(.*\\)\$/extern in
 ## Output variables. ##
 ## ----------------- ##
 
-ACLOCAL='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run aclocal-1.9'
+ACLOCAL='${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run aclocal-1.9'
 AMDEPBACKSLASH='\'
 AMDEP_FALSE='#'
 AMDEP_TRUE=''
-AMTAR='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run tar'
+AMTAR='${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run tar'
 AR='ar'
-AUTOCONF='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run autoconf'
-AUTOHEADER='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run autoheader'
-AUTOMAKE='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run automake-1.9'
+AUTOCONF='${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run autoconf'
+AUTOHEADER='${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run autoheader'
+AUTOMAKE='${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run automake-1.9'
 AWK='gawk'
 CC='gcc'
 CCDEPMODE='depmode=gcc3'
@@ -1520,7 +1520,7 @@ LIBS=''
 LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 LN_S='ln -s'
 LTLIBOBJS=''
-MAKEINFO='${SHELL} /home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run makeinfo'
+MAKEINFO='${SHELL} /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/missing --run makeinfo'
 OBJEXT='o'
 PACKAGE='ipkg'
 PACKAGE_BUGREPORT=''
@@ -1564,7 +1564,7 @@ host_os='linux-gnu'
 host_vendor='pc'
 includedir='${prefix}/include'
 infodir='${prefix}/info'
-install_sh='/home/tdt4258/Downloads/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/install-sh'
+install_sh='/home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/platform-energymicro-efm32gg-dk3750/build-host/ipkg-0.99.163/install-sh'
 ipkglibdir='/usr/lib'
 libdir='${exec_prefix}/lib'
 libexecdir='${exec_prefix}/libexec'

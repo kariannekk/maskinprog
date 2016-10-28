@@ -1,9 +1,9 @@
-include /home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/rules/game.make
-include /home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/rules/host-energyAwareTools.make
-include /home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/rules/driver-gamepad.make
-include /home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/rules/init.make
-include /home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/rules/geckoboot.make
-include /home/tdt4258/Documents/maskinprog/exercise3/OSELAS.BSP-EnergyMicro-Gecko/rules/host-genromfs.make
+include /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/rules/game.make
+include /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/rules/host-energyAwareTools.make
+include /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/rules/driver-gamepad.make
+include /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/rules/init.make
+include /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/rules/geckoboot.make
+include /home/tdt4258/Documents/OSELAS.BSP-EnergyMicro-Gecko/rules/host-genromfs.make
 include /opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/rules/xorg-proto-fixes.make
 include /opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/rules/libxml2.make
 include /opt/ex3/ptxdist-2013/lib/ptxdist-2013.07.1/rules/gst-plugins-good.make
