@@ -12,6 +12,8 @@
 #include <linux/compiler.h>
 #include <asm/io.h>
 
+#include "efm32gg.h"
+
 #define DEVICE_NAME "gamepad"
 
 /* Platform device data for TDT4258:
@@ -27,7 +29,7 @@
 irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
 	printk(KERN_ALERT "GPIO interrupt\n");
-	iowrite32(ioread32(GPIO_IF), GPIO_IFC); //Clear interrupt flag
+	iowrite32(0xff, GPIO_IFC); //Clear interrupt flag
 
 	//TO DO: asyncronic queue
 
@@ -156,12 +158,12 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	iowrite32(0xFF, GPIO_IFC);				//Clears external interrupt flags
 	iowrite32(0xFF, GPIO_IEN);				//Enables external interrupts
 
-	if(request_irq(irqGPIOEven, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+	if(request_irq(irqGPIOEven, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, NULL) < 0){ // siste param = void *dev_id
 		printk(KERN_ALERT "IRQ request failed for GPIO Even\n");
 		return -1;
 	}
 
-	if(request_irq(irqGPIOOdd, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+	if(request_irq(irqGPIOOdd, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, NULL) < 0){
 		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
 		return -1;
 	}
