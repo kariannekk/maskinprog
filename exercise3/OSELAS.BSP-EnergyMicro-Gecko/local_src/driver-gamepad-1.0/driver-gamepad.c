@@ -12,6 +12,8 @@
 #include <linux/compiler.h>
 #include <asm/io.h>
 
+#define DEVICE_NAME "gamepad"
+
 /* Platform device data for TDT4258:
 |	IRQ Source	|	IRQ number	|	Platform IRQ index	|	Platform mem index	|
 |	GPIO Even	|		17		|			0			|			0			|
@@ -21,13 +23,32 @@
 |	DAC			|		21		|			4			|			3			|
 */
 
+/* GPIO Interrupt handler */
+irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
+{
+	printk(KERN_ALERT "GPIO interrupt\n");
+	iowrite32(ioread32(GPIO_IF), GPIO_IFC); //Clear interrupt flag
+
+	//TO DO: asyncronic queue
+
+	return IRQ_HANDLED;
+}
+
+
 /* Initialize/set up/allocate */
 static int gamepadDriverProbe(struct platform_device *dev)
 {
 
+	/* Variables */
 	void *baseAddrResGPIOEvenOdd, *baseAddrResTimer3, *baseAddrResDMA, *baseAddrResDAC;
-	/* Find the I/O register base address */
 	struct resource *resGPIOEvenOdd, *resTimer3, *resDMA, *resDAC;
+	
+	/***********************/
+	/* Allocate I/O memory */
+	/***********************/
+	
+	/* Find the I/O register base address */
+	printk(KERN_INFO "Initialize hardware and allocate i/o memory\n");
 	
 	resGPIOEvenOdd = platform_get_resource(dev, IORESOURCE_MEM, 0);
 	if(unlikely(!resGPIOEvenOdd)){
@@ -42,8 +63,8 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		pr_err("Resource Timer 3 not available \n");
 		return -1;
 	}
-	printk(KERN_ALERT "\n Memory area Timer 3\n");
-	printk(KERN_ALERT "Start:%lx, End:%lx, Size:%d", (unsigned long)resTimer3->start, (unsigned long)resTimer3->end, resource_size(resTimer3));
+	printk(KERN_INFO "\n Memory area Timer 3\n");
+	printk(KERN_INFO "Start:%lx, End:%lx, Size:%d", (unsigned long)resTimer3->start, (unsigned long)resTimer3->end, resource_size(resTimer3));
 	
 
 	resDMA = platform_get_resource(dev, IORESOURCE_MEM, 2);
@@ -51,16 +72,16 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		pr_err("Resource DMA not available \n");
 		return -1;
 	}
-	printk(KERN_ALERT "\n Memory area DMA\n");
-	printk(KERN_ALERT "Start:%lx, End:%lx, Size:%d", (unsigned long)resDMA->start, (unsigned long)resDMA->end, resource_size(resDMA));
+	printk(KERN_INFO "\n Memory area DMA\n");
+	printk(KERN_INFO "Start:%lx, End:%lx, Size:%d", (unsigned long)resDMA->start, (unsigned long)resDMA->end, resource_size(resDMA));
 	
 	resDAC = platform_get_resource(dev, IORESOURCE_MEM, 3);
 	if(unlikely(!resDAC)){
 		pr_err("Resource DAC not available \n");
 		return -1;
 	}
-	printk(KERN_ALERT "\n Memory area DAC\n");
-	printk(KERN_ALERT "Start:%lx, End:%lx, Size:%d", (unsigned long)resDAC->start, (unsigned long)resDAC->end, resource_size(resDAC));
+	printk(KERN_INFO "\n Memory area DAC\n");
+	printk(KERN_INFO "Start:%lx, End:%lx, Size:%d", (unsigned long)resDAC->start, (unsigned long)resDAC->end, resource_size(resDAC));
 	
 	/* I/O Memory Allocation */
 	if( (request_mem_region(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd), dev->name)) == NULL){
@@ -109,20 +130,74 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		printk(KERN_ALERT " Cannot map I/O DAC\n");
 		return -1;
 	}
+
 	
-	/* Find the IRQ number*/
-//	int irqGPIOEven = platform_get_irq(dev, 0);
-//	int irqGPIOOdd  = platform_get_irq(dev, 1);
-//	int irqTimer3   = platform_get_irq(dev, 2);
-//	int irqDMA      = platform_get_irq(dev, 3);
-//	int irqDAC      = platform_get_irq(dev, 4);
+	/**************************/
+	/* Setup IRQs and buttons */
+	/**************************/
+	
+	printk(KERN_INFO "Enabling buttons\n");
+	iowrite32(0x33333333, GPIO_PC_MODEL);	//Enables input with filter
+	iowrite32(0xFF, GPIO_PC_DOUT);			//Enables pull-up resistors
+	
+	/* Find the IRQ number */
+	int irqGPIOEven = platform_get_irq(dev, 0);
+	int irqGPIOOdd  = platform_get_irq(dev, 1);
+	int irqTimer3   = platform_get_irq(dev, 2);
+	int irqDMA      = platform_get_irq(dev, 3);
+	int irqDAC      = platform_get_irq(dev, 4);
 	
 	/* Allocate and instansiate irq's */
-//	if(request_irq(irq, irqreturn_t (*handler)(int, void *, struct pt_regs *), NULL, dev->name, void *dev_id) < 0){
-//		printk(KERN_ALERT "IRQ request failed for res\n");
-//		return -1;
-//	}
+	printk(KERN_INFO "Initializing GPIO odd/even, Timer3, DMA and DAC interrupts\n");
+
+	/* Enable GPIO interrupt */
+	iowrite32(0x22222222, GPIO_EXTIPSELL);	//Selects port C for interrupts
+	iowrite32(0xFF, GPIO_EXTIFALL);			//Enables falling edge detection
+	iowrite32(0xFF, GPIO_IFC);				//Clears external interrupt flags
+	iowrite32(0xFF, GPIO_IEN);				//Enables external interrupts
+
+	if(request_irq(irqGPIOEven, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Even\n");
+		return -1;
+	}
+
+	if(request_irq(irqGPIOOdd, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+		return -1;
+	}
 	
+	/* Enable Timer 3 interrupt */
+//	iowrite(???, ????);
+/*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+		return -1;
+	}*/
+
+	/* Enable DMA intterrupt */
+//	iowrite(???, ????);
+/*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+		return -1;
+	}*/
+	
+	/* Enable DAC interrupt */
+//	iowrite(???, ????);
+/*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+		return -1;
+	}*/	
+
+	/**********************/
+	/* Set up char device */
+	/**********************/
+
+
+	/* Make the driver visible to user space */
+//	struct class *cl;
+//	dev_t devno;
+//	cl = class_create(THIS_MODULE, CLASS_NAME);
+//	device_create(cl, NULL, devno, NULL, CLASS_NAME);
+
 	return 0;
 }
 
@@ -144,7 +219,7 @@ static struct platform_driver gamepadDriver = {
 	.probe  = gamepadDriverProbe,
 	.remove = gamepadDriverRemove,
 	.driver = {
-		.name  = "gamepadDevice",
+		.name  = DEVICE_NAME,
 		.owner = THIS_MODULE,
 		.of_match_table = my_of_match,
 	},
