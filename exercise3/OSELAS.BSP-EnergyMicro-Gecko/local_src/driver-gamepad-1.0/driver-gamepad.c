@@ -5,7 +5,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
-
+#include <linux/cdev.h>
 #include <linux/ioport.h>
 #include <linux/platform_device.h>
 #include <linux/interrupt.h>
@@ -206,7 +206,6 @@ static int gamepadDriverProbe(struct platform_device *dev)
 /* Deallocate everything allocated in the probe-function */
 static int gamepadDriverRemove(struct platform_device *dev)
 {
-
 	return 0;
 }
 
@@ -217,15 +216,21 @@ static const struct of_device_id my_of_match[] = {
 
 MODULE_DEVICE_TABLE(of, my_of_match);
 
+
+/* Structures */
 static struct platform_driver gamepadDriver = {
 	.probe  = gamepadDriverProbe,
 	.remove = gamepadDriverRemove,
+	.read = gamepadDriverRead, 
 	.driver = {
 		.name  = DEVICE_NAME,
 		.owner = THIS_MODULE,
 		.of_match_table = my_of_match,
 	},
 };
+struct cdev gamepadDriverCdev; 
+
+
 
 /*
  * template_init - function to insert this module into kernel space
@@ -242,7 +247,18 @@ static int __init gamepadDriverInit(void)
 	
 	/* Register with Kernel */
 	platform_driver_register(&gamepadDriver);
+
+	int err = alloc_chrdev_region(&devno, 0, 1, DRIVER);
+
+	/* Initialization of char device structure aka cdev */
+	cdev_init (&gamepadDriverCdev, &gamepadDriver);
+	gamepadDriverCdev.owner = THIS_MODULE;
+
+
+	/* Pass cdev structure to kernel */
+	err = cdev_add(&gamepadDriverCdev, devno, 1);
 	
+
 	return 0;
 }
 
@@ -252,6 +268,19 @@ static int __init gamepadDriverInit(void)
  * This is the second of two exported functions to handle cleanup this
  * code from a running kernel
  */
+
+
+
+static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
+	uint32_t buttonData = ioread32(GPIO_PC_DIN);
+	copy_to_user(buff, &buttonData, 1)
+
+	return 1;
+}
+
+
+
+
 
 static void __exit gamepadDriverCleanup(void)
 {

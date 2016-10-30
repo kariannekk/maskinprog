@@ -178,11 +178,11 @@ static struct file_operations my_fops = {
 	.release = my_release
 };
 
-struct cdev my_cdev;
+struct cdev gamepadDrivercdev;
 
 
 
-cdev_init (&my_cdev, &my_fops);
+cdev_init (&gamepadDrivercdev, &my_fops);
 //
 
 /*
