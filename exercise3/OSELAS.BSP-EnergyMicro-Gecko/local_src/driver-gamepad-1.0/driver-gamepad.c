@@ -12,9 +12,14 @@
 #include <linux/compiler.h>
 #include <asm/io.h>
 
+#include <linux/types.h>
+#include <linux/fs.h>
+#include <asm/uaccess.h>
+
 #include "efm32gg.h"
 
 #define DEVICE_NAME "gamepad"
+#define CLASS_NAME "gamepad"
 
 /* Platform device data for TDT4258:
 |	IRQ Source	|	IRQ number	|	Platform IRQ index	|	Platform mem index	|
@@ -25,25 +30,94 @@
 |	DAC			|		21		|			4			|			3			|
 */
 
+/* Global variables */
+struct resource *resGPIOEvenOdd, *resTimer3, *resDMA, *resDAC;
+void *baseAddrResGPIOEvenOdd, *baseAddrResTimer3, *baseAddrResDMA, *baseAddrResDAC;
+int irqGPIOEven, irqGPIOOdd, irqTimer3, irqDMA, irqDAC;
+struct cdev gamepadCdev; 
+static dev_t devno;
+struct class *gamepadClass;
+
+/*******************/
+/* File operations */
+/*******************/
+
+
+static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
+	
+	uint32_t buttonData = ioread32(GPIO_PC_DIN);
+	copy_to_user(buff, &buttonData, 1);
+
+	return 1;
+}
+
+static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
+{
+	printk(KERN_INFO "Cannot write to gamepad buttons!\n");
+	return 0;
+}
+
+static int gamepadDriverRelease (struct inode *inode, struct file *filp)
+{
+	printk(KERN_INFO "Gamepad driver released!\n");
+	return 0;
+}
+
+static int gamepadDriverOpen (struct inode *inode, struct file *filp)
+{
+	printk(KERN_INFO "Gamepad driver opened!\n");
+	return 0;
+}
+
+/* Set up file operations */
+static struct file_operations gamepad_fops = {
+	.owner = THIS_MODULE,
+	.read = gamepadDriverRead,
+	.write = gamepadDriverWrite, 
+	.open = gamepadDriverOpen, 
+	.release = gamepadDriverRelease
+};
+
+
+/*********************/
+/* Interrupt handler */
+/*********************/
+
 /* GPIO Interrupt handler */
 irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
 	printk(KERN_ALERT "GPIO interrupt\n");
 	iowrite32(0xff, GPIO_IFC); //Clear interrupt flag
 
-	//TO DO: asyncronic queue
+	//TO DO: asynchronic queue
 
 	return IRQ_HANDLED;
 }
 
+/*******************/
+/* Platform driver */
+/*******************/
 
 /* Initialize/set up/allocate */
 static int gamepadDriverProbe(struct platform_device *dev)
 {
+	/**********************/
+	/* Set up char device */
+	/**********************/
+	
+	/* Allocate device number */
+	alloc_chrdev_region(&devno, 0, 1, DEVICE_NAME);
+	
+	/* Initialization of char device structure */
+	cdev_init (&gamepadCdev, &gamepad_fops);
+	gamepadCdev.owner = THIS_MODULE;
 
-	/* Variables */
-	void *baseAddrResGPIOEvenOdd, *baseAddrResTimer3, *baseAddrResDMA, *baseAddrResDAC;
-	struct resource *resGPIOEvenOdd, *resTimer3, *resDMA, *resDAC;
+	/* Pass cdev structure to kernel */
+	int err = cdev_add(&gamepadCdev, devno, 1);
+	if (err) {
+		printk(KERN_ALERT "Failed to add cdev to the kernel\n");
+		return -1;
+	}
 	
 	/***********************/
 	/* Allocate I/O memory */
@@ -57,8 +131,8 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		pr_err("Resource GPIOEvenOdd not available \n");
 		return -1;
 	}
-	printk(KERN_ALERT "\n Memory area GPIOEvenOdd\n");
-	printk(KERN_ALERT "Start:%lx, End:%lx, Size:%d", (unsigned long)resGPIOEvenOdd->start, (unsigned long)resGPIOEvenOdd->end, resource_size(resGPIOEvenOdd));
+	printk(KERN_INFO "\n Memory area GPIOEvenOdd\n");
+	printk(KERN_INFO "Start:%lx, End:%lx, Size:%d", (unsigned long)resGPIOEvenOdd->start, (unsigned long)resGPIOEvenOdd->end, resource_size(resGPIOEvenOdd));
 	
 	resTimer3 = platform_get_resource(dev, IORESOURCE_MEM, 1);
 	if(unlikely(!resTimer3)){
@@ -85,7 +159,9 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	printk(KERN_INFO "\n Memory area DAC\n");
 	printk(KERN_INFO "Start:%lx, End:%lx, Size:%d", (unsigned long)resDAC->start, (unsigned long)resDAC->end, resource_size(resDAC));
 	
-	/* I/O Memory Allocation */
+	
+	
+	/* I/O Memory Allocation -- ask to access hardware*/
 	if( (request_mem_region(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for GPIOEvenOdd\n");
 		return -1;
@@ -106,9 +182,7 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 	
-	/* I/O Memory mapping - Convert the physical address to virtual address */
-
-	
+	/* I/O Memory mapping - Map to virtual memory */
 	baseAddrResGPIOEvenOdd = ioremap_nocache(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd));
 	if(unlikely(!baseAddrResGPIOEvenOdd)){
 		printk(KERN_ALERT " Cannot map I/O GPIOEvenOdd\n");
@@ -134,40 +208,46 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	}
 
 	
-	/**************************/
-	/* Setup IRQs and buttons */
-	/**************************/
+	/******************/
+	/* Enable buttons */
+	/******************/
 	
 	printk(KERN_INFO "Enabling buttons\n");
 	iowrite32(0x33333333, GPIO_PC_MODEL);	//Enables input with filter
 	iowrite32(0xFF, GPIO_PC_DOUT);			//Enables pull-up resistors
+
+	/*************************/
+	/* Setup and enable IRQs */
+	/*************************/
 	
 	/* Find the IRQ number */
-	int irqGPIOEven = platform_get_irq(dev, 0);
-	int irqGPIOOdd  = platform_get_irq(dev, 1);
-	int irqTimer3   = platform_get_irq(dev, 2);
-	int irqDMA      = platform_get_irq(dev, 3);
-	int irqDAC      = platform_get_irq(dev, 4);
+	irqGPIOEven = platform_get_irq(dev, 0);
+	irqGPIOOdd  = platform_get_irq(dev, 1);
+	irqTimer3   = platform_get_irq(dev, 2);
+	irqDMA      = platform_get_irq(dev, 3);
+	irqDAC      = platform_get_irq(dev, 4);
 	
 	/* Allocate and instansiate irq's */
 	printk(KERN_INFO "Initializing GPIO odd/even, Timer3, DMA and DAC interrupts\n");
 
+
 	/* Enable GPIO interrupt */
+	if(request_irq(irqGPIOEven, (irq_handler_t)GPIOInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Even\n");
+		return -1;
+	}
+
+	if(request_irq(irqGPIOOdd, (irq_handler_t)GPIOInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
+		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+		return -1;
+	}
+
 	iowrite32(0x22222222, GPIO_EXTIPSELL);	//Selects port C for interrupts
 	iowrite32(0xFF, GPIO_EXTIFALL);			//Enables falling edge detection
 	iowrite32(0xFF, GPIO_IFC);				//Clears external interrupt flags
 	iowrite32(0xFF, GPIO_IEN);				//Enables external interrupts
 
-	if(request_irq(irqGPIOEven, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, NULL) < 0){ // siste param = void *dev_id
-		printk(KERN_ALERT "IRQ request failed for GPIO Even\n");
-		return -1;
-	}
 
-	if(request_irq(irqGPIOOdd, (irq_handler_t)GPIOInterruptHandler, NULL, DEVICE_NAME, NULL) < 0){
-		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
-		return -1;
-	}
-	
 	/* Enable Timer 3 interrupt */
 //	iowrite(???, ????);
 /*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
@@ -189,16 +269,12 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}*/	
 
-	/**********************/
-	/* Set up char device */
-	/**********************/
 
-
-	/* Make the driver visible to user space */
-//	struct class *cl;
-//	dev_t devno;
-//	cl = class_create(THIS_MODULE, CLASS_NAME);
-//	device_create(cl, NULL, devno, NULL, CLASS_NAME);
+	/********************************/
+	/* Driver Visible to User Space */
+	/********************************/
+	gamepadClass = class_create(THIS_MODULE, CLASS_NAME);
+	device_create(gamepadClass, NULL, devno, NULL, CLASS_NAME);
 
 	return 0;
 }
@@ -206,9 +282,43 @@ static int gamepadDriverProbe(struct platform_device *dev)
 /* Deallocate everything allocated in the probe-function */
 static int gamepadDriverRemove(struct platform_device *dev)
 {
+	/* Free device number */
+	unregister_chrdev_region(devno, 1);
+	
+	/* Delete class */
+	class_destroy(gamepadClass);
+	
+	/* Delete cdev */
+	cdev_del(&gamepadCdev);
+		
+	/* Free I/O memory*/
+	release_mem_region(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd));
+	release_mem_region(resTimer3->start, resource_size(resTimer3));
+	release_mem_region(resDMA->start, resource_size(resDMA));
+	release_mem_region(resDAC->start, resource_size(resDAC));
+	
+	/* Free mapped I/O memory */
+	iounmap(baseAddrResGPIOEvenOdd);
+	iounmap(baseAddrResTimer3);
+	iounmap(baseAddrResDMA);
+	iounmap(baseAddrResDAC);
+	
+	/* Free IRQs */
+	free_irq(0, &gamepadCdev);
+	free_irq(1, &gamepadCdev);
+	free_irq(2, &gamepadCdev);
+	free_irq(3, &gamepadCdev);
+	free_irq(4, &gamepadCdev);
+		
 	return 0;
 }
 
+
+
+
+
+
+/* Set up platform device */
 static const struct of_device_id my_of_match[] = {
 	{.compatible = "tdt4258", },
 	{ },
@@ -216,49 +326,34 @@ static const struct of_device_id my_of_match[] = {
 
 MODULE_DEVICE_TABLE(of, my_of_match);
 
-
-/* Structures */
+/* Set up platform driver */
 static struct platform_driver gamepadDriver = {
 	.probe  = gamepadDriverProbe,
 	.remove = gamepadDriverRemove,
-	.read = gamepadDriverRead, 
 	.driver = {
 		.name  = DEVICE_NAME,
 		.owner = THIS_MODULE,
 		.of_match_table = my_of_match,
 	},
 };
-struct cdev gamepadDriverCdev; 
-
-
 
 /*
  * template_init - function to insert this module into kernel space
  *
+
  * This is the first of two exported functions to handle inserting this
  * code into a running kernel
  *
+
  * Returns 0 if successfull, otherwise -1
  */
-
 static int __init gamepadDriverInit(void)
 {
 	printk("Init gamepad driver!\n");
 	
 	/* Register with Kernel */
 	platform_driver_register(&gamepadDriver);
-
-	int err = alloc_chrdev_region(&devno, 0, 1, DRIVER);
-
-	/* Initialization of char device structure aka cdev */
-	cdev_init (&gamepadDriverCdev, &gamepadDriver);
-	gamepadDriverCdev.owner = THIS_MODULE;
-
-
-	/* Pass cdev structure to kernel */
-	err = cdev_add(&gamepadDriverCdev, devno, 1);
 	
-
 	return 0;
 }
 
@@ -268,20 +363,6 @@ static int __init gamepadDriverInit(void)
  * This is the second of two exported functions to handle cleanup this
  * code from a running kernel
  */
-
-
-
-static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
-	uint32_t buttonData = ioread32(GPIO_PC_DIN);
-	copy_to_user(buff, &buttonData, 1)
-
-	return 1;
-}
-
-
-
-
-
 static void __exit gamepadDriverCleanup(void)
 {
 	 printk("Short life for a small module...\n");
@@ -289,6 +370,7 @@ static void __exit gamepadDriverCleanup(void)
 	/* Unregister with Kernel */
 	platform_driver_unregister(&gamepadDriver);
 }
+
 
 module_init(gamepadDriverInit);
 module_exit(gamepadDriverCleanup);
