@@ -1,3 +1,0 @@
-ptxd_install_run preinst
-ptxd_install_alternative '/linuxrc' '' '0' '0' '0755' ''
-ptxd_install_run postinst
