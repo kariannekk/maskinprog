@@ -15,6 +15,9 @@
 #include <linux/types.h>
 #include <linux/fs.h>
 #include <asm/uaccess.h>
+#include <linux/poll.h>
+#include <asm/signal.h>
+#include <asm/siginfo.h>
 
 #include "efm32gg.h"
 
@@ -37,6 +40,8 @@ int irqGPIOEven, irqGPIOOdd, irqTimer3, irqDMA, irqDAC;
 struct cdev gamepadCdev; 
 static dev_t devno;
 struct class *gamepadClass;
+struct fasync_struct *async_queue;
+int err;
 
 /*******************/
 /* File operations */
@@ -57,8 +62,18 @@ static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, s
 	return 0;
 }
 
+static int gamepadDriverFasync(int fd, struct file *filp, int mode)
+{
+	printk(KERN_INFO "Setting up fasync\n");
+	
+	return fasync_helper(fd, filp, mode, &async_queue);
+}
+
 static int gamepadDriverRelease (struct inode *inode, struct file *filp)
 {
+	/* Remove filp from the asynchronously notifies filp's */
+	gamepadDriverFasync(-1, filp, 0);
+	
 	printk(KERN_INFO "Gamepad driver released!\n");
 	return 0;
 }
@@ -69,12 +84,14 @@ static int gamepadDriverOpen (struct inode *inode, struct file *filp)
 	return 0;
 }
 
+	
 /* Set up file operations */
 static struct file_operations gamepad_fops = {
-	.owner = THIS_MODULE,
-	.read = gamepadDriverRead,
-	.write = gamepadDriverWrite, 
-	.open = gamepadDriverOpen, 
+	.owner   = THIS_MODULE,
+	.read    = gamepadDriverRead,
+	.write   = gamepadDriverWrite, 
+	.open    = gamepadDriverOpen, 
+	.fasync  = gamepadDriverFasync,
 	.release = gamepadDriverRelease
 };
 
@@ -89,7 +106,10 @@ irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 	printk(KERN_ALERT "GPIO interrupt\n");
 	iowrite32(0xff, GPIO_IFC); //Clear interrupt flag
 
-	//TO DO: asynchronic queue
+	/* Signal asynchronous readers */
+	if(async_queue){
+		kill_fasync(&async_queue, SIGIO, POLL_IN);
+	}
 
 	return IRQ_HANDLED;
 }
@@ -113,7 +133,7 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	gamepadCdev.owner = THIS_MODULE;
 
 	/* Pass cdev structure to kernel */
-	int err = cdev_add(&gamepadCdev, devno, 1);
+	err = cdev_add(&gamepadCdev, devno, 1);
 	if (err) {
 		printk(KERN_ALERT "Failed to add cdev to the kernel\n");
 		return -1;
@@ -269,7 +289,6 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}*/	
 
-
 	/********************************/
 	/* Driver Visible to User Space */
 	/********************************/
@@ -309,7 +328,7 @@ static int gamepadDriverRemove(struct platform_device *dev)
 	free_irq(2, &gamepadCdev);
 	free_irq(3, &gamepadCdev);
 	free_irq(4, &gamepadCdev);
-		
+	
 	return 0;
 }
 
