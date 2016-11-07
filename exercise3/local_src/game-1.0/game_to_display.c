@@ -11,6 +11,9 @@
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <string.h>
+#include <stdint.h>
+
+
 
 
 
@@ -18,34 +21,35 @@
 #define SUCCESS 1
 
 /* 320x240 display, 0-indexed. */
-#define PIXEL_MAX_LINE				238  //239
-#define PIXEL_MAX_COLUMN			318  //319
+#define PIXEL_MAX_LINE				240  //239
+#define PIXEL_MAX_COLUMN			320  //319
+#define PIXEL_AMOUNT				(PIXEL_MAX_LINE * PIXEL_MAX_COLUMN) //(240*320)  //152960  //153600
 
 /* Two bytes per pixel. */
-#define PIXEL_BYTES					152960  //153600
-#define PIXEL_BYTE_LAST_POSITION	152958  //<- actual. Said to be: 153592.
+#define PIXEL_BYTE_LAST_POSITION		152958  //<- actual. Said to be: 153592.
 #define PIXEL_BYTE_NEXT_LINE_FACTOR		640
 #define PIXEL_BYTE_NEXT_COLUMN_OFFSET	2
 
 /* Pixel colour setup. */
-#define COLOUR_BLACK	((char*) 0x01)	//memcpy() didn't like NULL. This value is impossible to tell apart from 0x00.
-#define COLOUR_WHITE	((char*) 0xFF)
-#define COLOUR_GREEN	((char*) 0x5A)
+#define COLOUR_BLACK	0x0000
+#define COLOUR_WHITE	0xFFFF
+#define COLOUR_RED		0xF800
+#define COLOUR_GREEN	0x07E0
+#define COLOUR_BLUE		0x001F
 
 /* Wall setup */
-#define WALL_THICKNESS		13	//In pixel lines.
+#define WALL_THICKNESS		10	//In pixel lines.
 
 /* Formulas; to reduce time spent calculating. */
-#define PIXEL_BYTE_UPPER_WALL_END (WALL_THICKNESS * PIXEL_BYTE_NEXT_LINE_FACTOR) //Start at 0.
-#define PIXEL_LOWER_WALL_START (PIXEL_MAX_LINE - WALL_THICKNESS)
-#define PIXEL_BYTE_LOWER_WALL_START ((PIXEL_MAX_LINE - WALL_THICKNESS) * PIXEL_BYTE_NEXT_LINE_FACTOR) //End at max.
-
-
+#define PIXEL_UPPER_WALL_END	(WALL_THICKNESS * PIXEL_MAX_COLUMN) //Start at 0.
+#define PIXEL_LOWER_WALL_START (PIXEL_AMOUNT - (WALL_THICKNESS * PIXEL_MAX_COLUMN)) //End at last pixel.
 
 
 
 struct fb_copyarea rect;
 int gamepadDevice;
+int file_p;
+uint16_t * address;
 
 
 
@@ -70,10 +74,11 @@ int main(int argc, char *argv[])
 	
 	close(gamepadDevice);
 	
+	exit(EXIT_SUCCESS);
+	
+	
 	return 0;
 }
-
-
 
 int setupGamepadDriver()
 {
@@ -85,474 +90,348 @@ int setupGamepadDriver()
 	return SUCCESS;
 }
 
-
-
-
-
-
-
-
-/*
-void test1(){
-//Test writing other than {echo "ZZZZZZZZZ" > /dev/fb0}.
-//It appears we must write an odd number of letters, e.g. "ZZZ" or "ZZZZZ" etc. In terminal -> echo there was a sh-error if the number was even. 
-	int fd = open("/dev/fb0", O_RDWR);
-	printf("fd: %i\n", fd);
-	int offset = lseek(fd, 100960, SEEK_SET); //Set position near middle of screen, towards bottom right corner.
-	printf("offset: %i\n", offset);
-	int ok = write(fd, "ZZZZZZZZZZZZZZZZZZZZZZZZZ", 40);
-	printf("ok: %i\n", ok);
-	close(fd);
-	printf("fd: %i\n", fd);
-}*/
-
-/*
-void test2(){
-//Test writing as memory mapped instead of direct.
-	int fd = open("/dev/fb0", O_RDWR);
-	printf("fd: %i\n", fd);
-	char * address = NULL;
-	address = mmap(NULL, 153600, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	printf("address: %i\n", address == MAP_FAILED);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = 320;
-	rect.height = 240;
-	// *(address + 50) = "ZZZ"; //Writes only one pixel.
-	// *(address + PIXEL_BYTE_LAST_POSITION - 700) = "ZZZ"; //Writes only one pixel.
-	*(address + 152960) = "ZZZ"; //Writes only one pixel.
-	int noe = ioctl(fd, 0x4680, &rect);
-	printf("noe: %i\n", noe);
-	close(fd);
-}*/
-
-/*
-void test3(){
-//Test writing memory mapped, but more than one pixel.
-	int fd = open("/dev/fb0", O_RDWR);
-	printf("fd: %i\n", fd);
-	char * address = NULL;
-	address = mmap(NULL, 153600, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	printf("address: %i\n", address == MAP_FAILED);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = 320;
-	rect.height = 240;
-	memcpy(address+34000,  //Start somewhere other than the upper left corner. 
-	"ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
-	, 3000);
-	int noe = ioctl(fd, 0x4680, &rect);
-	printf("noe: %i\n", noe);
-	close(fd);
-}*/
-
-/*
-void test4(){
-//Test writing colours. 
-//Found 0xFF to be white, and 0x00 to be black. 'Z'=0x5A appears blue. Found 0x5A to be green later, in mmap.
-	int fd = open("/dev/fb0", O_RDWR);
-	printf("fd: %i\n", fd);
-	char * address = NULL;
-	address = mmap(NULL, 153600, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	printf("address: %i\n", address == MAP_FAILED);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = 320;
-	rect.height = 240;
-	char temp[3000];
-	int i = 0;
-	for (i=0; i<3000; i++){	//Create long string for easier viewing. 
-		temp[i] = 0x00; //Select colour. 
+int herdelay(uint32_t cycles){
+	uint32_t i = 0;
+	int p = 1;
+	while (i<cycles){
+		p = p * cycles;
+		i++;
 	}
-	memcpy(address+34000, temp, 3000); //Start somewhere other than the upper left corner. 
-	int noe = ioctl(fd, 0x4680, &rect);
-	printf("noe: %i\n", noe);
-	close(fd);
-}*/
+	return p;
+}
 
-/*
-void test5(){
-//Test writing to entire display.
-	int fd = open("/dev/fb0", O_RDWR);
-	
-	char * address = NULL;
-	address = mmap(NULL, 153600, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = PIXEL_MAX_COLUMN ;
-	rect.height = PIXEL_MAX_LINE ;
-	
-	char display_colour[PIXEL_BYTE_NEXT_LINE_FACTOR];
-	for (i=0; i<(PIXEL_BYTE_NEXT_LINE_FACTOR - PIXEL_BYTE_NEXT_COLUMN_OFFSET); i++){
-		display_colour[i] = 0x00; //Select black colour. 
-	}
-	
-	for (i=0; i<PIXEL_MAX_LINE; i++){
-		memcpy(address + (i * PIXEL_BYTE_NEXT_LINE_FACTOR), display_write, PIXEL_BYTE_NEXT_LINE_FACTOR);
-		ioctl(fd, 0x4680, &rect);
-	}
-	
-	close(fd);
-}*/
 
-/*
-void test6(){
-//Test writing entire display with less memory usage.
-	int fd = open("/dev/fb0", O_RDWR);
+
+
+
+
+
+void refresh_rectangle(int startX, int startY, int lengthX, int lengthY){
+//	lseek(file_p, startX + (startY * PIXEL_MAX_COLUMN), SEEK_SET);
 	
-	char * address = mmap(NULL, 153600, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 100;
-	rect.dy = 0;
-	rect.width = 10;//PIXEL_MAX_COLUMN;
-	rect.height = 10;//PIXEL_MAX_LINE;
+	rect.dx = startX;
+	rect.dy = startY;
+	rect.width = lengthX;
+	rect.height = lengthY;
 	
-	int i = 0;
-	for (i=0; i<PIXEL_BYTE_LAST_POSITION; i++){
-		memcpy(address + i, COLOUR_WHITE, 1);
-	}
-	
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
-}*/
+	ioctl(file_p, 0x4680, &rect);
+}
+
+void refresh_display(){
+	refresh_rectangle(0, 0, PIXEL_MAX_COLUMN, PIXEL_MAX_LINE);
+}
+
+void open_display(){
+	file_p = open("/dev/fb0", O_RDWR);
+	address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, file_p, 0);
+}
+
+void close_display(){
+	munmap(address, PIXEL_AMOUNT);
+	close(file_p);
+}
+
+
+
+
+
+
 
 void clear_display(){
 //sjekk fb_fillrect.
-	int fd = open("/dev/fb0", O_RDWR);
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 	
-	char * address = mmap(NULL, 153600, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = PIXEL_MAX_COLUMN;
-	rect.height = PIXEL_MAX_LINE;
-	
-	int i = 0;
-	for (i=0; i<PIXEL_BYTE_LAST_POSITION; i++){
-		memcpy(address + i, COLOUR_BLACK, 1);
+	uint32_t i = 0;
+	for (i=0; i<PIXEL_AMOUNT; i++){
+		address[i] = COLOUR_BLACK;
 	}
 	
-	ioctl(fd, 0x4680, &rect);
+//	rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE; ioctl(fd, 0x4680, &rect);
 	
-	close(fd);
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
 }
 
-/*
-void test7(){
-//Test of writing walls.
-	int fd = open("/dev/fb0", O_RDWR);
-	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = PIXEL_MAX_COLUMN;
-	rect.height = WALL_THICKNESS;
-	
-	int i = 0;
-	for (i=0; i<PIXEL_BYTE_UPPER_WALL_END; i++){
-		memcpy(address + i, COLOUR_WHITE, 1);
-	}
-	for (i=PIXEL_BYTE_LOWER_WALL_START; i<PIXEL_BYTE_LAST_POSITION; i++){
-		memcpy(address + i, COLOUR_WHITE, 1);
-	}
-	ioctl(fd, 0x4680, &rect);
-	
-	rect.dx = 0;
-	rect.dy = PIXEL_LOWER_WALL_START;
-	rect.width = PIXEL_MAX_COLUMN;
-	rect.height = WALL_THICKNESS;
-	
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
-}*/
 
 void draw_walls(){
-	int fd = open("/dev/fb0", O_RDWR);
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = PIXEL_MAX_COLUMN;
-	rect.height = WALL_THICKNESS;
-	
-	int i = 0;
-	for (i=0; i<PIXEL_BYTE_UPPER_WALL_END; i++){
-		memcpy(address + i, COLOUR_WHITE, 1);
+	uint32_t i = 0;
+	for (i=0; i<PIXEL_UPPER_WALL_END
+	; i++){
+		address[i] = COLOUR_WHITE;
 	}
-	for (i=PIXEL_BYTE_LOWER_WALL_START; i<PIXEL_BYTE_LAST_POSITION; i++){
-		memcpy(address + i, COLOUR_WHITE, 1);
+//	rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = WALL_THICKNESS; ioctl(fd, 0x4680, &rect);
+	
+	for (i=PIXEL_LOWER_WALL_START; i<PIXEL_AMOUNT; i++){
+		address[i] = COLOUR_WHITE;
 	}
-	ioctl(fd, 0x4680, &rect);
+//	rect.dx = 0; rect.dy = PIXEL_LOWER_WALL_START; rect.width = PIXEL_MAX_COLUMN; rect.height = WALL_THICKNESS;
+	//rect.dx = 0; rect.dy = 0; rect.width = 320; rect.height = 240;
+//	ioctl(fd, 0x4680, &rect);
 	
-	rect.dx = 0;
-	rect.dy = PIXEL_LOWER_WALL_START;
-	rect.width = PIXEL_MAX_COLUMN;
-	rect.height = WALL_THICKNESS;
-	
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
 }
+
+
+
+
 
 #define PIXEL_RACKET_WIDTH		10
 #define PIXEL_RACKET_HEIGHT		40 
 #define PIXELS_BEHIND_RACKETS	20 
-#define PIXEL_MEDIAN_HEIGHT		(PIXEL_BYTE_LAST_POSITION / (PIXEL_BYTE_NEXT_LINE_FACTOR * 2)) //119
+#define PIXEL_MEDIAN_HEIGHT		(PIXEL_MAX_LINE / 2) //(PIXEL_BYTE_LAST_POSITION / (PIXEL_BYTE_NEXT_LINE_FACTOR * 2)) //119
 
-#define PIXEL_BYTE_RACKET_WIDTH		(PIXEL_RACKET_WIDTH * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
-#define PIXEL_BYTE_RACKET_HEIGHT	(PIXEL_RACKET_HEIGHT * PIXEL_BYTE_NEXT_LINE_FACTOR)
+//#define PIXEL_BYTE_RACKET_WIDTH		(PIXEL_RACKET_WIDTH * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
+//#define PIXEL_BYTE_RACKET_HEIGHT	(PIXEL_RACKET_HEIGHT * PIXEL_BYTE_NEXT_LINE_FACTOR)
 
 #define PIXEL_RACKET_LEFT_X_START		PIXELS_BEHIND_RACKETS
 #define PIXEL_RACKET_RIGHT_X_START		(PIXEL_MAX_COLUMN - PIXELS_BEHIND_RACKETS - PIXEL_RACKET_WIDTH)
-#define PIXEL_BYTE_RACKET_LEFT_X_START	(PIXEL_RACKET_LEFT_X_START * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
-#define PIXEL_BYTE_RACKET_RIGHT_X_START	(PIXEL_RACKET_RIGHT_X_START * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
-#define PIXEL_BYTE_RACKET_LEFT_X_END	(PIXEL_BYTE_RACKET_LEFT_X_START + PIXEL_BYTE_RACKET_WIDTH)
-#define PIXEL_BYTE_RACKET_RIGHT_X_END	(PIXEL_BYTE_RACKET_RIGHT_X_START + PIXEL_BYTE_RACKET_WIDTH)
+//#define PIXEL_BYTE_RACKET_LEFT_X_START	(PIXEL_RACKET_LEFT_X_START * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
+//#define PIXEL_BYTE_RACKET_RIGHT_X_START	(PIXEL_RACKET_RIGHT_X_START * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
+
+#define PIXEL_RACKET_LEFT_X_END		(PIXEL_RACKET_LEFT_X_START + PIXEL_RACKET_WIDTH)
+#define PIXEL_RACKET_RIGHT_X_END	(PIXEL_RACKET_RIGHT_X_START + PIXEL_RACKET_WIDTH)
+//#define PIXEL_BYTE_RACKET_LEFT_X_END	(PIXEL_BYTE_RACKET_LEFT_X_START + PIXEL_BYTE_RACKET_WIDTH)
+//#define PIXEL_BYTE_RACKET_RIGHT_X_END	(PIXEL_BYTE_RACKET_RIGHT_X_START + PIXEL_BYTE_RACKET_WIDTH)
+
+#define PIXEL_ARRAY_RACKET_HEIGHT		(PIXEL_RACKET_HEIGHT * PIXEL_MAX_COLUMN)
 
 #define PIXEL_RACKET_INITIAL_POSITION	(PIXEL_MEDIAN_HEIGHT - (PIXEL_RACKET_HEIGHT / 2))
 
+/*
 #define PIXEL_RACKET_LEFT_CURRENT_POSITION	10//		PIXEL_RACKET_LEFT_INITIAL_POSITION
 #define PIXEL_RACKET_RIGHT_CURRENT_POSITION			PIXEL_RACKET_RIGHT_INITIAL_POSITION
 #define PIXEL_BYTE_RACKET_LEFT_CURRENT_POSITION		(PIXEL_RACKET_LEFT_CURRENT_POSITION * PIXEL_BYTE_NEXT_LINE_FACTOR)
 #define PIXEL_BYTE_RACKET_RIGHT_CURRENT_POSITION	(PIXEL_RACKET_RIGHT_CURRENT_POSITION * PIXEL_BYTE_NEXT_LINE_FACTOR)
 #define PIXEL_BYTE_RACKET_LEFT_CURRENT_END			(PIXEL_BYTE_RACKET_LEFT_CURRENT_POSITION + PIXEL_BYTE_RACKET_HEIGHT)
+*/
 
-/*
-void test8(){
-//Test writing a racket.
-	int fd = open("/dev/fb0", O_RDWR);
-	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	//rect.dx = PIXEL_RACKET_LEFT_X_START;
-	//rect.dy = PIXEL_RACKET_LEFT_CURRENT_POSITION;
-	//rect.width = PIXEL_RACKET_WIDTH;
-	//rect.height = PIXEL_RACKET_HEIGHT;
-	
-	//int i = 0;
-	//for (i=0; i<PIXEL_BYTE_LAST_POSITION; i++){
-	//	memcpy(address + i, COLOUR_GREEN, 1);
-	//}
-	//ioctl(fd, 0x4680, &rect);
-	
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = PIXEL_MAX_COLUMN;
-	rect.height = PIXEL_MAX_LINE;
-	
-	int i = 0;
-	int j = 0;
-	
-	//for (i=(PIXEL_RACKET_LEFT_CURRENT_POSITION * PIXEL_BYTE_NEXT_LINE_FACTOR) + PIXEL_BYTE_RACKET_LEFT_X_START; i<((PIXEL_RACKET_LEFT_CURRENT_POSITION + PIXEL_RACKET_HEIGHT) * PIXEL_BYTE_NEXT_LINE_FACTOR) + PIXEL_BYTE_RACKET_LEFT_X_START; i=i+640){
-	////for (i=6418; i<38418; i=i+640){	
-		//for (j=i; j<i + 20;//PIXEL_BYTE_RACKET_WIDTH; j++){
-		
-		
-	for (i=PIXEL_BYTE_RACKET_LEFT_X_START; i<PIXEL_BYTE_RACKET_LEFT_X_END; i++){
-		for (j=i+ PIXEL_BYTE_RACKET_LEFT_CURRENT_POSITION; j<PIXEL_BYTE_RACKET_LEFT_CURRENT_END; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_WHITE, 1);
-		}
-	}
-	
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
-}*/
+unsigned int previous_pixel_racket_left = PIXEL_RACKET_INITIAL_POSITION;
+unsigned int previous_pixel_racket_right = PIXEL_RACKET_INITIAL_POSITION;
+uint32_t previous_array_pos_racket_left = PIXEL_RACKET_INITIAL_POSITION * PIXEL_MAX_COLUMN;
+uint32_t previous_array_pos_racket_right = PIXEL_RACKET_INITIAL_POSITION * PIXEL_MAX_COLUMN;
 
 
-unsigned int previous_pixel_racket_left = 0;
-unsigned int previous_pixel_racket_right = 0;
-
-void draw_racket_left(unsigned int current_pixel){
-	int fd = open("/dev/fb0", O_RDWR);
-	
-	double current_byte = current_pixel * PIXEL_BYTE_NEXT_LINE_FACTOR;
-	previous_pixel_racket_left = current_pixel;
-	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = PIXEL_RACKET_LEFT_X_START;
-	rect.dy = current_pixel; 
-	rect.width = PIXEL_RACKET_WIDTH;
-	rect.height = PIXEL_RACKET_HEIGHT;
-	//rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
-	
-	int i = 0;
-	int j = 0;
-	for (i=PIXEL_BYTE_RACKET_LEFT_X_START; i<PIXEL_BYTE_RACKET_LEFT_X_END; i++){
-		for (j=i+ current_byte; j<current_byte + PIXEL_BYTE_RACKET_HEIGHT; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_WHITE, 1);
-		}
-	}
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
-}
-
-void draw_racket_right(unsigned int current_pixel){
-	int fd = open("/dev/fb0", O_RDWR);
-	
-	double current_byte = current_pixel * PIXEL_BYTE_NEXT_LINE_FACTOR;
-	previous_pixel_racket_right = current_pixel;
-	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = PIXEL_RACKET_RIGHT_X_START;
-	rect.dy = current_pixel; 
-	rect.width = PIXEL_RACKET_WIDTH;
-	rect.height = PIXEL_RACKET_HEIGHT;
-	//rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
-	
-	int i = 0;
-	int j = 0;
-	for (i=PIXEL_BYTE_RACKET_RIGHT_X_START; i<PIXEL_BYTE_RACKET_RIGHT_X_END; i++){
-		for (j=i+ current_byte; j<current_byte + PIXEL_BYTE_RACKET_HEIGHT; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_WHITE, 1);
-		}
-	}
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
-}
 
 
 
 void clear_racket_left(){
-	int fd = open("/dev/fb0", O_RDWR);
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 	
-	double previous_byte = previous_pixel_racket_left * PIXEL_BYTE_NEXT_LINE_FACTOR;
+//	uint32_t previous_array_position = previous_pixel_racket_left * PIXEL_MAX_COLUMN;
 	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = PIXEL_RACKET_LEFT_X_START;
-	rect.dy = previous_pixel_racket_left; 
-	rect.width = PIXEL_RACKET_WIDTH;
-	rect.height = PIXEL_RACKET_HEIGHT;
-	//rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
 	
-	int i = 0;
-	int j = 0;
-	for (i=PIXEL_BYTE_RACKET_LEFT_X_START; i<PIXEL_BYTE_RACKET_LEFT_X_END; i++){
-		for (j=i+ previous_byte; j<previous_byte + PIXEL_BYTE_RACKET_HEIGHT; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_BLACK, 1);
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_LEFT_X_START; i<PIXEL_RACKET_LEFT_X_END; i++){
+		for (j=i+ previous_array_pos_racket_left; j<previous_array_pos_racket_left + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_RED;
 		}
 	}
-	ioctl(fd, 0x4680, &rect);
+//	rect.dx = PIXEL_RACKET_LEFT_X_START;
+//	rect.dy = previous_pixel_racket_left; 
+//	rect.width = PIXEL_RACKET_WIDTH;
+//	rect.height = PIXEL_RACKET_HEIGHT;
+//	rect.dx = 0; rect.dy = 0; rect.width = 320; rect.height = 240;
+//	ioctl(file_p, 0x4680, &rect);
 	
-	close(fd);
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
 }
 
 void clear_racket_right(){
-	int fd = open("/dev/fb0", O_RDWR);
+//	uint32_t previous_array_position = previous_pixel_racket_right * PIXEL_MAX_COLUMN;
 	
-	double previous_byte = previous_pixel_racket_right * PIXEL_BYTE_NEXT_LINE_FACTOR;
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	rect.dx = PIXEL_RACKET_RIGHT_X_START;
-	rect.dy = previous_pixel_racket_right; 
-	rect.width = PIXEL_RACKET_WIDTH;
-	rect.height = PIXEL_RACKET_HEIGHT;
-	//rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
-	
-	int i = 0;
-	int j = 0;
-	for (i=PIXEL_BYTE_RACKET_RIGHT_X_START; i<PIXEL_BYTE_RACKET_RIGHT_X_END; i++){
-		for (j=i+ previous_byte; j<previous_byte + PIXEL_BYTE_RACKET_HEIGHT; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_BLACK, 1);
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_RIGHT_X_START; i<PIXEL_RACKET_RIGHT_X_END; i++){
+		for (j=i+ previous_array_pos_racket_right; j<previous_array_pos_racket_right + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_RED;
 		}
 	}
-	ioctl(fd, 0x4680, &rect);
+//	rect.dx = PIXEL_RACKET_RIGHT_X_START;
+//	rect.dy = previous_pixel_racket_right; 
+//	rect.width = PIXEL_RACKET_WIDTH;
+//	rect.height = PIXEL_RACKET_HEIGHT;
+	//rect.dx = 0; rect.dy = 0; rect.width = 320; rect.height = 240;
+//	ioctl(fd, 0x4680, &rect);
 	
-	close(fd);
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
 }
+
+
+
+
+
+
+void draw_racket_left(unsigned int current_pixel){
+//	clear_racket_left();
+	
+	uint32_t current_array_position = current_pixel * PIXEL_MAX_COLUMN;
+	
+	previous_pixel_racket_left = current_pixel;
+	previous_array_pos_racket_left = current_array_position;
+	
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+	
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_LEFT_X_START; i<PIXEL_RACKET_LEFT_X_END; i++){
+		for (j=i+ current_array_position; j<current_array_position + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_WHITE;
+		}
+	}
+//	rect.dx = PIXEL_RACKET_LEFT_X_START;
+//	rect.dy = current_pixel; 
+//	rect.width = PIXEL_RACKET_WIDTH;
+//	rect.height = PIXEL_RACKET_HEIGHT;
+//	ioctl(fd, 0x4680, &rect);
+	
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
+}
+
+void draw_racket_right(unsigned int current_pixel){
+//	clear_racket_right();
+	
+	uint32_t current_array_position = current_pixel * PIXEL_MAX_COLUMN;
+	
+	previous_pixel_racket_right = current_pixel;
+	previous_array_pos_racket_right = current_array_position;
+	
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+	
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_RIGHT_X_START; i<PIXEL_RACKET_RIGHT_X_END; i++){
+		for (j=i + current_array_position; j< current_array_position + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_WHITE;
+		}
+	}
+//	rect.dx = PIXEL_RACKET_RIGHT_X_START;
+//	rect.dy = current_pixel; 
+//	rect.width = PIXEL_RACKET_WIDTH;
+//	rect.height = PIXEL_RACKET_HEIGHT;
+	//rect.dx = 0; rect.dy = 0; rect.width = 320; rect.height = 240;
+//	ioctl(fd, 0x4680, &rect);
+	
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #define PIXEL_BALL_RADIUS			3
 #define PIXEL_BALL_DIAMETER			(PIXEL_BALL_RADIUS * 2)
-#define PIXEL_BYTE_BALL_DIAMETER	(PIXEL_BALL_DIAMETER * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
-#define PIXEL_BYTE_BALL_Y_END		(PIXEL_BALL_DIAMETER * PIXEL_BYTE_NEXT_LINE_FACTOR)
+//#define PIXEL_BYTE_BALL_DIAMETER	(PIXEL_BALL_DIAMETER * PIXEL_BYTE_NEXT_COLUMN_OFFSET)
+#define PIXEL_BALL_Y_END			(PIXEL_BALL_DIAMETER * PIXEL_MAX_COLUMN)
 #define PIXEL_BALL_INITIAL_X		(PIXEL_MAX_COLUMN / 2)
 #define PIXEL_BALL_INITIAL_Y		(PIXEL_MAX_LINE / 2)
 
-unsigned int previous_pixel_ball_x = 0;
-unsigned int previous_pixel_ball_y = 0;
+unsigned int previous_pixel_ball_x = (PIXEL_BALL_INITIAL_X - PIXEL_BALL_RADIUS);
+unsigned int previous_pixel_ball_y = (PIXEL_BALL_INITIAL_Y - PIXEL_BALL_RADIUS);
+uint32_t previous_array_pos_ball_y = ((PIXEL_BALL_INITIAL_Y - PIXEL_BALL_RADIUS) * PIXEL_MAX_COLUMN);
+
+
+
+
+
+void clear_ball(){
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+	
+//	uint32_t previous_array_position_y = previous_pixel_ball_y * PIXEL_MAX_COLUMN;
+	
+	uint32_t i, j;
+	for (i=previous_pixel_ball_x; i<previous_pixel_ball_x + PIXEL_BALL_DIAMETER; i++){
+		for (j=i+ previous_array_pos_ball_y; j<i + previous_array_pos_ball_y + PIXEL_BALL_Y_END; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_RED;
+		}
+	}
+//	rect.dx = previous_pixel_ball_x;
+//	rect.dy = previous_pixel_ball_y; 
+//	rect.width = PIXEL_BALL_DIAMETER;
+//	rect.height = PIXEL_BALL_DIAMETER;
+//	ioctl(fd, 0x4680, &rect);
+	
+//	refresh_rectangle(previous_pixel_ball_x, previous_pixel_ball_y, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+	
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
+}
+
+
+
+
+
 
 
 void draw_ball(unsigned int current_pixel_x, unsigned int current_pixel_y){
-	int fd = open("/dev/fb0", O_RDWR);
+//	clear_ball();
 	
 	current_pixel_x -= PIXEL_BALL_RADIUS;
 	current_pixel_y -= PIXEL_BALL_RADIUS;
 	
-	double current_byte_x = current_pixel_x * PIXEL_BYTE_NEXT_COLUMN_OFFSET;
-	double current_byte_y = current_pixel_y * PIXEL_BYTE_NEXT_LINE_FACTOR;
 	previous_pixel_ball_x = current_pixel_x;
 	previous_pixel_ball_y = current_pixel_y;
 	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
+	uint32_t current_array_position_y = current_pixel_y * PIXEL_MAX_COLUMN;
+	previous_array_pos_ball_y = current_array_position_y;
 	
-	rect.dx = current_pixel_x;
-	rect.dy = current_pixel_y; 
-	rect.width = PIXEL_BALL_DIAMETER;
-	rect.height = PIXEL_BALL_DIAMETER;
 	
-	//rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
+//	int fd = open("/dev/fb0", O_RDWR);
+//	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 	
-	int i = 0;
-	int j = 0;
-	for (i=current_byte_x; i<current_byte_x + PIXEL_BYTE_BALL_DIAMETER; i++){
-		for (j=i+ current_byte_y; j<current_byte_y + PIXEL_BYTE_BALL_Y_END; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_WHITE, 1);
+	uint32_t i, j;
+	for (i=current_pixel_x; i<current_pixel_x + PIXEL_BALL_DIAMETER; i++){
+		for (j=i+ current_array_position_y; j<i + current_array_position_y + PIXEL_BALL_Y_END; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_BLUE;
 		}
 	}
-	ioctl(fd, 0x4680, &rect);
+//	rect.dx = current_pixel_x;
+//	rect.dy = current_pixel_y; 
+//	rect.width = PIXEL_BALL_DIAMETER;
+//	rect.height = PIXEL_BALL_DIAMETER;
+//	ioctl(fd, 0x4680, &rect);
 	
-	close(fd);
+//	refresh_rectangle(current_pixel_x, current_pixel_y, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+	
+//	munmap(address, PIXEL_AMOUNT);
+//	close(fd);
 }
 
 
-void clear_ball(){
-	int fd = open("/dev/fb0", O_RDWR);
-	
-	double previous_byte_x = previous_pixel_ball_x * PIXEL_BYTE_NEXT_COLUMN_OFFSET;
-	double previous_byte_y = previous_pixel_ball_y * PIXEL_BYTE_NEXT_LINE_FACTOR;
-	
-	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset. 
-	
-	rect.dx = previous_pixel_ball_x;
-	rect.dy = previous_pixel_ball_y; 
-	rect.width = PIXEL_BALL_DIAMETER;
-	rect.height = PIXEL_BALL_DIAMETER;
-	
-	//rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
-	
-	int i = 0;
-	int j = 0;
-	for (i=previous_byte_x; i<previous_byte_x + PIXEL_BYTE_BALL_DIAMETER; i++){
-		for (j=i+ previous_byte_y; j<previous_byte_y + PIXEL_BYTE_BALL_Y_END; j=j+PIXEL_BYTE_NEXT_LINE_FACTOR){
-			memcpy(address + j, COLOUR_BLACK, 1);
-		}
-	}
-	ioctl(fd, 0x4680, &rect);
-	
-	close(fd);
-}
+
+
 
 
 
 
 
 void display_init(){
+	//Open file and memorymap it.
+	open_display();
+	
 	//Remove linux penguin.
 	clear_display();
 	
@@ -565,7 +444,183 @@ void display_init(){
 	
 	//Print ball at start position. 
 	draw_ball(PIXEL_BALL_INITIAL_X, PIXEL_BALL_INITIAL_Y);
+	
+	//Update framebuffer for display. 
+	refresh_display();
+	
+	//Close file and unmap it.
+	close_display();
 }
+
+
+
+
+
+
+
+
+
+
+/*
+void test9(){
+	int fd = open("/dev/fb0", O_RDWR);
+	
+	char * address = mmap(NULL, PIXEL_BYTE_LAST_POSITION, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset.
+	rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
+	
+	//struct color my_rgb; color.r = 0xFF; color.g = 0xFF; color.b = 0xFF;
+		
+	struct fb_fillrect area; area.dx = 100; area.dy = 100; area.width = 20; area.height = 20; area.color = 0x5A;//COLOUR_GREEN;//my_rgb;
+	ioctl(fd, 0x4680, &area);
+	//Didnt get this working.
+	
+	//ioctl(fd, 0x4680, &rect);
+	
+	munmap(address, PIXEL_BYTE_LAST_POSITION);
+	close(fd);
+}*/
+
+/*
+void test10(){
+	int fd = open("/dev/fb0", O_RDWR);
+	
+	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+	//If rect.width or rect.height are higher than pixels available, the buffer will not be updated. Equal to the pixel amount is fine, and should update the entire display. I think rect.dx and rect.dy are start positions, and width/height offset.
+	rect.dx = 0; rect.dy = 0; rect.width = PIXEL_MAX_COLUMN; rect.height = PIXEL_MAX_LINE;
+	
+	// *(address + 50) = "ZZZ"; //Writes only one pixel.
+	// *(address + PIXEL_BYTE_LAST_POSITION - 700) = "ZZZ"; //Writes only one pixel.
+	uint32_t i = 0;
+	for (i=0;i<100;i+=1){
+		address[i] = 0x001F;//COLOUR_GREEN;
+	}
+	
+	//printf("sizeof %i\n", sizeof(int16_t)); //returns 2 because bytes.
+	
+	ioctl(fd, 0x4680, &rect);
+	
+	munmap(address, PIXEL_BYTE_LAST_POSITION);
+	close(fd);
+}*/
+
+void test11(){
+	open_display();
+	
+	clear_racket_left();
+	draw_racket_left(160);
+	clear_racket_left();
+	draw_racket_left(40);
+	
+	clear_racket_right();
+	draw_racket_right(30);
+	clear_racket_right();
+	draw_racket_right(150);
+	
+	clear_ball();
+	draw_ball(100,100);
+	
+	close_display();
+	
+	open_display();
+	refresh_display();
+	close_display();
+}
+
+
+
+
+#define RACKET_STEP_AMOUNT		10
+#define RACKET_STEP_LENGTH		((PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - (PIXEL_RACKET_HEIGHT / 2)) / RACKET_STEP_AMOUNT)
+ 
+
+void move_left_racket(unsigned int position){
+	position = position % 10;
+	
+//	unsigned int step = (PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - (PIXEL_RACKET_HEIGHT / 2)) / 10;
+	
+	int here = (position * RACKET_STEP_LENGTH) + WALL_THICKNESS;
+	
+	clear_racket_left();
+	draw_racket_left(here);
+}
+
+void move_right_racket(unsigned int pixel_y){
+	pixel_y = pixel_y % 10;
+	
+//	unsigned int step = (PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - (PIXEL_RACKET_HEIGHT / 2)) / 10;
+	
+	int here = (pixel_y * RACKET_STEP_LENGTH) + WALL_THICKNESS;
+	
+	clear_racket_right();
+	draw_racket_right(here);
+}
+
+void test12(){
+	int temp = 0;
+	open_display();
+	int i = 0;
+	for (i=0; i<15; i++){
+		temp = herdelay(6500000);
+		move_left_racket(i);
+		move_right_racket(20-i);
+		refresh_display();
+	}
+	
+	close_display();
+	printf("temp %i", temp);
+}
+
+
+
+
+
+void move_ball(unsigned int pixel_x, unsigned int pixel_y){
+	pixel_x = pixel_x % PIXEL_MAX_COLUMN;
+	pixel_y = pixel_y % PIXEL_MAX_LINE;
+	
+//	unsigned int step_y = (PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - PIXEL_BALL_DIAMETER);
+//	unsigned int step_x = (PIXEL_MAX_COLUMN - (2 * PIXELS_BEHIND_RACKETS) - (2 * PIXEL_RACKET_WIDTH) - PIXEL_BALL_DIAMETER);
+
+	clear_ball();
+	refresh_rectangle(previous_pixel_ball_x, previous_pixel_ball_y, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+	
+	draw_ball(pixel_x, pixel_y);
+	refresh_rectangle(pixel_x - PIXEL_BALL_RADIUS, pixel_y - PIXEL_BALL_RADIUS, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+}
+
+void test13(){
+	int temp = 0;
+	open_display();
+	
+	int i, j;
+	for (i=0; i<PIXEL_MAX_COLUMN; i++){
+	//for (j=0; j<PIXEL_MAX_LINE; j++){
+		//temp = herdelay(6500000);
+		move_ball(i, 40);
+		//refresh_display();
+	}//}
+	
+	/*
+	move_ball(40,20);
+	refresh_display();
+	move_ball(60,20);
+	refresh_display();
+	move_ball(60,80);
+	refresh_display();
+	move_ball(40,80);
+	refresh_display();
+	move_ball(200,150);
+	refresh_display();
+	*/
+	
+	refresh_display();
+	close_display();
+	printf("temp %i", temp);
+}
+
+
+
 
 
 int display()
@@ -574,12 +629,11 @@ int display()
 	//We should open the file as short as possible (to allow several processes access). 
 
 	//TODO:
-	//Print racket at position Y.
-	//Print ball at position.
 	//Move racket (remove entire + redraw OR remove section + redraw section). 
 	//Move ball.
 	//Print score. 
 	//Print winner (e.g. "Player 1 wins!").
+	//Change functions so they don't all open & close the file. This includes memorymapping again and again. Perhaps create two files: one for operations such as display_init() and one for a lower abstraction interface to the fb. Open file at start of display_init and close at end, while doing actions in between. 
 	//Add border box around text, so it is easier to read if ball/racket overlaps. In practice: create empty rectangle before writing to an area. 
 	//Colour? Cool animations? Animated rainbow colours with unicorns??
 	//End TODO. 
@@ -588,21 +642,22 @@ int display()
 	
 	display_init();
 	
-	//test8();
+	//clear_display();
 	
-	//clear_racket_right();
-	//draw_racket_right(30);
+	//test10();
 	
-	//clear_ball();
-	//draw_ball(100,100);
+	int temp = 0;
+//	temp = herdelay(6500000);
 	
+//	test11();
 	
+	//move_left_racket(0);
+//	test12();
 	
+	//move_ball(200,200);
+	test13();
 	
-	
-	exit(EXIT_SUCCESS);
-	
-	
+	printf("temp %i", temp);
 	return 0;
 }
 
