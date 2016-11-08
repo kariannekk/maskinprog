@@ -26,14 +26,14 @@
 #define PIXEL_AMOUNT				(PIXEL_MAX_LINE * PIXEL_MAX_COLUMN) //(240*320)  //152960  //153600
 
 /* Two bytes per pixel. */
-#define PIXEL_BYTE_LAST_POSITION		152958  //<- actual. Said to be: 153592.
-#define PIXEL_BYTE_NEXT_LINE_FACTOR		640
-#define PIXEL_BYTE_NEXT_COLUMN_OFFSET	2
+//#define PIXEL_BYTE_LAST_POSITION		152958  //<- actual. Said to be: 153592.
+//#define PIXEL_BYTE_NEXT_LINE_FACTOR		640
+//#define PIXEL_BYTE_NEXT_COLUMN_OFFSET	2
 
 /* Pixel colour setup. */
 #define COLOUR_BLACK	0x0000
 #define COLOUR_WHITE	0xFFFF
-#define COLOUR_RED		0xF800
+#define COLOUR_RED		0x3800	//0xF800
 #define COLOUR_GREEN	0x07E0
 #define COLOUR_BLUE		0x001F
 
@@ -42,7 +42,7 @@
 
 /* Formulas; to reduce time spent calculating. */
 #define PIXEL_UPPER_WALL_END	(WALL_THICKNESS * PIXEL_MAX_COLUMN) //Start at 0.
-#define PIXEL_LOWER_WALL_START (PIXEL_AMOUNT - (WALL_THICKNESS * PIXEL_MAX_COLUMN)) //End at last pixel.
+#define PIXEL_LOWER_WALL_START	(PIXEL_AMOUNT - (WALL_THICKNESS * PIXEL_MAX_COLUMN)) //End at last pixel.
 
 
 
@@ -299,8 +299,6 @@ void draw_racket_left(unsigned int current_pixel){
 }
 
 void draw_racket_right(unsigned int current_pixel){
-//	clear_racket_right();
-	
 	uint32_t current_array_position = current_pixel * PIXEL_MAX_COLUMN;
 	
 	previous_pixel_racket_right = current_pixel;
@@ -374,7 +372,7 @@ void clear_ball(){
 //	rect.height = PIXEL_BALL_DIAMETER;
 //	ioctl(fd, 0x4680, &rect);
 	
-//	refresh_rectangle(previous_pixel_ball_x, previous_pixel_ball_y, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+//	refresh_rectangle(previous_pixel_ball_x-1, previous_pixel_ball_y-1, PIXEL_BALL_DIAMETER+2, PIXEL_BALL_DIAMETER+2); //For some reason this will miss a few pixels if it is the exact size it should be. Maybe because the pixels appear to be connected to neighbouring pixel (I think it looks as if two pixels are required for one colour).
 	
 //	munmap(address, PIXEL_AMOUNT);
 //	close(fd);
@@ -387,25 +385,21 @@ void clear_ball(){
 
 
 void draw_ball(unsigned int current_pixel_x, unsigned int current_pixel_y){
-//	clear_ball();
-	
 	current_pixel_x -= PIXEL_BALL_RADIUS;
 	current_pixel_y -= PIXEL_BALL_RADIUS;
+	uint32_t current_array_position_y = current_pixel_y * PIXEL_MAX_COLUMN;
 	
 	previous_pixel_ball_x = current_pixel_x;
 	previous_pixel_ball_y = current_pixel_y;
-	
-	uint32_t current_array_position_y = current_pixel_y * PIXEL_MAX_COLUMN;
 	previous_array_pos_ball_y = current_array_position_y;
-	
-	
+		
 //	int fd = open("/dev/fb0", O_RDWR);
 //	uint16_t * address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 	
 	uint32_t i, j;
 	for (i=current_pixel_x; i<current_pixel_x + PIXEL_BALL_DIAMETER; i++){
 		for (j=i+ current_array_position_y; j<i + current_array_position_y + PIXEL_BALL_Y_END; j=j+PIXEL_MAX_COLUMN){
-			address[j] = COLOUR_BLUE;
+			address[j] = COLOUR_WHITE;
 		}
 	}
 //	rect.dx = current_pixel_x;
@@ -520,9 +514,7 @@ void test11(){
 	clear_ball();
 	draw_ball(100,100);
 	
-	close_display();
-	
-	open_display();
+	close_display();  open_display();	//Ja, det er tydeligvis greit å lukke filen og unmap, og oppdatere framebuffer senere. 
 	refresh_display();
 	close_display();
 }
@@ -535,36 +527,46 @@ void test11(){
  
 
 void move_left_racket(unsigned int position){
-	position = position % 10;
+	position = position % 10; //Move asserts as this one to game. 
 	
 //	unsigned int step = (PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - (PIXEL_RACKET_HEIGHT / 2)) / 10;
 	
-	int here = (position * RACKET_STEP_LENGTH) + WALL_THICKNESS;
+	int pixel_y = (position * RACKET_STEP_LENGTH) + WALL_THICKNESS;
 	
 	clear_racket_left();
-	draw_racket_left(here);
+	refresh_rectangle(
+	PIXEL_RACKET_LEFT_X_START, previous_pixel_racket_left-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
+	
+	draw_racket_left(pixel_y);
+	refresh_rectangle(PIXEL_RACKET_LEFT_X_START, pixel_y-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
 }
 
-void move_right_racket(unsigned int pixel_y){
-	pixel_y = pixel_y % 10;
+
+
+
+void move_right_racket(unsigned int position){
+	position = position % 10; //Move asserts as this one to game. 
 	
 //	unsigned int step = (PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - (PIXEL_RACKET_HEIGHT / 2)) / 10;
 	
-	int here = (pixel_y * RACKET_STEP_LENGTH) + WALL_THICKNESS;
+	int pixel_y = (position * RACKET_STEP_LENGTH) + WALL_THICKNESS;
 	
 	clear_racket_right();
-	draw_racket_right(here);
+	refresh_rectangle(PIXEL_RACKET_RIGHT_X_START,  previous_pixel_racket_right-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
+	
+	draw_racket_right(pixel_y);
+	refresh_rectangle(PIXEL_RACKET_RIGHT_X_START, pixel_y-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
 }
 
 void test12(){
 	int temp = 0;
 	open_display();
 	int i = 0;
-	for (i=0; i<15; i++){
-		temp = herdelay(6500000);
+	for (i=0; i<RACKET_STEP_AMOUNT; i++){
+//		temp = herdelay(6500000);
 		move_left_racket(i);
-		move_right_racket(20-i);
-		refresh_display();
+		move_right_racket(RACKET_STEP_AMOUNT-1-i);
+//		refresh_display();
 	}
 	
 	close_display();
@@ -576,47 +578,56 @@ void test12(){
 
 
 void move_ball(unsigned int pixel_x, unsigned int pixel_y){
-	pixel_x = pixel_x % PIXEL_MAX_COLUMN;
-	pixel_y = pixel_y % PIXEL_MAX_LINE;
+//	pixel_x = pixel_x % PIXEL_MAX_COLUMN; //Move asserts as this one to game. 
+//	pixel_y = pixel_y % PIXEL_MAX_LINE; //Move asserts as this one to game. 
 	
 //	unsigned int step_y = (PIXEL_MAX_LINE - (2 * WALL_THICKNESS) - PIXEL_BALL_DIAMETER);
 //	unsigned int step_x = (PIXEL_MAX_COLUMN - (2 * PIXELS_BEHIND_RACKETS) - (2 * PIXEL_RACKET_WIDTH) - PIXEL_BALL_DIAMETER);
 
 	clear_ball();
-	refresh_rectangle(previous_pixel_ball_x, previous_pixel_ball_y, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+	refresh_rectangle(previous_pixel_ball_x-1, previous_pixel_ball_y-1, PIXEL_BALL_DIAMETER+2, PIXEL_BALL_DIAMETER+2); //For some reason this will miss a few pixels if it is the exact size it should be.  Maybe because the pixels appear to be connected to neighbouring pixel (I think it looks as if two pixels are required for one colour).
 	
 	draw_ball(pixel_x, pixel_y);
 	refresh_rectangle(pixel_x - PIXEL_BALL_RADIUS, pixel_y - PIXEL_BALL_RADIUS, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+	
+//	refresh_display();
 }
+
+
+#define PIXEL_BALL_AREA_X_START		(PIXELS_BEHIND_RACKETS + PIXEL_RACKET_WIDTH +PIXEL_BALL_RADIUS)
+#define PIXEL_BALL_AREA_X_END		(PIXEL_MAX_COLUMN - PIXELS_BEHIND_RACKETS - PIXEL_RACKET_WIDTH - PIXEL_BALL_RADIUS+1)
+#define PIXEL_BALL_AREA_Y_START		(WALL_THICKNESS + PIXEL_BALL_RADIUS)
+#define PIXEL_BALL_AREA_Y_END		(PIXEL_MAX_LINE - WALL_THICKNESS - PIXEL_BALL_RADIUS +1)
 
 void test13(){
 	int temp = 0;
 	open_display();
 	
 	int i, j;
-	for (i=0; i<PIXEL_MAX_COLUMN; i++){
-	//for (j=0; j<PIXEL_MAX_LINE; j++){
+	for (i=PIXEL_BALL_AREA_X_START; i<PIXEL_BALL_AREA_X_END; i++){
+	for (j=PIXEL_BALL_AREA_Y_START; j<PIXEL_BALL_AREA_Y_END; j++){
 		//temp = herdelay(6500000);
-		move_ball(i, 40);
+		move_ball(i, j);
 		//refresh_display();
-	}//}
+	}}
 	
-	/*
-	move_ball(40,20);
-	refresh_display();
-	move_ball(60,20);
-	refresh_display();
-	move_ball(60,80);
-	refresh_display();
-	move_ball(40,80);
-	refresh_display();
-	move_ball(200,150);
-	refresh_display();
-	*/
+	
+//	move_ball(40,20);	move_ball(60,20);	move_ball(60,80);	move_ball(40,80);	move_ball(200,150);
 	
 	refresh_display();
 	close_display();
 	printf("temp %i", temp);
+}
+
+void game_over(){
+	open_display();
+	
+	clear_ball();
+	
+	//F.eks. printe tekst?? Eller pil på vinner?
+	
+	refresh_display();
+	close_display();
 }
 
 
@@ -639,10 +650,10 @@ int display()
 	//End TODO. 
 	
 	
+	//system("# echo 0 > /sys/class/graphics/fbcon/cursor_blink");
 	
 	display_init();
 	
-	//clear_display();
 	
 	//test10();
 	
@@ -652,7 +663,7 @@ int display()
 //	test11();
 	
 	//move_left_racket(0);
-//	test12();
+	test12();
 	
 	//move_ball(200,200);
 	test13();
