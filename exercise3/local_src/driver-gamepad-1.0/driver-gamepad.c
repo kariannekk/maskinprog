@@ -18,6 +18,7 @@
 #include <linux/poll.h>
 #include <asm/signal.h>
 #include <asm/siginfo.h>
+#include <linux/timer.h>
 
 #include "efm32gg.h"
 
@@ -43,6 +44,8 @@ struct class *gamepadClass;
 struct fasync_struct *async_queue;
 int err;
 
+static struct timer_list gameTimer;
+
 /*******************/
 /* File operations */
 /*******************/
@@ -51,6 +54,7 @@ int err;
 static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
 	
 	uint32_t buttonData = ioread32(GPIO_PC_DIN);
+	//int buttonData = ioread32(GPIO_PC_DIN);
 	copy_to_user(buff, &buttonData, 1);
 
 	return 1;
@@ -58,8 +62,35 @@ static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t c
 
 static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
-	printk(KERN_INFO "Cannot write to gamepad buttons!\n");
-	return 0;
+	char input;
+	
+	printk(KERN_INFO "Starting/stopping timer!\n");
+		
+	if (count == 0){ //Empty input
+		return 0;
+	}
+	
+	copy_from_user(&input, buff, count);
+
+	printk("Input %c\n", input);
+
+	switch(input){
+		case '0': //Stop Timer3
+			iowrite32(0x2, TIMER3_CMD);
+			break;
+		case '1': //Start Timer3
+			iowrite32(0x1, TIMER3_CMD);
+			break;
+		case '2': //Start kernel timer
+			printk(KERN_INFO "Starting timer to fire in 100ms (%ld)\n", jiffies );
+			err = mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100) );
+			if (err) printk("Error in mod_timer\n");
+			break;
+		default:
+			return 0;
+	}
+
+	return count;
 }
 
 static int gamepadDriverFasync(int fd, struct file *filp, int mode)
@@ -81,6 +112,7 @@ static int gamepadDriverRelease (struct inode *inode, struct file *filp)
 static int gamepadDriverOpen (struct inode *inode, struct file *filp)
 {
 	printk(KERN_INFO "Gamepad driver opened!\n");
+	
 	return 0;
 }
 
@@ -95,6 +127,17 @@ static struct file_operations gamepad_fops = {
 	.release = gamepadDriverRelease
 };
 
+/*****************/
+/* Timer handler */
+/*****************/
+void gameTimerDone( unsigned long data )
+{
+//	printk( "Kernel ball timer called (%ld).\n", jiffies );
+//	mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100));
+  	if(async_queue){
+		kill_fasync(&async_queue, SIGIO, POLL_OUT);
+	}
+}
 
 /*********************/
 /* Interrupt handler */
@@ -111,6 +154,20 @@ irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 		kill_fasync(&async_queue, SIGIO, POLL_IN);
 	}
 
+	return IRQ_HANDLED;
+}
+
+irqreturn_t TIMERInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
+{
+	printk(KERN_ALERT "TIMER3 interrupt\n");	
+	iowrite32(0x01, TIMER3_IFC);
+	
+	//iowrite32(0x2, TIMER3_CMD);
+	
+	if(async_queue){
+		kill_fasync(&async_queue, SIGIO, POLL_OUT);
+	}
+		
 	return IRQ_HANDLED;
 }
 
@@ -245,7 +302,6 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	irqGPIOOdd  = platform_get_irq(dev, 1);
 	irqTimer3   = platform_get_irq(dev, 2);
 	irqDMA      = platform_get_irq(dev, 3);
-	irqDAC      = platform_get_irq(dev, 4);
 	
 	/* Allocate and instansiate irq's */
 	printk(KERN_INFO "Initializing GPIO odd/even, Timer3, DMA and DAC interrupts\n");
@@ -267,27 +323,30 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	iowrite32(0xFF, GPIO_IFC);				//Clears external interrupt flags
 	iowrite32(0xFF, GPIO_IEN);				//Enables external interrupts
 
-
 	/* Enable Timer 3 interrupt */
-//	iowrite(???, ????);
-/*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
+	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
 		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
 		return -1;
-	}*/
-
-	/* Enable DMA intterrupt */
-//	iowrite(???, ????);
-/*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
-		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
-		return -1;
-	}*/
+	}
 	
-	/* Enable DAC interrupt */
-//	iowrite(???, ????);
-/*	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, NULL, DEVICE_NAME, void *dev_id) < 0){
-		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
-		return -1;
-	}*/	
+	iowrite32(31700, TIMER3_TOP);
+	iowrite32(0x1, TIMER3_IEN);
+	
+	/**************/
+	/* Set up DAC */
+	/**************/
+
+	iowrite32(0x50010, DAC0_CTRL);
+	iowrite32(0x1, DAC0_CH0CTRL);
+	iowrite32(0x1, DAC0_CH1CTRL);
+
+	/***********************/
+	/* Set up kernel timer */
+	/***********************/	
+	printk(KERN_INFO "Instanziating Kernel game timer.\n");
+
+	setup_timer( &gameTimer, gameTimerDone, 0 );
+
 
 	/********************************/
 	/* Driver Visible to User Space */
@@ -328,6 +387,11 @@ static int gamepadDriverRemove(struct platform_device *dev)
 	free_irq(2, &gamepadCdev);
 	free_irq(3, &gamepadCdev);
 	free_irq(4, &gamepadCdev);
+	
+	/* Delete kernel game timer */
+	err = del_timer(&gameTimer);
+	if (err) printk(KERN_ALERT "The timer is still in use!\n");
+
 	
 	return 0;
 }
