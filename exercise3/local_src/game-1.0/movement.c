@@ -1,11 +1,39 @@
 #include <stdio.h>
 
-
+/*
 #include "defines.h"
 #include "driver-gamepad.c"
 #include "efm32GG.h"
 #include "game_to_display.c"
 #include "game.c"
+*/
+
+
+#define MOVEMENT_DISTANCE_RAQUETS	10
+#define PIXEL_BALL_INITIAL_X	100
+#define PIXEL_BALL_INITIAL_Y	100
+#define INITIAL_BALL_DIRECTION_X	3
+#define INITIAL_BALL_DIRECTION_Y	3
+#define UPPER_WALL	10
+#define LOWER_WALL	200
+
+#define PIXEL_MAX_LINE				240  //239
+#define PIXEL_MAX_COLUMN			320  //319
+#define PIXEL_AMOUNT				(PIXEL_MAX_LINE * PIXEL_MAX_COLUMN) //(240*320)  //152960  //153600
+
+#define PIXEL_RACKET_WIDTH		10
+#define PIXEL_RACKET_HEIGHT		40 
+#define PIXELS_BEHIND_RACKETS	20 
+
+#define PIXEL_RACKET_LEFT_X_START		PIXELS_BEHIND_RACKETS
+#define PIXEL_RACKET_RIGHT_X_START		(PIXEL_MAX_COLUMN - PIXELS_BEHIND_RACKETS - PIXEL_RACKET_WIDTH)
+#define PIXEL_RACKET_LEFT_X_END			(PIXEL_RACKET_LEFT_X_START + PIXEL_RACKET_WIDTH)
+#define PIXEL_RACKET_RIGHT_X_END		(PIXEL_RACKET_RIGHT_X_START + PIXEL_RACKET_WIDTH)
+
+#define PIXEL_ARRAY_RACKET_HEIGHT		(PIXEL_RACKET_HEIGHT * PIXEL_MAX_COLUMN)
+
+#define PIXEL_RACKET_INITIAL_POSITION	((PIXEL_MAX_LINE / 2) - (PIXEL_RACKET_HEIGHT / 2))
+#define BALL_STEP_LENGTH	
 
 /*
 #define LEFT_RAQUET_TOP_START = 10; //Må endre tall pga pixeloppsett på skjerm, bruke samme konstanter i alle filer
@@ -25,10 +53,211 @@
 	må sørge for at raquets ikke kan gå utenfor toppvegg eller bunnvegg
 	*/
 
-uint32_t score_player_1 = 0;
-uint32_t score_player_2 = 0;
+int ball_direction_x = INITIAL_BALL_DIRECTION_X;
+int ball_direction_y = INITIAL_BALL_DIRECTION_Y;
+int x_position = PIXEL_BALL_INITIAL_X;
+int y_position = PIXEL_BALL_INITIAL_Y;
+int score_A = 0;
+int score_B = 0;
+int current_upper_pixel_position = PIXEL_RACKET_INITIAL_POSITION;
+int current_lower_pixel_position = PIXEL_RACKET_INITIAL_POSITION + PIXEL_RACKET_HEIGHT;
+int piksel2 = PIXEL_RACKET_INITIAL_POSITION;
+
+void move_racket_left_up(int pixel_racket_initial_position);
+void move_racket_left_down(int pixel_racket_initial_position);
+void move_racket_right_up(int pixel_racket_initial_position);
+void move_racket_right_down(int pixel_racket_initial_position);
+void move_ball(int x_position, int y_position);
 
 
+int main(void) {
+	move_racket_left_up(piksel2);
+	move_racket_left_down(piksel2);
+	move_racket_right_up(piksel2);
+	move_racket_right_down(piksel2);
+	int x = PIXEL_BALL_INITIAL_X;
+	int y = PIXEL_BALL_INITIAL_Y;
+//for(int t=0;t<100;t++) {
+	move_ball(x, y);
+//}
+	return 0;
+}
+
+void move_racket_left_up(int pixel_racket_initial_position) {
+	int current_upper_pixel_position = pixel_racket_initial_position;
+	int current_lower_pixel_position = pixel_racket_initial_position + PIXEL_RACKET_HEIGHT;
+
+	if(current_upper_pixel_position == UPPER_WALL) {
+		current_upper_pixel_position = current_upper_pixel_position;
+		current_lower_pixel_position = current_lower_pixel_position;
+		printf("Racket can not move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+	else {
+		current_upper_pixel_position -= MOVEMENT_DISTANCE_RAQUETS;
+		current_lower_pixel_position -= MOVEMENT_DISTANCE_RAQUETS;
+		printf("Racket can move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+
+}
+
+void move_racket_left_down(int pixel_racket_initial_position) {
+	int current_upper_pixel_position = pixel_racket_initial_position;
+	int current_lower_pixel_position = pixel_racket_initial_position + PIXEL_RACKET_HEIGHT;
+
+	if(current_lower_pixel_position == LOWER_WALL) {
+		current_upper_pixel_position = current_upper_pixel_position;
+		current_lower_pixel_position = current_lower_pixel_position;
+		printf("Racket can not move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+	else {
+		current_upper_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+		current_lower_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+		printf("Racket can move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+
+}
+
+void move_racket_right_up(int pixel_racket_initial_position) {
+	int current_upper_pixel_position = pixel_racket_initial_position;
+	int current_lower_pixel_position = pixel_racket_initial_position + PIXEL_RACKET_HEIGHT;
+
+	if(current_upper_pixel_position == UPPER_WALL) {
+		current_upper_pixel_position = current_upper_pixel_position;
+		current_lower_pixel_position = current_lower_pixel_position;
+		printf("Racket can not move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+	else {
+		current_upper_pixel_position -= MOVEMENT_DISTANCE_RAQUETS;
+		current_lower_pixel_position -= MOVEMENT_DISTANCE_RAQUETS;
+		printf("Racket can move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+
+}
+
+void move_racket_right_down(int pixel_racket_initial_position) {
+	int current_upper_pixel_position = pixel_racket_initial_position;
+	int current_lower_pixel_position = pixel_racket_initial_position + PIXEL_RACKET_HEIGHT;
+
+	if(current_lower_pixel_position == LOWER_WALL) {
+		current_upper_pixel_position = current_upper_pixel_position;
+		current_lower_pixel_position = current_lower_pixel_position;
+		printf("Racket can not move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+	else {
+		current_upper_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+		current_lower_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+		printf("Racket can move, current_upper_pos = %d, current_lower_pos = %d, UPPER_WALL = %d\n", current_upper_pixel_position, current_lower_pixel_position, UPPER_WALL);
+	}
+
+}
+
+void move_ball(int x_position, int y_position) {
+for(int t=0;t<150;t++) {
+	if(x_position <= UPPER_WALL) {
+		//ball_direction_y = ball_direction_y - 2*ball_direction_y;
+		ball_direction_y = ~ball_direction_y;
+	}
+	if(x_position >= LOWER_WALL) {
+		//ball_direction_y = ball_direction_y - 2*ball_direction_y;
+		ball_direction_y = ~ball_direction_y;
+	}
+	if(x_position == PIXEL_RACKET_LEFT_X_END) {
+		ball_direction_x = ~ball_direction_x;
+		if(y_position >= current_upper_pixel_position || y_position <= current_lower_pixel_position) {
+			score_B ++;
+			printf("score_B: %d\n\n", score_B);
+			ball_direction_x = INITIAL_BALL_DIRECTION_X;
+			ball_direction_y = INITIAL_BALL_DIRECTION_Y;
+			x_position = PIXEL_BALL_INITIAL_X;
+			y_position = PIXEL_BALL_INITIAL_Y;
+		}
+	}
+	else if(x_position == PIXEL_RACKET_RIGHT_X_START) {
+		ball_direction_x = ~ball_direction_x;
+		if(y_position >= current_upper_pixel_position || y_position <= current_lower_pixel_position) {
+			score_A ++;
+			printf("score_A: %d\n\n", score_A);
+			ball_direction_x = INITIAL_BALL_DIRECTION_X;
+			ball_direction_y = INITIAL_BALL_DIRECTION_Y;
+			x_position = PIXEL_BALL_INITIAL_X;
+			y_position = PIXEL_BALL_INITIAL_Y;
+		}
+	}
+
+	x_position = x_position + ball_direction_x;
+	y_position = y_position + ball_direction_y;
+
+	printf("x_position: %d, y_position: %d\n\n", x_position, y_position);
+}
+}
+
+/*
+void move_racket_left_up(PIXEL_RACKET_INITIAL_POSITION) {
+	//Tegn opp øverst som initial position
+	//Draw racket at 3201 + 
+	*/
+	/*
+	if(up button)
+		current pixel = initial + racket step
+	if(upper pos == upper_wall || lower pos == lower wall)
+		draw racket left
+	else if(up button) {
+		upper pos == upper pos - racket_step
+	}
+	else if(down button) {
+		lower pos == lower pos + racket_step
+	}
+	*/
+
+/*
+	if(current_upper_pixel_position == UPPER_WALL) {
+		current_upper_pixel_position = MOVEMENT_DISTANCE_RAQUETS;
+	}
+	else {
+		current_upper_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+	}
+
+	
+}
+
+void move_racket_left_down(PIXEL_RACKET_INITIAL_POSITION) {
+	if(current_lower_pixel_position == UPPER_WALL) {
+		current_upper_pixel_position = MOVEMENT_DISTANCE_RAQUETS;
+	}
+	else {
+		current_upper_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+	}
+}
+
+void move_racket_right_up(PIXEL_RACKET_INITIAL_POSITION) {
+	if(current_upper_pixel_position == UPPER_WALL) {
+		current_upper_pixel_position = MOVEMENT_DISTANCE_RAQUETS;
+	}
+	else {
+		current_upper_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+	}
+}
+
+void move_racket_right_down(PIXEL_RACKET_INITIAL_POSITION) {
+	if(current_upper_pixel_position == UPPER_WALL) {
+		current_upper_pixel_position = MOVEMENT_DISTANCE_RAQUETS;
+	}
+	else {
+		current_upper_pixel_position += MOVEMENT_DISTANCE_RAQUETS;
+	}
+}
+
+
+
+void move_racket_right(PIXEL_RACKET_INITIAL_POSITION) {
+
+}
+*/
+
+
+
+
+/*
 void check_space_and_move_left_raquet(unsigned int button_direction) {
 	if(MOVEMENT_DISTANCE_RAQUETS >= UPPER_BOUNDARY + MOVEMENT_DISTANCE_RAQUETS) {
 		if(button_direction == UP) {
@@ -58,9 +287,9 @@ void check_space_and_move_right_raquet(unsigned int button_direction) {
 		}
 	}
 }
+*/
 
-
-
+/*
 void move_ball(unsigned int current_ball_pixel_x, unsigned int current_ball_pixel_y) {
 //	ball drawn
 
@@ -86,7 +315,8 @@ void move_ball(unsigned int current_ball_pixel_x, unsigned int current_ball_pixe
 	}
 
 }
-
+*/
+/*
 bool check_ball_passed_raquet(unsigned int current_ball_pixel_x, unsigned int current_ball_pixel_y) {
 	if(current_ball_pixel_x < ) {
 	return true;
@@ -94,7 +324,7 @@ bool check_ball_passed_raquet(unsigned int current_ball_pixel_x, unsigned int cu
 	else 
 		return false;
 }
-
+*/
 /*
 	bool space_above = false;
 	switch(button_value) {

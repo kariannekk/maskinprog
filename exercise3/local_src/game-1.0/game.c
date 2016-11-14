@@ -86,7 +86,7 @@ void signalHandler(int signal, siginfo_t *info, void *ptr)
 {
 //	printf("Signal nr: %d\n", signal);
 	uint8_t button;
-
+	int pixel_racket_initial_position = PIXEL_RACKET_INITIAL_POSITION;
 	read(gamepadDevice, &button, 1);
 //	uint8_t button = fgetc(gamepadDevice);
 //	printf("Button pushed: SW%x\n", button);
@@ -103,12 +103,13 @@ void signalHandler(int signal, siginfo_t *info, void *ptr)
 	case 0x0E :
 		printf("Button pushed: SW1\n");
 		// Perform action
-		write(gamepadDevice, &buffer[2], 1);
+		//write(gamepadDevice, &buffer[2], 1);
 		break;
 	case 0x0D :
 		printf("Button pushed: SW2\n");
 		// Perform action
 		//write(gamepadDevice, &buffer[1], 1);
+		//move_racket_left_up(pixel_racket_initial_position);
 		break;
 	case 0x0B :
 		printf("Button pushed: SW3\n");
@@ -118,13 +119,14 @@ void signalHandler(int signal, siginfo_t *info, void *ptr)
 	case 0x07 :
 		printf("Button pushed: SW4\n");
 		// Perform action
+		//move_racket_left_down(pixel_racket_initial_position);
 		break;
 	default:
 		break;
 	}
 
 	/* Perform actions from right sided buttons */
-/*	switch(button & 0xF0){
+	switch(button & 0xF0){
 	case 0xE0 :
 		printf("Button pushed: SW5\n");
 		// Perform action
@@ -132,6 +134,7 @@ void signalHandler(int signal, siginfo_t *info, void *ptr)
 	case 0xD0 :
 		printf("Button pushed: SW6\n");
 		// Perform action
+		//move_racket_right_up(pixel_racket_initial_position);
 		break;
 	case 0xB0 :
 		printf("Button pushed: SW7\n");
@@ -140,10 +143,11 @@ void signalHandler(int signal, siginfo_t *info, void *ptr)
 	case 0x70 :
 		printf("Button pushed: SW8\n");
 		// Perform action 
+		//move_racket_right_down(pixel_racket_initial_position);
 		break;
 	default :
 		break;
-	}*/
+	}
 }
 
 void setupGame()
@@ -181,6 +185,11 @@ int main(int argc, char *argv[])
 
 	while(gameStatus){
 		//Test if interrupt works 
+		/*
+		if(timer) {
+			move_ball();
+		}
+		*/
 	}
 	
 	close(gamepadDevice);
