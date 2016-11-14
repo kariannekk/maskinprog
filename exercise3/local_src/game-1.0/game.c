@@ -26,18 +26,22 @@
 #define PAUSE 2
 
 struct fb_copyarea rect;
-//FILE *gamepadDevice;
 int gamepadDevice;
 
 int gameStatus;
 struct sigaction act;
+char buffer[4] = {'0', '1', '2', '3'};
+//write(gamepadDevice, &buffer[0], 1); --Stop timer3
+//write(gamepadDevice, &buffer[1], 1); --Start timer3
+//write(gamepadDevice, &buffer[2], 1); --Start kernel timer (ball timer)
+//write(gamepadDevice, &buffer[3], 1); --Stop kernel timer
 
 void signalHandler(int signal, siginfo_t *info, void *ptr);
 
 
 int setupGamepadDriver()
 {
-	//gamepadDevice = fopen("dev/gamepad", "w+");
+	/* Open device driver as a "file" */
 	gamepadDevice = open("dev/gamepad", O_RDWR);
 	if(!gamepadDevice){
 		printf("Could not open gamepad device!\n");
@@ -45,11 +49,6 @@ int setupGamepadDriver()
 	}
 	
 	/* Set up signal handling */
-/*	if((signal(SIGIO, &signalHandler) < 0)){
-		printf("Could not register the signal handler!\n");
-		return ERROR;
-	}*/
-	
 	struct sigaction sigHandler;
 	sigHandler.sa_flags = SA_SIGINFO;
 	sigHandler.sa_sigaction = signalHandler;
@@ -59,13 +58,13 @@ int setupGamepadDriver()
 		return ERROR;
 	}
 	
-	if((fcntl(gamepadDevice, F_SETOWN, getpid( )) < 0)){ //fileno(gamepadDevice)
-		printf("Could not set pid as owner F_SETOWN!\n");
+	if((fcntl(gamepadDevice, F_SETOWN, getpid( )) < 0)){
+		printf("Could not set pid as owner, F_SETOWN!\n");
 		return ERROR;
 	}
 	
 	if((fcntl(gamepadDevice, F_SETSIG, SIGIO) < 0)){
-		printf("Could not set pid as owner F_SETSIG!\n");
+		printf("F_SETSIG!\n");
 		return ERROR;
 	}
 	
@@ -81,40 +80,24 @@ int setupGamepadDriver()
 	return SUCCESS;
 }
 
-
-void signalHandler(int signal, siginfo_t *info, void *ptr)
+void ButtonHandler(uint8_t button)
 {
-//	printf("Signal nr: %d\n", signal);
-	uint8_t button;
 	int pixel_racket_initial_position = PIXEL_RACKET_INITIAL_POSITION;
-	read(gamepadDevice, &button, 1);
-//	uint8_t button = fgetc(gamepadDevice);
-//	printf("Button pushed: SW%x\n", button);
-	
-	//printf("POLL_IN %d, POLL_OUT %d, POLL_MSG %d\n", POLL_IN, POLL_OUT, POLL_MSG);
-
-//	printf("si_band %ld\n", info->si_band);
-	printf("si_code %d\n", info->si_code);
-	
-	char buffer[3] = {'0', '1', '2'};
 	
 	/* Perform actions from left sided buttons */
 	switch(button & 0x0F){
 	case 0x0E :
 		printf("Button pushed: SW1\n");
 		// Perform action
-		//write(gamepadDevice, &buffer[2], 1);
 		break;
 	case 0x0D :
 		printf("Button pushed: SW2\n");
 		// Perform action
-		//write(gamepadDevice, &buffer[1], 1);
 		//move_racket_left_up(pixel_racket_initial_position);
 		break;
 	case 0x0B :
 		printf("Button pushed: SW3\n");
 		// Perform action
-		//write(gamepadDevice, &buffer[0], 1);
 		break;
 	case 0x07 :
 		printf("Button pushed: SW4\n");
@@ -147,6 +130,21 @@ void signalHandler(int signal, siginfo_t *info, void *ptr)
 		break;
 	default :
 		break;
+	}
+}
+
+void signalHandler(int signal, siginfo_t *info, void *ptr)
+{
+	switch (info->si_code){
+		case POLL_IN: //GPIO interrupt
+			uint8_t button;
+			read(gamepadDevice, &button, 1);
+		case POLL_OUT: //Timer3 interrupt
+			// Play sound sample
+		case POLL_MSG: //Kernel timer interrupt
+			// Update ball
+		default:
+			return;
 	}
 }
 

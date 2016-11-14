@@ -43,6 +43,7 @@ static dev_t devno;
 struct class *gamepadClass;
 struct fasync_struct *async_queue;
 int err;
+int kernelTimerRunning;
 
 static struct timer_list gameTimer;
 
@@ -83,9 +84,11 @@ static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, s
 			break;
 		case '2': //Start kernel timer
 			printk(KERN_INFO "Starting timer to fire in 100ms (%ld)\n", jiffies );
-			err = mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100) );
-			if (err) printk("Error in mod_timer\n");
+			kernelTimerRunning = 1;
+			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100) );
 			break;
+		case '3': //Stop kernel timer
+			kernelTimerRunning = 0;
 		default:
 			return 0;
 	}
@@ -135,7 +138,7 @@ void gameTimerDone( unsigned long data )
 //	printk( "Kernel ball timer called (%ld).\n", jiffies );
 //	mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100));
   	if(async_queue){
-		kill_fasync(&async_queue, SIGIO, POLL_OUT);
+		kill_fasync(&async_queue, SIGIO, POLL_MSG);
 	}
 }
 
@@ -347,6 +350,7 @@ static int gamepadDriverProbe(struct platform_device *dev)
 
 	setup_timer( &gameTimer, gameTimerDone, 0 );
 
+	kernelTimerRunning = 0;
 
 	/********************************/
 	/* Driver Visible to User Space */
