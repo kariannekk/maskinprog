@@ -47,6 +47,24 @@ int kernelTimerRunning;
 
 static struct timer_list gameTimer;
 
+
+void pauseGame()
+{
+	kernelTimerRunning = 0; //Stop kernel timer
+	
+	iowrite32(0x05, GPIO_IEN); //Turn off interrupt from unecessary buttons during a pause
+
+}
+
+void continueGame()
+{
+	kernelTimerRunning = 1;
+
+	mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500));
+
+	iowrite32(0xFF, GPIO_IEN);
+}
+
 /*******************/
 /* File operations */
 /*******************/
@@ -76,16 +94,18 @@ static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, s
 	printk("Input %c\n", input);
 
 	switch(input){
-		case '0': //Stop Timer3
-			iowrite32(0x2, TIMER3_CMD);
+		case '0': //Pause game
+			//iowrite32(0x2, TIMER3_CMD); //Stop Timer3
+			pauseGame();
 			break;
-		case '1': //Start Timer3
-			iowrite32(0x1, TIMER3_CMD);
+		case '1': //Start game
+			//iowrite32(0x1, TIMER3_CMD); //Start Timer3
+			continueGame();
 			break;
 		case '2': //Start kernel timer
-			printk(KERN_INFO "Starting timer to fire in 100ms (%ld)\n", jiffies );
+			printk(KERN_INFO "Starting timer to fire in 500ms (%ld)\n", jiffies );
 			kernelTimerRunning = 1;
-			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100) );
+			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500) );
 			break;
 		case '3': //Stop kernel timer
 			kernelTimerRunning = 0;
@@ -135,12 +155,16 @@ static struct file_operations gamepad_fops = {
 /*****************/
 void gameTimerDone( unsigned long data )
 {
-//	printk( "Kernel ball timer called (%ld).\n", jiffies );
-//	mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100));
+	printk( "Kernel ball timer called (%ld).\n", jiffies );
+	if(kernelTimerRunning){
+		mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500));
+	}
+  	
   	if(async_queue){
 		kill_fasync(&async_queue, SIGIO, POLL_MSG);
 	}
 }
+
 
 /*********************/
 /* Interrupt handler */
@@ -149,7 +173,7 @@ void gameTimerDone( unsigned long data )
 /* GPIO Interrupt handler */
 irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
-	printk(KERN_ALERT "GPIO interrupt\n");
+	//printk(KERN_ALERT "GPIO interrupt\n");
 	iowrite32(0xff, GPIO_IFC); //Clear interrupt flag
 
 	/* Signal asynchronous readers */
@@ -162,11 +186,9 @@ irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 
 irqreturn_t TIMERInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
-	printk(KERN_ALERT "TIMER3 interrupt\n");	
+	//printk(KERN_ALERT "TIMER3 interrupt\n");	
 	iowrite32(0x01, TIMER3_IFC);
-	
-	//iowrite32(0x2, TIMER3_CMD);
-	
+		
 	if(async_queue){
 		kill_fasync(&async_queue, SIGIO, POLL_OUT);
 	}
