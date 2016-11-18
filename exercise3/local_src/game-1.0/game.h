@@ -41,3 +41,4 @@ void ButtonHandler(uint8_t button);
 
 int initGame();
 
+void printIntructions();

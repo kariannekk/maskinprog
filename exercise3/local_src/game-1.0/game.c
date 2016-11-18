@@ -10,7 +10,30 @@
 
 
 void printIntructions(){
-	printf("-----------------\n");
+	printf("**************************************\n");
+	printf("Welcome to the Ping Pong Game!\n");
+	printf("**************************************\n\n");
+
+	printf("--------------------------------------\n");
+	printf("Instructions!\n");
+	printf("--------------------------------------\n");
+	printf("Player 1:\n");
+	printf("			Move racket up: SW2\n");
+	printf("			Move raceket down: SW4\n");
+	printf("--------------------------------------\n");
+	printf("Player 2:\n");
+	printf("			Move racket up: SW6\n");
+	printf("			Move raceket down: SW8\n");	
+	printf("--------------------------------------\n");
+	printf("Pause game: SW5\n");
+	printf("--------------------------------------\n");
+	printf("Continue game: SW1\n");
+	printf("--------------------------------------\n");
+	printf("Stop/Quit game: SW3\n");
+	printf("--------------------------------------\n");
+	printf("PS: when game is paused, only\n");
+	printf("continue(SW1) and stop(SW3) is enabled")
+	printf("--------------------------------------\n");
 }
 
 int setupGamepadDriver()
@@ -149,12 +172,7 @@ int initGame()
 
 int main(int argc, char *argv[])
 {
-	printf("Hello World, I'm game!\n");
-
-	printf("Racket left: %d\n", LEFT_RACKET_WALL);
-	printf("Racket right: %d\n", RIGHT_RACKET_WALL);
-	printf("Upper wall: %d\n", BALL_UPPER_WALL);
-	printf("Lower wall: %d\n", BALL_LOWER_WALL);
+	printIntructions()
 	
 	
 	if (initGame() == ERROR){
