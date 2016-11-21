@@ -15,8 +15,6 @@
 
 void setupGame();
 
-void moveRacket(int direction, int racket);
-
 void startBall();
 
 void randomBallDirection();

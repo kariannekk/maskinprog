@@ -91,7 +91,6 @@ void moveBall(){
 			printf("GOAL PLAYER 2\n");
 			scoreRacketRight += 1;
 			startBall();
-			refreshDisplay();
 		}
 		else{
 			ball.xDir = BALL_RIGHT;
@@ -105,7 +104,6 @@ void moveBall(){
 			printf("GOAL PLAYER 1\n");
 			scoreRacketLeft += 1;
 			startBall();
-			refreshDisplay();
 		}
 		else{
 			ball.xDir = BALL_LEFT;
@@ -133,6 +131,7 @@ void startBall()
 }
 
 void randomBallDirection(){
+	srand(time(NULL));
 	int randNumb = rand() % 4;
 	switch(randNumb){
 		case 0:
@@ -169,7 +168,7 @@ void newBallOffsetAngle(){
 			else if(randNumb > 5){ //6-11
 				ball.offsetAngle = FORTYFIVE_DEG;
 			}
-			//1-4 unchanged
+			//1-5 unchanged
 			break;
 		case FORTYFIVE_DEG :
 			if(randNumb < 4){ //0-3
@@ -178,7 +177,7 @@ void newBallOffsetAngle(){
 			else if(randNumb > 7){ //8-11
 				ball.offsetAngle = THIRTY_DEG;
 			}
-			//4-6 unchanged
+			//4-7 unchanged
 			break;
 		case SIXTY_DEG :
 			if(randNumb > 6){//7-11
@@ -191,29 +190,6 @@ void newBallOffsetAngle(){
 	}
 }
 
-
-/*void moveRacket(int direction, int racket)
-{
-	int tempPosition;
-	switch(racket){
-		case LEFT:
-			tempPosition = currentLeftPosition + direction;
-			if((tempPosition <= UPPER_POSITION) && (tempPosition >= LOWER_POSITION)){
-				currentLeftPosition = tempPosition;
-				displayMoveLeftRacket(currentLeftPosition);
-			}
-			break;
-		case RIGHT:
-			tempPosition = currentRightPosition + direction;
-			if((tempPosition <= UPPER_POSITION) && (tempPosition >= LOWER_POSITION)){
-				currentRightPosition = tempPosition;
-				displayMoveRightRacket(currentRightPosition);
-			}
-			break;
-		default:
-		 return;
-	}
-}*/
 
 void moveRightRacket(int direction)
 {
@@ -243,5 +219,5 @@ void setupGame()
 
 	startBall();
 
-	srand(time(NULL));
+	//srand(time(NULL));
 }

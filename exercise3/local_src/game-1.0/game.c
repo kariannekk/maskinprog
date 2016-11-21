@@ -30,7 +30,7 @@ void printIntructions(){
 	printf("Quit game: SW3\n");
 	printf("--------------------------------------\n");
 	printf("PS: when game is paused, only\n");
-	printf("continue(SW1) and quit(SW3) is enabled");
+	printf("continue(SW1) and quit(SW3) is enabled\n");
 	printf("--------------------------------------\n");
 }
 
@@ -102,12 +102,12 @@ void ButtonHandler(uint8_t button)
 	switch(button & 0xF0){
 	case 0xE0 : //SW5
 		write(gamepadDevice, &buffer[0], 1); //Pause game
+		refreshDisplay();
 		break;
 	case 0xD0 : //SW6
 		moveRightRacket(UP);
 		break;
 	case 0xB0 : //SW7
-		write(gamepadDevice, &buffer[3], 1); //Stop kernel timer
 		break;
 	case 0x70 : //SW8
 		moveRightRacket(DOWN);
@@ -175,7 +175,8 @@ int main(int argc, char *argv[])
 	while(gameStatus){
 		pause(); //Sleep and wait for the next SIGIO
 	}
-	
+
+
 	displayGameOver();
 	close(gamepadDevice);
 	

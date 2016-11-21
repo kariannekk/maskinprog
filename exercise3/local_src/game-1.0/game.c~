@@ -88,6 +88,7 @@ void ButtonHandler(uint8_t button)
 		moveLeftRacket(UP);
 		break;
 	case 0x0B : //SW3
+		write(gamepadDevice, &buffer[3], 1); //--Stop kernel timer
 		gameStatus = QUIT; //Quit game
 		break;
 	case 0x07 : //SW4
@@ -101,12 +102,12 @@ void ButtonHandler(uint8_t button)
 	switch(button & 0xF0){
 	case 0xE0 : //SW5
 		write(gamepadDevice, &buffer[0], 1); //Pause game
+		refreshDisplay();
 		break;
 	case 0xD0 : //SW6
 		moveRightRacket(UP);
 		break;
 	case 0xB0 : //SW7
-		write(gamepadDevice, &buffer[3], 1); //Stop kernel timer
 		break;
 	case 0x70 : //SW8
 		moveRightRacket(DOWN);
@@ -174,7 +175,8 @@ int main(int argc, char *argv[])
 	while(gameStatus){
 		pause(); //Sleep and wait for the next SIGIO
 	}
-	
+
+
 	displayGameOver();
 	close(gamepadDevice);
 	

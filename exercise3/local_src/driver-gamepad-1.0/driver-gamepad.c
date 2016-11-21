@@ -299,7 +299,7 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	if(unlikely(!baseAddrResTimer3)){
 		printk(KERN_ALERT " Cannot map I/O Timer 3\n");
 		return -1;
-	}	
+	}
 
 	baseAddrResDMA = ioremap_nocache(resDMA->start, resource_size(resDMA));
 	if(unlikely(!baseAddrResDMA)){
@@ -355,21 +355,21 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	iowrite32(0xBE, resGPIOEvenOdd->start + GPIO_IEN);				//Enables external interrupts
 
 	/* Enable Timer 3 interrupt */
-	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
-		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
-		return -1;
-	}
+//	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
+//		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+//		return -1;
+//	}
 	
-	iowrite32(31700, resTimer3->start + TIMER3_TOP);
-	iowrite32(0x1, resTimer3->start + TIMER3_IEN);
+//	iowrite32(31700, resTimer3->start + TIMER3_TOP);
+//	iowrite32(0x1, resTimer3->start + TIMER3_IEN);
 	
 	/**************/
 	/* Set up DAC */
 	/**************/
 
-	iowrite32(0x50010, resDAC->start + DAC0_CTRL);
-	iowrite32(0x1, resDAC->start + DAC0_CH0CTRL);
-	iowrite32(0x1, resDAC->start + DAC0_CH1CTRL);
+//	iowrite32(0x50010, resDAC->start + DAC0_CTRL);
+//	iowrite32(0x1, resDAC->start + DAC0_CH0CTRL);
+//	iowrite32(0x1, resDAC->start + DAC0_CH1CTRL);
 
 	/***********************/
 	/* Set up kernel timer */

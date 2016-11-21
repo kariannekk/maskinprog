@@ -76,8 +76,6 @@ void continueGame()
 
 static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
 	
-	//uint32_t buttonData = ioread32(resGPIOEvenOdd->start + GPIO_PC_DIN);
-	//int buttonData = ioread32(resGPIOEvenOdd->start + GPIO_PC_DIN);
 	copy_to_user(buff, &buttonData, 1);
 
 	buttonData = 0xFF; //Mark buttons as "read" ("no buttons pushed")
@@ -275,20 +273,20 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 	
-	if( (request_mem_region(resTimer3->start, resource_size(resTimer3), dev->name)) == NULL){
+/*	if( (request_mem_region(resTimer3->start, resource_size(resTimer3), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for Timer 3\n");
 		return -1;
-	}
+	}*/
 	
-	if( (request_mem_region(resDMA->start, resource_size(resDMA), dev->name)) == NULL){
+/*	if( (request_mem_region(resDMA->start, resource_size(resDMA), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for DMA\n");
 		return -1;
-	}
+	}*/
 	
-	if( (request_mem_region(resDAC->start, resource_size(resDAC), dev->name)) == NULL){
+/*	if( (request_mem_region(resDAC->start, resource_size(resDAC), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for DAC\n");
 		return -1;
-	}
+	}*/
 	
 	/* I/O Memory mapping - Map to virtual memory */
 	baseAddrResGPIOEvenOdd = ioremap_nocache(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd));
@@ -297,23 +295,23 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 	
-	baseAddrResTimer3 = ioremap_nocache(resTimer3->start, resource_size(resTimer3));
+/*	baseAddrResTimer3 = ioremap_nocache(resTimer3->start, resource_size(resTimer3));
 	if(unlikely(!baseAddrResTimer3)){
 		printk(KERN_ALERT " Cannot map I/O Timer 3\n");
 		return -1;
-	}	
+	}*/
 
-	baseAddrResDMA = ioremap_nocache(resDMA->start, resource_size(resDMA));
+/*	baseAddrResDMA = ioremap_nocache(resDMA->start, resource_size(resDMA));
 	if(unlikely(!baseAddrResDMA)){
 		printk(KERN_ALERT " Cannot map I/O DMA\n");
 		return -1;
-	}
+	}*/
 
-	baseAddrResDAC = ioremap_nocache(resDAC->start, resource_size(resDAC));
+/*	baseAddrResDAC = ioremap_nocache(resDAC->start, resource_size(resDAC));
 	if(unlikely(!baseAddrResDAC)){
 		printk(KERN_ALERT " Cannot map I/O DAC\n");
 		return -1;
-	}
+	}*/
 
 	
 	/******************/
@@ -333,8 +331,8 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	/* Find the IRQ number */
 	irqGPIOEven = platform_get_irq(dev, 0);
 	irqGPIOOdd  = platform_get_irq(dev, 1);
-	irqTimer3   = platform_get_irq(dev, 2);
-	irqDMA      = platform_get_irq(dev, 3);
+//	irqTimer3   = platform_get_irq(dev, 2);
+//	irqDMA      = platform_get_irq(dev, 3);
 	
 	/* Allocate and instansiate irq's */
 	printk(KERN_INFO "Initializing GPIO odd/even, Timer3, DMA and DAC interrupts\n");
@@ -357,21 +355,21 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	iowrite32(0xBE, resGPIOEvenOdd->start + GPIO_IEN);				//Enables external interrupts
 
 	/* Enable Timer 3 interrupt */
-	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
-		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
-		return -1;
-	}
+//	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
+//		printk(KERN_ALERT "IRQ request failed for GPIO Odd\n");
+//		return -1;
+//	}
 	
-	iowrite32(31700, resTimer3->start + TIMER3_TOP);
-	iowrite32(0x1, resTimer3->start + TIMER3_IEN);
+//	iowrite32(31700, resTimer3->start + TIMER3_TOP);
+//	iowrite32(0x1, resTimer3->start + TIMER3_IEN);
 	
 	/**************/
 	/* Set up DAC */
 	/**************/
 
-	iowrite32(0x50010, resDAC->start + DAC0_CTRL);
-	iowrite32(0x1, resDAC->start + DAC0_CH0CTRL);
-	iowrite32(0x1, resDAC->start + DAC0_CH1CTRL);
+//	iowrite32(0x50010, resDAC->start + DAC0_CTRL);
+//	iowrite32(0x1, resDAC->start + DAC0_CH0CTRL);
+//	iowrite32(0x1, resDAC->start + DAC0_CH1CTRL);
 
 	/***********************/
 	/* Set up kernel timer */
