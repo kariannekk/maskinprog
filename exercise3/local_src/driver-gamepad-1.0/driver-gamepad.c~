@@ -24,6 +24,7 @@
 
 #define DEVICE_NAME "gamepad"
 #define CLASS_NAME "gamepad"
+#define KERNEL_SPEED 100 //ms before interrupt from kernel timer
 
 /* Platform device data for TDT4258:
 |	IRQ Source	|	IRQ number	|	Platform IRQ index	|	Platform mem index	|
@@ -48,26 +49,6 @@ static struct timer_list gameTimer;
 uint8_t buttonData;
 
 
-/************************/
-/* Turn on/off hardware */
-/************************/
-
-void pauseGame()
-{
-	kernelTimerRunning = 0; //Stop kernel timer
-	
-	iowrite32(0x05, resGPIOEvenOdd->start + GPIO_IEN); //Turn off interrupt from unecessary buttons during a pause
-
-}
-
-void continueGame()
-{
-	kernelTimerRunning = 1;
-
-	mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500));
-
-	iowrite32(0xBF, resGPIOEvenOdd->start + GPIO_IEN);
-}
 
 /*******************/
 /* File operations */
@@ -97,17 +78,18 @@ static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, s
 
 	switch(input){
 		case '0': //Pause game
-			//iowrite32(0x2, resTimer3->start + TIMER3_CMD); //Stop Timer3
-			pauseGame();
+			kernelTimerRunning = 0; //Stop kernel timer
+			iowrite32(0x05, (volatile void *)resGPIOEvenOdd->start + GPIO_IEN); //Turn off interrupt from unecessary buttons during a pause
 			break;
 		case '1': //Start game
-			//iowrite32(0x1, resTimer3->start + TIMER3_CMD); //Start Timer3
-			continueGame();
+			kernelTimerRunning = 1;
+			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500));
+			iowrite32(0xBF, (volatile void *)resGPIOEvenOdd->start + GPIO_IEN);
 			break;
 		case '2': //Start kernel timer
 			printk(KERN_INFO "Starting timer to fire in 100ms (%ld)\n", jiffies );
 			kernelTimerRunning = 1;
-			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100) );
+			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(KERNEL_SPEED) );
 			break;
 		case '3': //Stop kernel timer
 			kernelTimerRunning = 0;
@@ -159,7 +141,7 @@ void gameTimerDone( unsigned long data )
 {
 	//printk( "Kernel ball timer called (%ld).\n", jiffies );
 	if(kernelTimerRunning){
-		mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100));
+		mod_timer( &gameTimer, jiffies + msecs_to_jiffies(KERNEL_SPEED));
 	}
   	
   	if(async_queue){
@@ -176,9 +158,9 @@ void gameTimerDone( unsigned long data )
 irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
 	//printk(KERN_ALERT "GPIO interrupt\n");
-	iowrite32(0xff, resGPIOEvenOdd->start + GPIO_IFC); //Clear interrupt flag
+	iowrite32(0xff, (volatile void *)resGPIOEvenOdd->start + GPIO_IFC); //Clear interrupt flag
 	
-	buttonData = ioread8(resGPIOEvenOdd->start + GPIO_PC_DIN); //Read button values
+	buttonData = ioread8((volatile void *)resGPIOEvenOdd->start + GPIO_PC_DIN); //Read button values
 
 	/* Signal asynchronous readers */
 	if(async_queue){
@@ -191,7 +173,7 @@ irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 irqreturn_t TIMERInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
 	//printk(KERN_ALERT "TIMER3 interrupt\n");	
-	iowrite32(0x01, resTimer3->start + TIMER3_IFC);
+	iowrite32(0x01, (volatile void *)resTimer3->start + TIMER3_IFC);
 		
 	if(async_queue){
 		kill_fasync(&async_queue, SIGIO, POLL_OUT);
@@ -273,20 +255,20 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 	
-/*	if( (request_mem_region(resTimer3->start, resource_size(resTimer3), dev->name)) == NULL){
+	if( (request_mem_region(resTimer3->start, resource_size(resTimer3), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for Timer 3\n");
 		return -1;
-	}*/
+	}
 	
-/*	if( (request_mem_region(resDMA->start, resource_size(resDMA), dev->name)) == NULL){
+	if( (request_mem_region(resDMA->start, resource_size(resDMA), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for DMA\n");
 		return -1;
-	}*/
+	}
 	
-/*	if( (request_mem_region(resDAC->start, resource_size(resDAC), dev->name)) == NULL){
+	if( (request_mem_region(resDAC->start, resource_size(resDAC), dev->name)) == NULL){
 		printk(KERN_ALERT "Unable to obtain I/O memory address for DAC\n");
 		return -1;
-	}*/
+	}
 	
 	/* I/O Memory mapping - Map to virtual memory */
 	baseAddrResGPIOEvenOdd = ioremap_nocache(resGPIOEvenOdd->start, resource_size(resGPIOEvenOdd));
@@ -295,23 +277,23 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 	
-/*	baseAddrResTimer3 = ioremap_nocache(resTimer3->start, resource_size(resTimer3));
+	baseAddrResTimer3 = ioremap_nocache(resTimer3->start, resource_size(resTimer3));
 	if(unlikely(!baseAddrResTimer3)){
 		printk(KERN_ALERT " Cannot map I/O Timer 3\n");
 		return -1;
-	}*/
+	}
 
-/*	baseAddrResDMA = ioremap_nocache(resDMA->start, resource_size(resDMA));
+	baseAddrResDMA = ioremap_nocache(resDMA->start, resource_size(resDMA));
 	if(unlikely(!baseAddrResDMA)){
 		printk(KERN_ALERT " Cannot map I/O DMA\n");
 		return -1;
-	}*/
+	}
 
-/*	baseAddrResDAC = ioremap_nocache(resDAC->start, resource_size(resDAC));
+	baseAddrResDAC = ioremap_nocache(resDAC->start, resource_size(resDAC));
 	if(unlikely(!baseAddrResDAC)){
 		printk(KERN_ALERT " Cannot map I/O DAC\n");
 		return -1;
-	}*/
+	}
 
 	
 	/******************/
@@ -319,10 +301,10 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	/******************/
 	
 	printk(KERN_INFO "Enabling buttons\n");
-	iowrite32(0x33333333, resGPIOEvenOdd->start + GPIO_PC_MODEL);	//Enables input with filter
-	iowrite32(0xFF, resGPIOEvenOdd->start + GPIO_PC_DOUT);			//Enables pull-up resistors
+	iowrite32(0x33333333, (volatile void *)resGPIOEvenOdd->start + GPIO_PC_MODEL);	//Enables input with filter
+	iowrite32(0xFF, (volatile void *)resGPIOEvenOdd->start + GPIO_PC_DOUT);			//Enables pull-up resistors
 
-	uint32_t buttonData = 0xFF;
+	buttonData = 0xFF;
 
 	/*************************/
 	/* Setup and enable IRQs */
@@ -331,8 +313,8 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	/* Find the IRQ number */
 	irqGPIOEven = platform_get_irq(dev, 0);
 	irqGPIOOdd  = platform_get_irq(dev, 1);
-//	irqTimer3   = platform_get_irq(dev, 2);
-//	irqDMA      = platform_get_irq(dev, 3);
+	irqTimer3   = platform_get_irq(dev, 2);
+	irqDMA      = platform_get_irq(dev, 3);
 	
 	/* Allocate and instansiate irq's */
 	printk(KERN_INFO "Initializing GPIO odd/even, Timer3, DMA and DAC interrupts\n");
@@ -349,10 +331,10 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 
-	iowrite32(0x22222222, resGPIOEvenOdd->start + GPIO_EXTIPSELL);	//Selects port C for interrupts
-	iowrite32(0xFF, resGPIOEvenOdd->start + GPIO_EXTIFALL);			//Enables falling edge detection
-	iowrite32(0xFF, resGPIOEvenOdd->start + GPIO_IFC);				//Clears external interrupt flags
-	iowrite32(0xBE, resGPIOEvenOdd->start + GPIO_IEN);				//Enables external interrupts
+	iowrite32(0x22222222, (volatile void *)resGPIOEvenOdd->start + GPIO_EXTIPSELL);	//Selects port C for interrupts
+	iowrite32(0xFF, (volatile void *)resGPIOEvenOdd->start + GPIO_EXTIFALL);			//Enables falling edge detection
+	iowrite32(0xFF, (volatile void *)resGPIOEvenOdd->start + GPIO_IFC);				//Clears external interrupt flags
+	iowrite32(0xBE, (volatile void *)resGPIOEvenOdd->start + GPIO_IEN);				//Enables external interrupts
 
 	/* Enable Timer 3 interrupt */
 //	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
@@ -360,16 +342,16 @@ static int gamepadDriverProbe(struct platform_device *dev)
 //		return -1;
 //	}
 	
-//	iowrite32(31700, resTimer3->start + TIMER3_TOP);
-//	iowrite32(0x1, resTimer3->start + TIMER3_IEN);
+//	iowrite32(31700, (volatile void *)resTimer3->start + TIMER3_TOP);
+//	iowrite32(0x1, (volatile void *)resTimer3->start + TIMER3_IEN);
 	
 	/**************/
 	/* Set up DAC */
 	/**************/
 
-//	iowrite32(0x50010, resDAC->start + DAC0_CTRL);
-//	iowrite32(0x1, resDAC->start + DAC0_CH0CTRL);
-//	iowrite32(0x1, resDAC->start + DAC0_CH1CTRL);
+//	iowrite32(0x50010, (volatile void *)resDAC->start + DAC0_CTRL);
+//	iowrite32(0x1, (volatile void *)resDAC->start + DAC0_CH0CTRL);
+//	iowrite32(0x1, (volatile void *)resDAC->start + DAC0_CH1CTRL);
 
 	/***********************/
 	/* Set up kernel timer */

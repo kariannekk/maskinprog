@@ -3,8 +3,8 @@
 #include "display.h"
 
 
-//write(gamepadDevice, &buffer[0], 1); --Stop timer3
-//write(gamepadDevice, &buffer[1], 1); --Start timer3
+//write(gamepadDevice, &buffer[0], 1); --Pause game
+//write(gamepadDevice, &buffer[1], 1); --Continue game
 //write(gamepadDevice, &buffer[2], 1); --Start kernel timer (ball timer)
 //write(gamepadDevice, &buffer[3], 1); --Stop kernel timer
 

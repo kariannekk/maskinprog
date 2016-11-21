@@ -1,0 +1,242 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <sys/mman.h>
+#include <linux/fb.h>
+#include <sys/ioctl.h>
+//#include <linux/fs.h>
+//#include <string.h>
+#include <stdint.h>
+
+#include "display.h"
+
+
+
+/* Pixel colour setup. */
+#define COLOUR_BLACK		0x0000
+#define COLOUR_WHITE		0xFFFF
+//#define COLOUR_RED		0xF800
+//#define COLOUR_GREEN		0x07E0
+//#define COLOUR_BLUE		0x001F
+
+/* 320x240 display. */
+#define PIXEL_AMOUNT				(PIXEL_MAX_LINE * PIXEL_MAX_COLUMN)
+
+/* Wall setup. */
+#define PIXEL_UPPER_WALL_END	(WALL_THICKNESS * PIXEL_MAX_COLUMN) //Start at 0.
+#define PIXEL_LOWER_WALL_START	(PIXEL_AMOUNT - (WALL_THICKNESS * PIXEL_MAX_COLUMN)) //End at last pixel.
+
+/* Racket */
+#define PIXEL_ARRAY_RACKET_HEIGHT (PIXEL_RACKET_HEIGHT * PIXEL_MAX_COLUMN)
+
+/* Ball */
+#define PIXEL_BALL_Y_END			(PIXEL_BALL_DIAMETER * PIXEL_MAX_COLUMN)
+
+
+
+unsigned int previousPixelRacketLeft;
+unsigned int previousPixelRacketRight;
+uint32_t previousArrayPosRacketLeft = PIXEL_RACKET_INITIAL_POSITION * PIXEL_MAX_COLUMN;
+uint32_t previousArrayPosRacketRight = PIXEL_RACKET_INITIAL_POSITION * PIXEL_MAX_COLUMN;
+
+unsigned int previousPixelBallX = PIXEL_BALL_INITIAL_X;
+unsigned int previousPixelBallY = PIXEL_BALL_INITIAL_Y;
+uint32_t previousArrayPosBallY = (PIXEL_BALL_INITIAL_Y  * PIXEL_MAX_COLUMN);
+
+struct fb_copyarea rect;
+int file_p;
+uint16_t * address;
+
+
+
+unsigned int getPixelRacketLeft(){
+	return previousPixelRacketLeft;
+}
+
+unsigned int getPixelRacketRight(){
+	return previousPixelRacketRight;
+}
+
+void openDisplay(){
+	file_p = open("/dev/fb0", O_RDWR);
+	address = mmap(NULL, PIXEL_AMOUNT, PROT_READ|PROT_WRITE, MAP_SHARED, file_p, 0);
+}
+
+void closeDisplay(){
+	munmap(address, PIXEL_AMOUNT);
+	close(file_p);
+}
+
+void refreshRectangle(int startX, int startY, int lengthX, int lengthY){
+	rect.dx = startX;
+	rect.dy = startY;
+	rect.width = lengthX;
+	rect.height = lengthY;
+	
+	ioctl(file_p, 0x4680, &rect);
+}
+
+void refreshDisplay(){
+	refreshRectangle(0, 0, PIXEL_MAX_COLUMN, PIXEL_MAX_LINE);
+}
+
+void clearDisplay(){
+	uint32_t i = 0;
+	for (i=0; i<PIXEL_AMOUNT; i++){
+		address[i] = COLOUR_BLACK;
+	}
+}
+
+void drawWalls(){
+	uint32_t i = 0;
+	for (i=0; i<PIXEL_UPPER_WALL_END; i++){
+		address[i] = COLOUR_WHITE;
+	}
+	
+	for (i=PIXEL_LOWER_WALL_START; i<PIXEL_AMOUNT; i++){
+		address[i] = COLOUR_WHITE;
+	}
+}
+
+void clearRacketLeft(){
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_LEFT_X_START; i<PIXEL_RACKET_LEFT_X_END; i++){
+		for (j=i+ previousArrayPosRacketLeft; j<previousArrayPosRacketLeft + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_BLACK;
+		}
+	}
+}
+
+void clearRacketRight(){
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_RIGHT_X_START; i<PIXEL_RACKET_RIGHT_X_END; i++){
+		for (j=i+ previousArrayPosRacketRight; j<previousArrayPosRacketRight + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_BLACK;
+		}
+	}
+}
+
+void drawRacketLeft(unsigned int currentPixel){
+	uint32_t currentArrayPosition = currentPixel * PIXEL_MAX_COLUMN;
+	
+	previousPixelRacketLeft = currentPixel;
+	previousArrayPosRacketLeft = currentArrayPosition;
+	
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_LEFT_X_START; i<PIXEL_RACKET_LEFT_X_END; i++){
+		for (j=i+ currentArrayPosition; j<currentArrayPosition + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_WHITE;
+		}
+	}
+}
+
+void drawRacketRight(unsigned int currentPixel){
+	uint32_t currentArrayPosition = currentPixel * PIXEL_MAX_COLUMN;
+	
+	previousPixelRacketRight = currentPixel;
+	previousArrayPosRacketRight = currentArrayPosition;
+	
+	uint32_t i, j;
+	for (i=PIXEL_RACKET_RIGHT_X_START; i<PIXEL_RACKET_RIGHT_X_END; i++){
+		for (j=i + currentArrayPosition; j< currentArrayPosition + PIXEL_ARRAY_RACKET_HEIGHT; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_WHITE;
+		}
+	}
+}
+
+
+void clearBall(){
+	uint32_t i, j;
+	for (i=previousPixelBallX; i<previousPixelBallX + PIXEL_BALL_DIAMETER; i++){
+		for (j=i+ previousArrayPosBallY; j<i + previousArrayPosBallY + PIXEL_BALL_Y_END; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_BLACK;
+		}
+	}
+}
+
+void drawBall(unsigned int currentPixelX, unsigned int currentPixelY){
+	uint32_t currentArrayPositionY = currentPixelY * PIXEL_MAX_COLUMN;
+	
+	previousPixelBallX = currentPixelX;
+	previousPixelBallY = currentPixelY;
+	previousArrayPosBallY = currentArrayPositionY;
+	
+	uint32_t i, j;
+	for (i=currentPixelX; i<currentPixelX + PIXEL_BALL_DIAMETER; i++){
+		for (j=i+ currentArrayPositionY; j<i + currentArrayPositionY + PIXEL_BALL_Y_END; j=j+PIXEL_MAX_COLUMN){
+			address[j] = COLOUR_WHITE;
+		}
+	}
+}
+
+void displayInit(){
+	//Open file and memorymap it.
+	openDisplay();
+	
+	//Remove linux penguin.
+	clearDisplay();
+	
+	//Print upper and lower wall. 
+	drawWalls();
+	
+	//Print rackets at their start position.
+	drawRacketLeft(PIXEL_RACKET_INITIAL_POSITION);
+	drawRacketRight(PIXEL_RACKET_INITIAL_POSITION);
+	
+	//Print ball at start position. 
+	drawBall(PIXEL_BALL_INITIAL_X, PIXEL_BALL_INITIAL_Y);
+	
+	//Update framebuffer for display. 
+	refreshDisplay();
+	
+	//Close file and unmap it.
+	//closeDisplay();	//This seems unecessary while in this game. For a more multi-threaded application we should do it, though.
+}
+
+
+
+void displayMoveLeftRacket(unsigned int position){
+	//The game should handle regional asserts. 
+	int pixelY = (position * RACKET_STEP_LENGTH) + WALL_THICKNESS;
+	
+	clearRacketLeft();
+	refreshRectangle(PIXEL_RACKET_LEFT_X_START, previousPixelRacketLeft-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
+	
+	drawRacketLeft(pixelY);
+	refreshRectangle(PIXEL_RACKET_LEFT_X_START, pixelY-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
+}
+
+void displayMoveRightRacket(unsigned int position){
+	//The game should handle regional asserts. 
+	int pixelY = (position * RACKET_STEP_LENGTH) + WALL_THICKNESS;
+	
+	clearRacketRight();
+	refreshRectangle(PIXEL_RACKET_RIGHT_X_START,  previousPixelRacketRight-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
+	
+	drawRacketRight(pixelY);
+	refreshRectangle(PIXEL_RACKET_RIGHT_X_START, pixelY-1, PIXEL_RACKET_WIDTH, PIXEL_RACKET_HEIGHT+2);
+}
+
+void displayMoveBall(unsigned int pixelX, unsigned int pixelY){	
+	//The game should handle regional asserts. 
+	clearBall();
+	refreshRectangle(previousPixelBallX-1, previousPixelBallY-1, PIXEL_BALL_DIAMETER+2, PIXEL_BALL_DIAMETER+2);
+	
+	drawBall(pixelX, pixelY);
+	refreshRectangle(pixelX, pixelY, PIXEL_BALL_DIAMETER, PIXEL_BALL_DIAMETER);
+}
+
+void displayGameOver(){
+	//openDisplay();	//This seems unecessary while in this game. 
+	
+	clearBall();
+	
+	refreshDisplay();
+	closeDisplay();
+}
+
