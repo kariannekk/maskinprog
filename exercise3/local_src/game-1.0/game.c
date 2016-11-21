@@ -8,12 +8,10 @@
 //write(gamepadDevice, &buffer[2], 1); --Start kernel timer (ball timer)
 //write(gamepadDevice, &buffer[3], 1); --Stop kernel timer
 
-
 void printIntructions(){
 	printf("**************************************\n");
 	printf("Welcome to the Ping Pong Game!\n");
 	printf("**************************************\n\n");
-
 	printf("--------------------------------------\n");
 	printf("Instructions!\n");
 	printf("--------------------------------------\n");
@@ -29,10 +27,10 @@ void printIntructions(){
 	printf("--------------------------------------\n");
 	printf("Continue game: SW1\n");
 	printf("--------------------------------------\n");
-	printf("Stop/Quit game: SW3\n");
+	printf("Quit game: SW3\n");
 	printf("--------------------------------------\n");
 	printf("PS: when game is paused, only\n");
-	printf("continue(SW1) and stop(SW3) is enabled")
+	printf("continue(SW1) and quit(SW3) is enabled");
 	printf("--------------------------------------\n");
 }
 
@@ -79,25 +77,22 @@ int setupGamepadDriver()
 
 void ButtonHandler(uint8_t button)
 {
+	//printf("Button %x \n", button);
+	
 	/* Perform actions from left sided buttons */
 	switch(button & 0x0F){
-	case 0x0E :
-		//printf("Button pushed: SW1\n");
-		// Perform action
-		write(gamepadDevice, &buffer[1], 1); // Continue game
+	case 0x0E : //SW1
+		write(gamepadDevice, &buffer[1], 1); //Continue game
 		break;
-	case 0x0D :
-		//printf("Button pushed: SW2\n");
-		moveRacket(UP, LEFT);
+	case 0x0D : //SW2
+		moveLeftRacket(UP);
 		break;
-	case 0x0B :
-		//printf("Button pushed: SW3\n");
-		// Perform action
-		gameStatus = STOP; //Quit game
+	case 0x0B : //SW3
+		write(gamepadDevice, &buffer[3], 1); //--Stop kernel timer
+		gameStatus = QUIT; //Quit game
 		break;
-	case 0x07 :
-		//printf("Button pushed: SW4\n");
-		moveRacket(DOWN, LEFT);
+	case 0x07 : //SW4
+		moveLeftRacket(DOWN);
 		break;
 	default:
 		break;
@@ -105,23 +100,17 @@ void ButtonHandler(uint8_t button)
 
 	/* Perform actions from right sided buttons */
 	switch(button & 0xF0){
-	case 0xE0 :
-		//printf("Button pushed: SW5\n");
-		// Perform action
-		write(gamepadDevice, &buffer[0], 1); // Pause game
+	case 0xE0 : //SW5
+		write(gamepadDevice, &buffer[0], 1); //Pause game
 		break;
-	case 0xD0 :
-		//printf("Button pushed: SW6\n");
-		moveRacket(UP, RIGHT);
+	case 0xD0 : //SW6
+		moveRightRacket(UP);
 		break;
-	case 0xB0 :
-		//printf("Button pushed: SW7\n");
-		// Perform action
-		write(gamepadDevice, &buffer[3], 1); //--Stop kernel timer
+	case 0xB0 : //SW7
+		write(gamepadDevice, &buffer[3], 1); //Stop kernel timer
 		break;
-	case 0x70 :
-		//printf("Button pushed: SW8\n");
-		moveRacket(DOWN, RIGHT);
+	case 0x70 : //SW8
+		moveRightRacket(DOWN);
 		break;
 	default :
 		break;
@@ -131,15 +120,15 @@ void ButtonHandler(uint8_t button)
 void signalHandler(int signal, siginfo_t *info, void *ptr)
 {
 	uint8_t button;
-	printf("Code %d\n", info->si_code);
-	//printf("POLL_IN %d\n", POLL_IN);
+	//printf("Code %d\n", info->si_code);
+	
 	switch (info->si_code){
 		case POLL_IN: //GPIO interrupt
 			read(gamepadDevice, &button, 1);
 			ButtonHandler(button);
 			break;
 		case POLL_OUT: //Timer3 interrupt
-			// Play sound sample
+			// TODO Play sound sample
 			break;
 		case POLL_MSG: //Kernel timer interrupt
 			// Update ball
@@ -158,7 +147,7 @@ int initGame()
 	setupGame();
 	
 	/* Connect to framework - print board */
-	display_init();
+	displayInit();
 
 	/* Connect to gamepad driver - get access to hardware */
 	if(setupGamepadDriver() == ERROR){
@@ -172,13 +161,14 @@ int initGame()
 
 int main(int argc, char *argv[])
 {
-	printIntructions()
+	printIntructions();
 	
 	
 	if (initGame() == ERROR){
 		return 0;
 	}
 
+	
 	write(gamepadDevice, &buffer[2], 1); //--Start kernel timer (ball timer)
 
 
@@ -186,7 +176,7 @@ int main(int argc, char *argv[])
 		pause(); //Sleep and wait for the next SIGIO
 	}
 	
-	game_over();
+	displayGameOver();
 	close(gamepadDevice);
 	
 	return 0;

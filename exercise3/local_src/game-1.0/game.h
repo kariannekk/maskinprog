@@ -22,7 +22,7 @@
 
 /* Game status */
 #define PLAYING 1
-#define STOP 0
+#define QUIT 0
 #define PAUSE 2
 
 struct fb_copyarea rect;

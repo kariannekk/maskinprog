@@ -20,7 +20,7 @@
 #include <asm/siginfo.h>
 #include <linux/timer.h>
 
-#include "efm32gg.h"
+#include "driver-gamepad.h"
 
 #define DEVICE_NAME "gamepad"
 #define CLASS_NAME "gamepad"
@@ -44,15 +44,19 @@ struct class *gamepadClass;
 struct fasync_struct *async_queue;
 int err;
 int kernelTimerRunning;
-
 static struct timer_list gameTimer;
+uint8_t buttonData;
 
+
+/************************/
+/* Turn on/off hardware */
+/************************/
 
 void pauseGame()
 {
 	kernelTimerRunning = 0; //Stop kernel timer
 	
-	iowrite32(0x05, GPIO_IEN); //Turn off interrupt from unecessary buttons during a pause
+	iowrite32(0x05, resGPIOEvenOdd->start + GPIO_IEN); //Turn off interrupt from unecessary buttons during a pause
 
 }
 
@@ -62,7 +66,7 @@ void continueGame()
 
 	mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500));
 
-	iowrite32(0xFF, GPIO_IEN);
+	iowrite32(0xBF, resGPIOEvenOdd->start + GPIO_IEN);
 }
 
 /*******************/
@@ -72,9 +76,11 @@ void continueGame()
 
 static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t count, loff_t *offp) {
 	
-	uint32_t buttonData = ioread32(GPIO_PC_DIN);
-	//int buttonData = ioread32(GPIO_PC_DIN);
+	//uint32_t buttonData = ioread32(resGPIOEvenOdd->start + GPIO_PC_DIN);
+	//int buttonData = ioread32(resGPIOEvenOdd->start + GPIO_PC_DIN);
 	copy_to_user(buff, &buttonData, 1);
+
+	buttonData = 0xFF; //Mark buttons as "read" ("no buttons pushed")
 
 	return 1;
 }
@@ -82,30 +88,28 @@ static ssize_t gamepadDriverRead (struct file *filp, char __user *buff, size_t c
 static ssize_t gamepadDriverWrite (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
 	char input;
-	
-	printk(KERN_INFO "Starting/stopping timer!\n");
-		
+			
 	if (count == 0){ //Empty input
 		return 0;
 	}
 	
 	copy_from_user(&input, buff, count);
 
-	printk("Input %c\n", input);
+	//printk("Input %c\n", input);
 
 	switch(input){
 		case '0': //Pause game
-			//iowrite32(0x2, TIMER3_CMD); //Stop Timer3
+			//iowrite32(0x2, resTimer3->start + TIMER3_CMD); //Stop Timer3
 			pauseGame();
 			break;
 		case '1': //Start game
-			//iowrite32(0x1, TIMER3_CMD); //Start Timer3
+			//iowrite32(0x1, resTimer3->start + TIMER3_CMD); //Start Timer3
 			continueGame();
 			break;
 		case '2': //Start kernel timer
-			printk(KERN_INFO "Starting timer to fire in 500ms (%ld)\n", jiffies );
+			printk(KERN_INFO "Starting timer to fire in 100ms (%ld)\n", jiffies );
 			kernelTimerRunning = 1;
-			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500) );
+			mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100) );
 			break;
 		case '3': //Stop kernel timer
 			kernelTimerRunning = 0;
@@ -157,7 +161,7 @@ void gameTimerDone( unsigned long data )
 {
 	//printk( "Kernel ball timer called (%ld).\n", jiffies );
 	if(kernelTimerRunning){
-		mod_timer( &gameTimer, jiffies + msecs_to_jiffies(500));
+		mod_timer( &gameTimer, jiffies + msecs_to_jiffies(100));
 	}
   	
   	if(async_queue){
@@ -174,7 +178,9 @@ void gameTimerDone( unsigned long data )
 irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
 	//printk(KERN_ALERT "GPIO interrupt\n");
-	iowrite32(0xff, GPIO_IFC); //Clear interrupt flag
+	iowrite32(0xff, resGPIOEvenOdd->start + GPIO_IFC); //Clear interrupt flag
+	
+	buttonData = ioread8(resGPIOEvenOdd->start + GPIO_PC_DIN); //Read button values
 
 	/* Signal asynchronous readers */
 	if(async_queue){
@@ -187,7 +193,7 @@ irqreturn_t GPIOInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 irqreturn_t TIMERInterruptHandler(int irq, void* dev_id, struct pt_regs* regs)
 {
 	//printk(KERN_ALERT "TIMER3 interrupt\n");	
-	iowrite32(0x01, TIMER3_IFC);
+	iowrite32(0x01, resTimer3->start + TIMER3_IFC);
 		
 	if(async_queue){
 		kill_fasync(&async_queue, SIGIO, POLL_OUT);
@@ -315,8 +321,10 @@ static int gamepadDriverProbe(struct platform_device *dev)
 	/******************/
 	
 	printk(KERN_INFO "Enabling buttons\n");
-	iowrite32(0x33333333, GPIO_PC_MODEL);	//Enables input with filter
-	iowrite32(0xFF, GPIO_PC_DOUT);			//Enables pull-up resistors
+	iowrite32(0x33333333, resGPIOEvenOdd->start + GPIO_PC_MODEL);	//Enables input with filter
+	iowrite32(0xFF, resGPIOEvenOdd->start + GPIO_PC_DOUT);			//Enables pull-up resistors
+
+	uint32_t buttonData = 0xFF;
 
 	/*************************/
 	/* Setup and enable IRQs */
@@ -343,10 +351,10 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 
-	iowrite32(0x22222222, GPIO_EXTIPSELL);	//Selects port C for interrupts
-	iowrite32(0xFF, GPIO_EXTIFALL);			//Enables falling edge detection
-	iowrite32(0xFF, GPIO_IFC);				//Clears external interrupt flags
-	iowrite32(0xFF, GPIO_IEN);				//Enables external interrupts
+	iowrite32(0x22222222, resGPIOEvenOdd->start + GPIO_EXTIPSELL);	//Selects port C for interrupts
+	iowrite32(0xFF, resGPIOEvenOdd->start + GPIO_EXTIFALL);			//Enables falling edge detection
+	iowrite32(0xFF, resGPIOEvenOdd->start + GPIO_IFC);				//Clears external interrupt flags
+	iowrite32(0xBE, resGPIOEvenOdd->start + GPIO_IEN);				//Enables external interrupts
 
 	/* Enable Timer 3 interrupt */
 	if(request_irq(irqTimer3, (irq_handler_t)TIMERInterruptHandler, 0, DEVICE_NAME, &gamepadCdev) < 0){
@@ -354,16 +362,16 @@ static int gamepadDriverProbe(struct platform_device *dev)
 		return -1;
 	}
 	
-	iowrite32(31700, TIMER3_TOP);
-	iowrite32(0x1, TIMER3_IEN);
+	iowrite32(31700, resTimer3->start + TIMER3_TOP);
+	iowrite32(0x1, resTimer3->start + TIMER3_IEN);
 	
 	/**************/
 	/* Set up DAC */
 	/**************/
 
-	iowrite32(0x50010, DAC0_CTRL);
-	iowrite32(0x1, DAC0_CH0CTRL);
-	iowrite32(0x1, DAC0_CH1CTRL);
+	iowrite32(0x50010, resDAC->start + DAC0_CTRL);
+	iowrite32(0x1, resDAC->start + DAC0_CH0CTRL);
+	iowrite32(0x1, resDAC->start + DAC0_CH1CTRL);
 
 	/***********************/
 	/* Set up kernel timer */
@@ -374,9 +382,9 @@ static int gamepadDriverProbe(struct platform_device *dev)
 
 	kernelTimerRunning = 0;
 
-	/********************************/
-	/* Driver Visible to User Space */
-	/********************************/
+	/*************************************/
+	/* Make Driver Visible to User Space */
+	/*************************************/
 	gamepadClass = class_create(THIS_MODULE, CLASS_NAME);
 	device_create(gamepadClass, NULL, devno, NULL, CLASS_NAME);
 
@@ -446,16 +454,7 @@ static struct platform_driver gamepadDriver = {
 	},
 };
 
-/*
- * template_init - function to insert this module into kernel space
- *
-
- * This is the first of two exported functions to handle inserting this
- * code into a running kernel
- *
-
- * Returns 0 if successfull, otherwise -1
- */
+/* Init - register platform driver */
 static int __init gamepadDriverInit(void)
 {
 	printk("Init gamepad driver!\n");
@@ -466,15 +465,10 @@ static int __init gamepadDriverInit(void)
 	return 0;
 }
 
-/*
- * template_cleanup - function to cleanup this module from kernel space
- *
- * This is the second of two exported functions to handle cleanup this
- * code from a running kernel
- */
+/* Exit - register platform driver */
 static void __exit gamepadDriverCleanup(void)
 {
-	 printk("Short life for a small module...\n");
+	 printk("Exit gamepad driver!\n");
 
 	/* Unregister with Kernel */
 	platform_driver_unregister(&gamepadDriver);
